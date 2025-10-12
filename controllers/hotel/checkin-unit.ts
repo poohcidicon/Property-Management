@@ -1,3 +1,4 @@
+import { bookUnitService } from "@/services/external/hotel/booking";
 import { IResponse } from "@/services/external/models/master";
 
 export interface IPayloadBookUnit {
@@ -8,9 +9,18 @@ export interface IPayloadBookUnit {
 export const bookUnitController = async (payload: IPayloadBookUnit): Promise<IResponse<boolean>> => {
   try{
     // Placeholder for actual booking logic
+    const result = await bookUnitService(payload)
+    if(!result){
+      return {
+        success: false,
+        data: false,
+        error: "Booking failed",
+        message: "Booking failed"
+      }
+    }
     return {
       success: true,
-      data: true,
+      data: result,
       error: "",
       message: "Unit booked successfully"
     }

@@ -1,6 +1,6 @@
 import { IResponse } from "../models/master";
 import { UnitMatrixHotel } from "../models/unit-matrix";
-import { units } from './mock/units'
+import { db } from './mock/units'
 
 export const getUnitsHotelService = async (payload: {
   project_id: string;
@@ -8,7 +8,7 @@ export const getUnitsHotelService = async (payload: {
 }): Promise<IResponse<UnitMatrixHotel[]>> => {
   try{
     // fetch from mock data
-    const unitsFiltered = units.filter(u => u.floor === payload.floor)
+    const unitsFiltered = db.units.filter(u => u.floor === payload.floor)
     return {
       success: true,
       data: unitsFiltered as unknown as UnitMatrixHotel[],
