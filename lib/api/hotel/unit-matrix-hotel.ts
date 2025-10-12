@@ -22,9 +22,9 @@ export interface IPayloadGetUnitHotel {
   floor: number;
 }
 
-export const getUnitMatrixHotelApi = async (): Promise<ApiResponse<boolean>> => {
+export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Promise<ApiResponse<UnitMatrixHotel[]>> => {
   try{
-    const response = await axiosPublic('/api/hotel/units-matrix');
+    const response = await axiosPublic.post<ApiResponse<UnitMatrixHotel[]>>('/api/hotel/unit-matrix', payload);
     return response.data
   }
   catch (error: any) {

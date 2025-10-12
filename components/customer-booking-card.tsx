@@ -43,6 +43,7 @@ export default function CustomerBookingCard({
             onRoomTypeChange(roomTypeValue);
         }
     };
+
     return (
         <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
       <div className="p-3 md:p-4 border-b">
