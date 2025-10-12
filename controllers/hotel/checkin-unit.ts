@@ -1,0 +1,87 @@
+import { IResponse } from "@/services/external/models/master";
+
+export interface IPayloadBookUnit {
+  unit_id: string;
+  customer_id: string;
+  booking_date: string; // ISO date string
+}
+export const bookUnitController = async (payload: IPayloadBookUnit): Promise<IResponse<boolean>> => {
+  try{
+    // Placeholder for actual booking logic
+    return {
+      success: true,
+      data: true,
+      error: "",
+      message: "Unit booked successfully"
+    }
+  }
+  catch(err: any){
+    return {
+      success: false,
+      data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export interface IPayloadCheckinUnit {
+  unit_id: string;
+  customers: Array<{ customer_id: string; name?: string }>;
+  checkin_date: string; // ISO date string
+}
+
+export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promise<IResponse<boolean>> => {
+  try{
+    // Placeholder for actual check-in logic
+    // validate unit_id, customers, and checkin_date
+    const customersValid = Array.isArray(payload.customers) && payload.customers.length > 0 && payload.customers.every(c => c.customer_id);
+    if(!payload.unit_id || !customersValid || !payload.checkin_date){
+      return {
+        success: false,
+        data: false,
+        error: "Invalid input data",
+        message: "Invalid input data"
+      }
+    }
+    return {
+      success: true,
+      data: true,
+      error: "",
+      message: "Check-in successful"
+    }
+  }
+  catch(err: any){
+    return {
+      success: false,
+      data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export interface IPayloadCheckoutUnit {
+  unit_id: string;
+  checkout_date: string; // ISO date string
+}
+
+export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {
+  try{
+    // Placeholder for actual check-out logic
+    return {
+      success: true,
+      data: true,
+      error: "",
+      message: "Check-out successful"
+    }
+  }
+  catch (err: any){
+    return {
+      success: false,
+      data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+}
