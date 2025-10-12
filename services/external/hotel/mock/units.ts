@@ -55,7 +55,7 @@ export const db = {
       "unit_id": "M004-04004",
       "unit_number": "04004",
       "status": 3,
-      "status_desc": "checkin",
+      "status_desc": "Checkin",
       "x": 93,
       "y": 433,
       "m_price": 120,

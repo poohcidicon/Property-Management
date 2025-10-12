@@ -1,4 +1,6 @@
 import { bookUnitService } from "@/services/external/hotel/booking";
+import { checkinService } from "@/services/external/hotel/checkin";
+import { checkoutUnitService } from "@/services/external/hotel/checkout";
 import { IResponse } from "@/services/external/models/master";
 
 export interface IPayloadBookUnit {
@@ -54,6 +56,15 @@ export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promi
         message: "Invalid input data"
       }
     }
+    const result = await checkinService(payload)
+    if(!result){
+      return {
+        success: false,
+        data: false,
+        error: "Check-in failed",
+        message: "Check-in failed"
+      }
+    }
     return {
       success: true,
       data: true,
@@ -79,6 +90,15 @@ export interface IPayloadCheckoutUnit {
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {
   try{
     // Placeholder for actual check-out logic
+    const result = await checkoutUnitService(payload)
+    if(!result){
+      return {
+        success: false,
+        data: false,
+        error: "Check-out failed",
+        message: "Check-out failed"
+      }
+    }
     return {
       success: true,
       data: true,
