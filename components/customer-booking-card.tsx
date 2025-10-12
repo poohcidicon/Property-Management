@@ -7,9 +7,10 @@ import { Button } from "./ui/button"
 import { User, Phone, Bed, Calendar, Clock, Filter } from "lucide-react"
 import { format } from "date-fns"
 import { th } from "date-fns/locale"
-import { pendingBookings, checkedInBookings, ROOM_TYPES, HOTEL_ROOM_TYPES, PendingBooking } from "@/data/booking-mock-data"
-import { useState } from "react"
+import { pendingBookings as mockPendingBookings, checkedInBookings as mockCheckedInBookings, ROOM_TYPES, HOTEL_ROOM_TYPES, PendingBooking, CheckedInBooking } from "@/data/booking-mock-data"
+import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 
 export default function CustomerBookingCard({
     onRoomTypeChange,
@@ -18,6 +19,9 @@ export default function CustomerBookingCard({
 }) {
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
     const [selectedRoomType, setSelectedRoomType] = useState<"Suite" | "Standard" | "Deluxe" | null>(null);
+
+    const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
+    const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
     
     const selectBooking = (booking: PendingBooking) => {
         setSelectedBooking(booking);
@@ -43,6 +47,57 @@ export default function CustomerBookingCard({
             onRoomTypeChange(roomTypeValue);
         }
     };
+
+    const loadGuest = async () => {
+      const guestList = await getGuestListApi();
+      if(!guestList.success || !guestList.data){
+        console.error("Failed to load guest list:", guestList.error);
+        setPendingBookings([]);
+        setCheckedInBookings([]);
+        return;
+      }
+      const pendingList = guestList.data.filter(g => !g.checkin).map<PendingBooking>((g) => {
+        const checkInDate = g.booking ? g.booking.start_date : new Date().toISOString();
+        const checkOutDate = g.booking ? g.booking.end_date : new Date().toISOString();
+        const numberOfDays = Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24));
+        const totalAmount = g.summary_price
+        return {
+          id: g.id,
+          guestName: g.first_name + " " + g.last_name,
+          guestPhone: g.mobile,
+          roomType: g.room_type as keyof typeof ROOM_TYPES,
+          checkInDate,
+          checkOutDate,
+          numberOfDays,
+          totalAmount,
+          status: "pending",
+          assignedRoomId: g.booking ? g.booking.unit_id : undefined,
+        };
+      })
+      const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
+        return {
+          id: g.id,
+          guestName: g.first_name + " " + g.last_name,
+          assignedRoomId: g.checkin && g.checkin.unit_id ? g.checkin.unit_id : "",
+          checkOutDate: g.checkin ? g.checkin.checkin_date : new Date().toISOString(),
+          roomType: g.room_type as keyof typeof ROOM_TYPES,
+          guestPhone: g.mobile,
+          status: "confirmed",
+          numberOfDays: 0,
+          totalAmount: 0,
+          checkInDate: new Date().toISOString(),
+        }
+      })
+      setPendingBookings(pendingList);
+      setCheckedInBookings(checkedInList);
+    }
+
+    useEffect(() => {
+      loadGuest();
+    }, [])
+
+    console.log(selectedBooking, 'selectedRoomType')
+
     return (
         <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
       <div className="p-3 md:p-4 border-b">
@@ -103,7 +158,8 @@ export default function CustomerBookingCard({
                             "family": null
                         };
                         const mappedRoomType = roomTypeMapping[booking.roomType] || null;
-                        return selectedRoomType === mappedRoomType ? "ring-2 ring-blue-400 bg-blue-50" : "";
+                        // return selectedRoomType === mappedRoomType ? "ring-2 ring-blue-400 bg-blue-50" : "";
+                        return ""
                     })()
                   }`}
                   onClick={() => selectBooking(booking)}
