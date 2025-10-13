@@ -20,12 +20,50 @@ export const getUnitsHotelService = async (payload: {
     const result = await pool.request()
       .input("ActiveDate", dayjs().format('YYYY-MM-DD'))
       .query<IUnitMatrixHotelDB>(query)
+    
+    const checkinList = await pool.request()
+      .input("CheckInDate", dayjs().format('YYYY-MM-DD'))
+      .query<{
+        UnitID: string;
+        RoomNumber: string;
+        BookingID: string;
+        BookRoomID: string;
+        Status: string;
+        CheckIn: string;
+      }>(`
+        SELECT * FROM Sys_Hotel_CheckIn
+        WHERE Status = 'A'
+      `)
 
     const mappingData = result.recordset.map<UnitMatrixHotel>((item, index) => {
+      let checkInstartDate = ""
+      let checkInendDate = ""
+      const checkin_customers = checkinList.recordset.filter(c => (
+        c.UnitID === item.UnitID
+      )).reduce<Array<{book_room_id: string; booking_id: string; end_date: string; start_date: string}>>((acc, curr, index) => {
+        if (index === 0) {
+          checkInstartDate = curr.CheckIn
+        }
+        else if (index === checkinList.recordset.length - 1) {
+          checkInendDate = curr.CheckIn
+        }
+        const foundBooking = acc.find(a => a.booking_id === curr.BookingID && a.book_room_id === curr.BookRoomID)
+        if (!foundBooking) {
+          acc.push({
+            book_room_id: curr.BookRoomID,
+            booking_id: curr.BookingID,
+            end_date: checkInendDate,
+            start_date: checkInstartDate
+          })
+        }
+        return acc
+      }, [])
       return {
         unit_id: item.UnitID,
         unit_number: item.RoomNumber,
-        status: item.BookingStatus === 'W' ? 2 : item.Status,
+        status: checkin_customers.length > 0 ? 3
+          : item.BookingStatus === 'W' ? 2 
+          : item.Status,
         x: item.X || db.units[index+1]?.x || null,
         y: item.Y || db.units[index+1]?.y || null,
         booking: item.BookingID ? {
@@ -39,7 +77,15 @@ export const getUnitsHotelService = async (payload: {
         d_price: 0,
         floor: "1",
         room_type: 'standard',
-        status_desc: item.StatusText,
+        status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : 'Available',
+        checkin_customers: checkin_customers.map((c) => {
+          return {
+            book_room_id: c.book_room_id,
+            booking_id: c.booking_id,
+            end_date: checkInendDate,
+            start_date: checkInstartDate
+          }
+        })
       }
     })
     // use mock data for x,y

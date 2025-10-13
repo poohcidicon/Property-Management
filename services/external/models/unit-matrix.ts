@@ -33,6 +33,12 @@ export interface UnitMatrixHotel{
     start_date: string;
     end_date: string;
   } | null;
+  checkin_customers: Array<{
+    booking_id: string;
+    book_room_id: string;
+    start_date: string;
+    end_date: string;
+  }> | null;
 }
 
 // from database hotel
