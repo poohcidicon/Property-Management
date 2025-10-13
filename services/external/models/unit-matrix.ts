@@ -34,3 +34,25 @@ export interface UnitMatrixHotel{
     end_date: string;
   } | null;
 }
+
+// from database hotel
+export interface IUnitMatrixHotelDB {
+  UnitID: string;
+  RoomNumber: string;
+  Area: string;
+  X: number | null;
+  Y: number | null;
+  TowerID: string;
+  TowerName: string;
+  FloorID: string;
+  FloorName: string;
+  ActiveDate: string;
+  DateType: string;
+  StatusText: string;
+  Status: number;
+  LeadGuest: string;
+  LeadPhone: string;
+  CheckIn: string;
+  CheckOut: string;
+  TotalAmount: string;
+}

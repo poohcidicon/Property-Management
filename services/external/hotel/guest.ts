@@ -42,6 +42,11 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       }
     })
 
+    mappingData.push(db.customer[1] as unknown as IGuest)
+    mappingData.push(db.customer[2] as unknown as IGuest)
+    mappingData.push(db.customer[3] as unknown as IGuest)
+    mappingData.push(db.customer[4] as unknown as IGuest)
+
     return {
       success: true,
       data: mappingData,

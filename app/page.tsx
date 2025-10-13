@@ -26,7 +26,7 @@ export default function HomePage() {
     const selectTypeBusiness = params.get('type');
     const selectProject = params.get('p')
     setTypeBusiness(selectTypeBusiness || 'market')
-    setProjectId(selectProject || 'M004')
+    setProjectId(selectProject || 'PANDAAPT')
   }, [])
 
   if (typeof typeBusiness === 'string' && types.includes(typeBusiness) && projectId) {
