@@ -15,8 +15,12 @@ import dayjs from "dayjs"
 
 export default function CustomerBookingCard({
     onRoomTypeChange,
+    onPendingBookingsChange,
+    onCheckedInBookingsChange
 }: {
     onRoomTypeChange?: (roomType: string | null) => void;
+    onPendingBookingsChange?: (guest: any) => void
+    onCheckedInBookingsChange?: (guest: any) => void
 }) {
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null);
@@ -31,6 +35,12 @@ export default function CustomerBookingCard({
         setSelectedRoomType(bookingRoomType);
         if (onRoomTypeChange) {
             onRoomTypeChange(bookingRoomType);
+        }
+        if (onPendingBookingsChange) {
+          onPendingBookingsChange(booking);
+        }
+        if (onCheckedInBookingsChange) {
+          onCheckedInBookingsChange(booking);
         }
     };
 
@@ -49,7 +59,6 @@ export default function CustomerBookingCard({
         checkin_date: checkinDate
       });
       if(!guestList.success || !guestList.data){
-        console.error("Failed to load guest list:", guestList.error);
         setPendingBookings([]);
         setCheckedInBookings([]);
         return;
@@ -61,6 +70,7 @@ export default function CustomerBookingCard({
         const totalAmount = g.total_amount || 0;
         return {
           id: g.id,
+          book_room_id: g.book_room_id,
           guestName: g.full_name,
           guestPhone: g.mobile,
           roomType: g.room_type as keyof typeof ROOM_TYPES,

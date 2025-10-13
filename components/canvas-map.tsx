@@ -28,6 +28,8 @@ export interface Circle {
   m_price: number // ราคาเช่ารายเดือน
   d_price: number // ราคาเช่ารายวัน
   booking?: {
+    book_room_id?: string;
+    booking_id?: string
     customer_id: string;
     status: string;
     start_date: string;

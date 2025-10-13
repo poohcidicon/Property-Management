@@ -19,6 +19,7 @@ export interface ICustomer {
 export interface IGuest {
   id: string;
   member_id: string;
+  book_room_id: string;
   first_name?: string;
   last_name?: string;
   full_name: string;

@@ -27,6 +27,8 @@ import MarketLegend from "@/components/market-legend"
 import HotelLegend from "@/components/hotel-legend"
 import HotelRoomDialog from "@/components/hotel-room-dialog"
 import { useAuth } from "@/hooks/use-auth"
+import { BookUnitHotelApi, IPayloadBookUnitHotel } from "@/lib/api/hotel/checkin"
+import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 interface Property {
   id: string
   name: string;
@@ -117,6 +119,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [disableDateList, setDisableDateList] = useState<{[key: string]: number}>({})
   const [availableDateList, setAvilableDateList] = useState<{[key: string]: number}>({})
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
+  const [pendingBookingHotel, setPendingBookingHotel] = useState<PendingBooking | null>(null);
+  const [checkedInBookingHotel, setCheckedInBookingHotel] = useState<CheckedInBooking | null>(null);
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -1301,6 +1305,41 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
   }
 
+  const handleBookUnitHotel = async () => {
+    if (!pendingBookingHotel || !selectedProperty) return
+    if (selectedProperty && selectedProperty?.status !== 'available'){
+      return
+    }
+    const payloadBookUnit = {
+      booking_id: pendingBookingHotel.id,
+      book_room_id: pendingBookingHotel.book_room_id,
+      booking_date: dayjs().format('YYYY-MM-DD'),
+      start_date: dayjs(pendingBookingHotel.checkInDate).format('YYYY-MM-DD'),
+      end_date: dayjs(pendingBookingHotel.checkOutDate).format('YYYY-MM-DD'),
+      unit_id: selectedProperty?.id
+    } as IPayloadBookUnitHotel
+    const result = await BookUnitHotelApi(payloadBookUnit)
+    if (result.data) {
+      toast({
+        title: "🎉 จองสำเร็จ!",
+        description: ``,
+        duration: 5000,
+      })
+      setSearchUnitMatrix({
+        ...searchUnitMatrix,
+        counter: (searchUnitMatrix?.counter || 0) + 1
+      })
+      setShowHotelRoomDialog(false)
+    }
+    else {
+      toast({
+        title: "❌ ไม่สามารถจองได้",
+        description: "เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง",
+        duration: 5000,
+      })
+    }
+  }
+
   // const handleChangeDialogCustomer = (open: boolean) => {
   //   const isProd = process.env.NODE_ENV === 'production'
   //   if (!isProd && !open){
@@ -1478,6 +1517,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       ) : (
         <CustomerBookingCard
           onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "standard" | "family" | null)}
+          onPendingBookingsChange={(guest: PendingBooking) => setPendingBookingHotel(guest)}
+          onCheckedInBookingsChange={(guest: CheckedInBooking) => setCheckedInBookingHotel(guest)}
         />
       )}
 
@@ -2316,7 +2357,17 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             selectedProperty={selectedProperty}
             selectedRoomType={selectedRoomType}
             onConfirmHotelRoom={() => {
-              return "wait api"
+              handleBookUnitHotel()
+              // return "wait api"
+            }}
+            onChangeStatus={(status) => {
+              if (status) {
+                setSearchUnitMatrix({
+                  ...searchUnitMatrix,
+                  counter: searchUnitMatrix.counter ? searchUnitMatrix.counter + 1 : 1
+                })
+                setShowHotelRoomDialog(false)
+              }
             }}
             statusType={statusType}
           />

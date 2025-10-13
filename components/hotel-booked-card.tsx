@@ -1,19 +1,38 @@
+import { CheckinUnitApi, IPayloadCheckin } from '@/lib/api/hotel/checkin';
+import dayjs from 'dayjs';
 import React from 'react';
 
 interface HotelBookedCardProps {
   booking?: {
+    book_room_id?: string;
+    booking_id?: string
     customer_id: string;
     status: string;
     start_date: string;
     end_date: string;
   } | null;
   roomNumber?: string;
+  roomId?: string;
   roomType?: string;
+  onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelBookedCard({ booking, roomNumber, roomType }: HotelBookedCardProps) {
-  const handleCheckIn = () => {
-    console.log("เช็คอิน");
+export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus }: HotelBookedCardProps) {
+  const handleCheckIn = async () => {
+    const payloadCheckin = {
+      unit_id: roomId,
+      checkin_date: dayjs().format('YYYY-MM-DD'),
+      customers: [{ booking_id: booking?.booking_id, book_room_id: booking?.book_room_id }], // แก้ทีหลัง
+    } as IPayloadCheckin
+    const result = await CheckinUnitApi(payloadCheckin)
+    if (result.data){
+      if (onChangeStatus){
+        onChangeStatus(true)
+      }
+    }
+    else if (onChangeStatus){
+      onChangeStatus(false)
+    }
   };
 
   return (

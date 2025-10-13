@@ -10,9 +10,10 @@ interface HotelCheckinCardProps {
   } | null;
   roomNumber?: string;
   roomType?: string;
+  onChangeStatus?: () => void;
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
 

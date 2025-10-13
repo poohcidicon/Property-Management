@@ -38,8 +38,9 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
         }
       }
       return {
-        id: item.BookRoomID,
-        member_id: item.BookRoomID,
+        id: item.BookingID,
+        member_id: item.BookingID,
+        book_room_id: item.BookRoomID,
         full_name: item.LeadGuest,
         mobile: item.LeadPhone,
         start_booking: item.CheckIn,

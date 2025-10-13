@@ -11,6 +11,7 @@ interface HotelRoomDialogProps {
   selectedProperty: Circle | null
   selectedRoomType: "standard" | "family" | null
   onConfirmHotelRoom: () => void
+  onChangeStatus?: (status: boolean) => void
   statusType?: "available" | "booked" | "checkin"
 }
 
@@ -20,10 +21,11 @@ export default function HotelRoomDialog({
   selectedProperty,
   selectedRoomType,
   onConfirmHotelRoom,
+  onChangeStatus,
   statusType = "available"
 }: HotelRoomDialogProps) {
   if (!showHotelRoomDialog) return null
-  console.log('statusType', statusType)
+  // console.log('statusType', statusType)
   if (statusType === "checkin") {
     return (
       <div
@@ -55,7 +57,13 @@ export default function HotelRoomDialog({
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelBookedCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} />
+          <HotelBookedCard 
+            booking={selectedProperty?.booking} 
+            roomNumber={selectedProperty?.name} 
+            roomType={selectedProperty?.room_type} 
+            roomId={selectedProperty?.id}
+            onChangeStatus={onChangeStatus} 
+          />
         </div>
       </div>
     )

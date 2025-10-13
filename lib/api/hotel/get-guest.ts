@@ -3,6 +3,7 @@ import { ApiResponse, axiosPublic } from "@/lib/axios";
 export interface Guest {
   id: string;
   member_id: string;
+  book_room_id: string;
   first_name: string;
   last_name: string;
   full_name: string;

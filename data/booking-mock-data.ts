@@ -35,6 +35,7 @@ export const HOTEL_ROOM_TYPES = {
 // Booking interfaces
 export interface PendingBooking {
   id: string;
+  book_room_id: string;
   guestName: string;
   guestPhone: string;
   roomType: keyof typeof ROOM_TYPES;
@@ -65,7 +66,8 @@ export const pendingBookings: PendingBooking[] = [
     numberOfDays: 2,
     totalAmount: 2400,
     status: "confirmed",
-    assignedRoomId: "room-101"
+    assignedRoomId: "room-101",
+    book_room_id: ""
   },
   {
     id: "booking-002",
@@ -77,7 +79,8 @@ export const pendingBookings: PendingBooking[] = [
     numberOfDays: 4,
     totalAmount: 6800,
     status: "pending",
-    assignedRoomId: undefined
+    assignedRoomId: undefined,
+    book_room_id: ""
   },
   {
     id: "booking-003",
@@ -89,7 +92,8 @@ export const pendingBookings: PendingBooking[] = [
     numberOfDays: 2,
     totalAmount: 4200,
     status: "confirmed",
-    assignedRoomId: "room-201"
+    assignedRoomId: "room-201",
+    book_room_id: ""
   },
   {
     id: "booking-004",
@@ -101,7 +105,8 @@ export const pendingBookings: PendingBooking[] = [
     numberOfDays: 3,
     totalAmount: 5400,
     status: "pending",
-    assignedRoomId: undefined
+    assignedRoomId: undefined,
+    book_room_id: ""
   },
   {
     id: "booking-005",
@@ -113,7 +118,8 @@ export const pendingBookings: PendingBooking[] = [
     numberOfDays: 3,
     totalAmount: 3600,
     status: "confirmed",
-    assignedRoomId: "room-102"
+    assignedRoomId: "room-102",
+    book_room_id: ""
   }
 ];
 
