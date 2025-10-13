@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Clock, X } from 'lucide-react';
+import { CheckoutUnitApi, IPayloadCheckout } from '@/lib/api/hotel/checkin';
+import dayjs from 'dayjs';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -10,15 +12,27 @@ interface HotelCheckinCardProps {
   } | null;
   roomNumber?: string;
   roomType?: string;
-  onChangeStatus?: () => void;
+  roomId?: string;
+  onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
 
-  const handleCheckout = () => {
-    console.log("checkout!");
+  const handleCheckout = async () => {
+    const payloadCheckout = {
+      unit_id: roomId || '',
+      checkout_date: dayjs().format('YYYY-MM-DD'),
+      total_amount: 0
+    } as IPayloadCheckout
+    console.log(payloadCheckout, 'payloadCheckout')
+    const result = await CheckoutUnitApi(payloadCheckout);
+    if (result.data) {
+      if (onChangeStatus) {
+        onChangeStatus(true);
+      }
+    }
   };
 
   return (

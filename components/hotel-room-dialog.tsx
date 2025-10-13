@@ -38,7 +38,7 @@ export default function HotelRoomDialog({
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelCheckinCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} />
+          <HotelCheckinCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus}/>
         </div>
       </div>
     )
