@@ -19,19 +19,23 @@ export interface ICustomer {
 export interface IGuest {
   id: string;
   member_id: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
   full_name: string;
-  first_name_eng: string;
-  last_name_eng: string;
-  full_name_eng: string;
-  citizen_id: string;
-  gender: string;
-  type: string;
+  first_name_eng?: string;
+  last_name_eng?: string;
+  full_name_eng?: string;
+  citizen_id?: string;
+  gender?: string;
+  type?: string;
   mobile: string;
-  email: string;
-  opportunity_count: number;
-  create_date: string;
+  email?: string;
+  opportunity_count?: number;
+  create_date?: string;
+  night: number;
+  adults: number;
+  children: number;
+  total_amount: number;
   room_type: string;
   start_booking: string; // ISO date string
   end_booking: string;   // ISO date string
@@ -47,4 +51,21 @@ export interface IGuest {
     checkin_date: string; // ISO date string
     checkout_date: string; // ISO date string
   } | null;
+}
+
+// from Database
+export interface BookingGuest {
+  BookingID: string,
+  BookRoomID: string,
+  LeadGuest: string,
+  LeadPhone: string,
+  RoomType: string,
+  CheckIn: string,
+  CheckOut: string,
+  Night: string,
+  Adults: string,
+  Children: string,
+  TotalAmount: string,
+  StatusText: string,
+  RoomNumber: string
 }

@@ -17,9 +17,10 @@ export interface Guest {
   opportunity_count: number;
   create_date: string;
   room_type: string;
-  summary_price: number;
+  total_amount: number;
   start_booking: string;
   end_booking: string;
+  night: number;
   booking: {
     unit_id: string;
     unit_name: string;
@@ -36,9 +37,14 @@ export interface Guest {
   } | null;
 }
 
-export const getGuestListApi = async (): Promise<ApiResponse<Guest[]>> => {
+export interface GetGuestListPayload {
+  checkin_date: string; // ISO date string
+}
+export const getGuestListApi = async (payload: GetGuestListPayload): Promise<ApiResponse<Guest[]>> => {
   try{
-    const response = await axiosPublic('/api/hotel/get-guests');
+    const response = await axiosPublic.post('/api/hotel/get-guests', {
+      checkin_date: payload.checkin_date
+    });
     return response.data
   }
   catch (error: any) {

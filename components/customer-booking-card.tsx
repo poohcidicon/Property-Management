@@ -11,6 +11,7 @@ import { pendingBookings as mockPendingBookings, checkedInBookings as mockChecke
 import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { getGuestListApi } from "@/lib/api/hotel/get-guest"
+import dayjs from "dayjs"
 
 export default function CustomerBookingCard({
     onRoomTypeChange,
@@ -49,7 +50,11 @@ export default function CustomerBookingCard({
     };
 
     const loadGuest = async () => {
-      const guestList = await getGuestListApi();
+      // test checkin date 2025-10-12
+      const checkinDate = '2025-10-12';
+      const guestList = await getGuestListApi({
+        checkin_date: checkinDate
+      });
       if(!guestList.success || !guestList.data){
         console.error("Failed to load guest list:", guestList.error);
         setPendingBookings([]);
@@ -57,13 +62,13 @@ export default function CustomerBookingCard({
         return;
       }
       const pendingList = guestList.data.filter(g => !g.checkin).map<PendingBooking>((g) => {
-        const checkInDate = g.booking ? g.booking.start_date : new Date().toISOString();
-        const checkOutDate = g.booking ? g.booking.end_date : new Date().toISOString();
-        const numberOfDays = Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24));
-        const totalAmount = g.summary_price
+        const checkInDate = g.start_booking ? g.start_booking : new Date().toISOString();
+        const checkOutDate = g.end_booking ? g.end_booking: new Date().toISOString();
+        const numberOfDays = g.night || 1
+        const totalAmount = g.total_amount || 0;
         return {
           id: g.id,
-          guestName: g.first_name + " " + g.last_name,
+          guestName: g.full_name,
           guestPhone: g.mobile,
           roomType: g.room_type as keyof typeof ROOM_TYPES,
           checkInDate,
@@ -77,9 +82,9 @@ export default function CustomerBookingCard({
       const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
         return {
           id: g.id,
-          guestName: g.first_name + " " + g.last_name,
+          guestName: g.full_name,
           assignedRoomId: g.checkin && g.checkin.unit_id ? g.checkin.unit_id : "",
-          checkOutDate: g.checkin ? g.checkin.checkin_date : new Date().toISOString(),
+          checkOutDate: g.end_booking ? g.end_booking : new Date().toISOString(),
           roomType: g.room_type as keyof typeof ROOM_TYPES,
           guestPhone: g.mobile,
           status: "confirmed",
