@@ -29,7 +29,6 @@ export default function HotelRoomDialog({
   statusType = "available"
 }: HotelRoomDialogProps) {
   if (!showHotelRoomDialog) return null
-  // console.log('statusType', statusType)
   if (statusType === "checkin") {
     return (
       <div
@@ -42,7 +41,7 @@ export default function HotelRoomDialog({
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelCheckinCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus} guestList={guestList}/>
+          <HotelCheckinCard booking={selectedProperty?.booking} checkin_customers={selectedProperty?.checkin_customers || []} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus} guestList={guestList}/>
         </div>
       </div>
     )

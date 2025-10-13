@@ -6,11 +6,19 @@ import { Guest } from '@/lib/api/hotel/get-guest';
 
 interface HotelCheckinCardProps {
   booking?: {
+    book_room_id?: string;
+    booking_id?: string
     customer_id: string;
     status: string;
     start_date: string;
     end_date: string;
   } | null;
+  checkin_customers: Array<{
+    customer_id?: string; 
+    name?: string
+    booking_id: string; 
+    book_room_id: string 
+  }>
   roomNumber?: string;
   roomType?: string;
   roomId?: string;
@@ -18,10 +26,10 @@ interface HotelCheckinCardProps {
   onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [selectGust, setSelectGust] = useState<Guest | null>(null);
+  const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -29,7 +37,6 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       checkout_date: dayjs().format('YYYY-MM-DD'),
       total_amount: 0
     } as IPayloadCheckout
-    console.log(payloadCheckout, 'payloadCheckout')
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
       if (onChangeStatus) {
@@ -38,19 +45,21 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     }
   };
 
-  console.log(booking)
+  const handleSetGuest = () => {
+    if (guestList.length > 0) {
+      const guest = guestList.find((g) => {
+        const foundCheckin = checkin_customers.find((c) => c.book_room_id === g.book_room_id);
+        return foundCheckin
+      })
+      setSelectGuest(guest || null)
+    }
+  }
 
-  // const handleSetGuest = (roomNumber) => {
-  //   if (guestList.length > 0) {
-  //     setSelectGust(guestList[0]);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (roomNumber) {
-  //     handleSetGuest()
-  //   }
-  // }, [booking])
+  useEffect(() => {
+    if (guestList.length > 0){
+      handleSetGuest()
+    }
+  }, [booking])
 
   return (
     <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
@@ -79,7 +88,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาต่อคืน</p>
-              <p className="text-sm font-semibold text-green-600">฿2,500</p>
+              <p className="text-sm font-semibold text-green-600">฿0</p>
             </div>
           </div>
         </div>
@@ -91,37 +100,37 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">ชื่อ:</span>
-              <span className="font-medium text-gray-800">{booking?.customer_id || 'สมศรี โชติ'}</span>
+              <span className="font-medium text-gray-800">{selectGuest?.full_name || ''}</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เบอร์โทร:</span>
-              <span className="font-medium text-gray-800">081-234-5678</span>
+              <span className="font-medium text-gray-800">{selectGuest?.mobile || ''}</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
-                {booking?.start_date ? new Date(booking.start_date).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                {selectGuest?.start_booking ? new Date(selectGuest.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
-                {booking?.end_date ? new Date(booking.end_date).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                {selectGuest?.end_booking ? new Date(selectGuest.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
               </span>
             </div>
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
-              <span className="font-bold text-lg text-green-600">฿7,500</span>
+              <span className="font-bold text-lg text-green-600">฿{selectGuest?.total_amount || 0}</span>
             </div>
           </div>
         </div>
 
         {/* Expandable Section: Payment Details */}
-        <div className="border-t border-gray-200 mt-4">
+        {/* <div className="border-t border-gray-200 mt-4">
           <button 
             onClick={() => setShowPaymentDetails(!showPaymentDetails)}
             className="w-full flex items-center justify-between py-3 text-left"
@@ -135,10 +144,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               ไม่มีรายการชำระเงิน
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Expandable Section: Notes */}
-        <div className="border-t border-gray-200">
+        {/* <div className="border-t border-gray-200">
           <button 
             onClick={() => setShowNotes(!showNotes)}
             className="w-full flex items-center justify-between py-3 text-left"
@@ -152,7 +161,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               ไม่มีข้อมูลรายละเอียด
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Action Buttons */}

@@ -35,6 +35,12 @@ export interface Circle {
     start_date: string;
     end_date: string;
   } | null
+  checkin_customers?: Array<{
+    customer_id?: string; 
+    name?: string
+    booking_id: string; 
+    book_room_id: string 
+  }>
 }
 
 export interface Customer {
@@ -429,7 +435,8 @@ export default function CanvasMap({
                   m_price: unit.d_price, // Using d_price for both since hotel is daily
                   d_price: unit.d_price,
                   room_type: unit.room_type,
-                  booking: unit.booking
+                  booking: unit.booking,
+                  checkin_customers: unit.checkin_customers
                 } as Circle;
               })
               

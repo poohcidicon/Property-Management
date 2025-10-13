@@ -15,6 +15,12 @@ export interface UnitMatrixHotel{
     start_date: string;
     end_date: string;
   } | null;
+  checkin_customers?: Array<{
+    customer_id?: string; 
+    name?: string
+    booking_id: string; 
+    book_room_id: string 
+  }>
 }
 
 export interface IPayloadGetUnitHotel {
