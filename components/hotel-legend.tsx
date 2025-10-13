@@ -63,13 +63,13 @@ export default function HotelLegend({ showLegend, setShowLegend }: HotelLegendPr
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200 hover:bg-purple-100 transition-colors">
+            {/* <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200 hover:bg-purple-100 transition-colors">
               <div className="w-5 h-5 bg-purple-400 rounded-full border-2 border-purple-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">จองได้บางวัน</span>
                 <p className="text-xs text-gray-500">Some available</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
