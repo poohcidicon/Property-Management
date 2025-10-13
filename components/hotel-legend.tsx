@@ -35,7 +35,7 @@ export default function HotelLegend({ showLegend, setShowLegend }: HotelLegendPr
               <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-green-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">ว่าง</span>
-                <p className="text-xs text-gray-500">Available (Status: 0)</p>
+                <p className="text-xs text-gray-500">Available</p>
               </div>
             </div>
 
@@ -43,7 +43,7 @@ export default function HotelLegend({ showLegend, setShowLegend }: HotelLegendPr
               <div className="w-5 h-5 bg-orange-400 rounded-full border-2 border-orange-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">จองแล้ว</span>
-                <p className="text-xs text-gray-500">Booked (Status: 2)</p>
+                <p className="text-xs text-gray-500">Booked</p>
               </div>
             </div>
 
@@ -51,7 +51,7 @@ export default function HotelLegend({ showLegend, setShowLegend }: HotelLegendPr
               <div className="w-5 h-5 bg-red-400 rounded-full border-2 border-red-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">เช็คอินแล้ว</span>
-                <p className="text-xs text-gray-500">Checkin (Status: 3)</p>
+                <p className="text-xs text-gray-500">Checkin</p>
               </div>
             </div>
 
