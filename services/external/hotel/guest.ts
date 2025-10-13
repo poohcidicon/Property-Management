@@ -12,8 +12,11 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     // fetch from mock data
     const pool = await getConnection();
     const query = `
-      SELECT DISTINCT * FROM VW_Hotel_BookingStatus 
-      WHERE CheckIn = @CheckInDate
+      SELECT DISTINCT g.*
+      , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
+      FROM VW_Hotel_BookingStatus g
+      LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
+      WHERE g.CheckIn = @CheckInDate
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
@@ -32,8 +35,8 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
         adults: Number(item.Adults) || 1,
         children: Number(item.Children) || 0,
         total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,
-        booking: item.RoomNumber ? {
-          unit_id: item.RoomNumber,
+        booking: item.BookUnitID ? {
+          unit_id: item.BookUnitID,
           status: 'booked',
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
