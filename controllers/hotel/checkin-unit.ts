@@ -93,6 +93,7 @@ export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promi
 export interface IPayloadCheckoutUnit {
   unit_id: string;
   checkout_date: string; // ISO date string
+  total_amount: number
 }
 
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {

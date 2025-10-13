@@ -4,13 +4,13 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try{
     const body = await request.json()
-    const { unit_id, checkout_date } = body
-    if(!unit_id || !checkout_date){
-      return new Response(JSON.stringify({
-        message: "❌ Missing required parameters unit_id, customer_id, booking_date",
+    const { unit_id, checkout_date, total_amount } = body
+    if(!unit_id || !checkout_date || (!total_amount && total_amount !== 0)){
+      return NextResponse.json({
+        message: "Missing required parameters unit_id, customer_id, booking_date, total_amount",
         error: 'failed',
         data: null
-      }), { status: 400 })
+      }, { status: 400 })
     }
     const result = await checkoutUnitController(body)
     return NextResponse.json(result, { status: 200 })
