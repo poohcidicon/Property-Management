@@ -12,7 +12,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     // fetch from mock data
     const pool = await getConnection();
     const query = `
-      SELECT * FROM VW_Hotel_BookingStatus 
+      SELECT DISTINCT * FROM VW_Hotel_BookingStatus 
       WHERE CheckIn = @CheckInDate
     `
     const result = await pool.request()
@@ -42,10 +42,10 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       }
     })
 
-    mappingData.push(db.customer[1] as unknown as IGuest)
-    mappingData.push(db.customer[2] as unknown as IGuest)
-    mappingData.push(db.customer[3] as unknown as IGuest)
-    mappingData.push(db.customer[4] as unknown as IGuest)
+    // mappingData.push(db.customer[1] as unknown as IGuest)
+    // mappingData.push(db.customer[2] as unknown as IGuest)
+    // mappingData.push(db.customer[3] as unknown as IGuest)
+    // mappingData.push(db.customer[4] as unknown as IGuest)
 
     return {
       success: true,

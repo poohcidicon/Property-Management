@@ -29,34 +29,37 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
       .query(queryUpdateRoom)
     
     const checkinBooking = transaction.request()
+    delete checkinBooking.parameters['UnitID']
     let insertListOnDate = []
+    let count = 0
     for(let d = dayjs(payload.start_date); d.isBefore(dayjs(payload.end_date)); d = d.add(1, 'day')){
-      checkinBooking.input('UnitID', payload.unit_id)
-      checkinBooking.input('BookingID', payload.booking_id || null)
-      checkinBooking.input('BookingRoomID', payload.book_room_id || null)
-      checkinBooking.input('RoomNumber', payload.unit_id)
-      checkinBooking.input('TransacDate', dayjs().format('YYYY-MM-DD'))
-      checkinBooking.input('CheckIn', d.format('YYYY-MM-DD'))
-      checkinBooking.input('Status', 'W')
+      checkinBooking.input(`UnitID_${count}`, payload.unit_id)
+      checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
+      checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
+      checkinBooking.input(`RoomNumber_${count}`, payload.unit_id)
+      checkinBooking.input(`TransacDate_${count}`, dayjs().format('YYYY-MM-DD'))
+      checkinBooking.input(`CheckIn_${count}`, d.format('YYYY-MM-DD'))
+      checkinBooking.input(`Status_${count}`, 'W')
       insertListOnDate.push(`
-        (@UnitID
-        , @BookingID
-        , @BookingRoomID
-        , @RoomNumber
-        , @TransacDate
-        , @CheckIn
-        , @Status
+        (@UnitID_${count}
+        , @BookingID_${count}
+        , @BookingRoomID_${count}
+        , @RoomNumber_${count}
+        , @TransacDate_${count}
+        , @CheckIn_${count}
+        , @Status_${count}
         , GETDATE()
         )
       `)
+      count++
     }
     const queryInsertCheckin = `
-      INSERT INTO [dbo].[Hotel_CheckIn]
+      INSERT INTO [dbo].[Sys_Hotel_CheckIn]
       ([UnitID]
       ,[BookingID]
-      ,[BookingRoomID]
+      ,[BookRoomID]
       ,[RoomNumber]
-      ,[TransactionDate]
+      ,[TransacDate]
       ,[CheckIn]
       ,[Status]
       ,[CreateDate]
