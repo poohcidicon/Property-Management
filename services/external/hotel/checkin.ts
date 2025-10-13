@@ -5,43 +5,64 @@ import { db } from "./mock/units"
 
 export interface IPayloadCheckinUnitService {
   unit_id: string;
-  customers: Array<{ customer_id: string; name?: string }>;
+  customers: Array<{ 
+    customer_id?: string; 
+    name?: string
+    booking_id: string; 
+    book_room_id: string
+  }>;
   checkin_date: string; // ISO date string
 }
 
 export const checkinService = async (payload: IPayloadCheckinUnitService): Promise<boolean> => {
-  // const pool = await getConnection();
-  // let transaction = new sql.Transaction(pool);
-  // await transaction.begin();
+  const pool = await getConnection();
+  let transaction = new sql.Transaction(pool);
+  await transaction.begin();
+
   try{
     // Placeholder for actual check-in logic
     // validate unit_id, customers, and checkin_date
-    const customersValid = Array.isArray(payload.customers) && payload.customers.length > 0 && payload.customers.every(c => c.customer_id);
-    if(!payload.unit_id || !customersValid || !payload.checkin_date){
-      return false
-    }
-    // Simulate check-in process
+    // const customersValid = Array.isArray(payload.customers) && payload.customers.length > 0 && payload.customers.every(c => c.customer_id);
+    // if(!payload.unit_id || !customersValid || !payload.checkin_date){
+    //   return false
+    // }
+    // // Simulate check-in process
 
-    const unitIndex = db.units.findIndex(u => u.unit_id === payload.unit_id);
-    if(unitIndex === -1){
-      throw new Error("Unit not found");
+    // const unitIndex = db.units.findIndex(u => u.unit_id === payload.unit_id);
+    // if(unitIndex === -1){
+    //   throw new Error("Unit not found");
+    // }
+    // db.units[unitIndex].status = 3
+    // db.units[unitIndex].status_desc = "Checkin"
+    // db.units[unitIndex].checkin_customers = payload.customers.map((c) => {
+    //   return {
+    //     customer_id: c.customer_id,
+    //     start_date: payload.checkin_date,
+    //     end_date: dayjs(payload.checkin_date, 'YYYY-MM-DD').add(3, 'day').format("YYYY-MM-DD"),
+    //   }
+    // })
+    const queryUpdateRoom = `
+      UPDATE [dbo].[Sys_Hotel_CheckIn]
+      SET Status = 'A', ModifyDate = GETDATE()
+      WHERE UnitID = @UnitID AND BookingID = @BookingID AND BookRoomID = @BookRoomID AND Status = 'W'
+    `
+    for(const customer of payload.customers){
+      const updateRequest = transaction.request()
+      updateRequest.input("UnitID", payload.unit_id)
+      updateRequest.input("BookingID", customer.booking_id)
+      updateRequest.input("BookRoomID", customer.book_room_id)
+      await updateRequest.query(queryUpdateRoom)
+      delete updateRequest.parameters['UnitID']
+      delete updateRequest.parameters['BookingID']
+      delete updateRequest.parameters['BookRoomID']
     }
-    db.units[unitIndex].status = 3
-    db.units[unitIndex].status_desc = "Checkin"
-    db.units[unitIndex].checkin_customers = payload.customers.map((c) => {
-      return {
-        customer_id: c.customer_id,
-        start_date: payload.checkin_date,
-        end_date: dayjs(payload.checkin_date, 'YYYY-MM-DD').add(3, 'day').format("YYYY-MM-DD"),
-      }
-    })
 
-    // await transaction.commit();
+    await transaction.commit();
     
     return true
   }
   catch(err: any){
-    // await transaction.rollback();
+    await transaction.rollback();
     console.error('Error in checkinService:', err);
     return false
   }

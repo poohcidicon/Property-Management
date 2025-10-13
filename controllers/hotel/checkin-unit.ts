@@ -42,7 +42,12 @@ export const bookUnitController = async (payload: IPayloadBookUnit): Promise<IRe
 
 export interface IPayloadCheckinUnit {
   unit_id: string;
-  customers: Array<{ customer_id: string; name?: string }>;
+  customers: Array<{
+    customer_id?: string; 
+    name?: string
+    booking_id: string; 
+    book_room_id: string 
+  }>;
   checkin_date: string; // ISO date string
 }
 
@@ -50,7 +55,7 @@ export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promi
   try{
     // Placeholder for actual check-in logic
     // validate unit_id, customers, and checkin_date
-    const customersValid = Array.isArray(payload.customers) && payload.customers.length > 0 && payload.customers.every(c => c.customer_id);
+    const customersValid = Array.isArray(payload.customers) && payload.customers.length > 0 && payload.customers.every(c => c.booking_id && c.book_room_id);
     if(!payload.unit_id || !customersValid || !payload.checkin_date){
       return {
         success: false,
