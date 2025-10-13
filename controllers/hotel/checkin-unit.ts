@@ -5,8 +5,11 @@ import { IResponse } from "@/services/external/models/master";
 
 export interface IPayloadBookUnit {
   unit_id: string;
-  customer_id: string;
   booking_date: string; // ISO date string
+  start_date: string; // ISO date string
+  end_date: string; // ISO date string
+  booking_id: string;
+  book_room_id: string;
 }
 export const bookUnitController = async (payload: IPayloadBookUnit): Promise<IResponse<boolean>> => {
   try{
