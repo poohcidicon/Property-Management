@@ -79,7 +79,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("UnitID", payload.unit_id)
       .query(`
         UPDATE Sys_Hotel_Room
-        SET Status = 'P'
+        SET Status = '3'
         WHERE UnitID = @UnitID
       `)
     
