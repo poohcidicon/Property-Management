@@ -1980,7 +1980,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
           {/* Floating Detail Panel - Booking Interface */}
           <div
-            className={`absolute top-4 right-4 bottom-4 transition-all duration-300 ${showDetailPanel ? "translate-x-0" : "translate-x-full"}`}
+            className={`absolute top-4 right-4 bottom-4 transition-all duration-300 ${showDetailPanel && currentBusinessType === "market" ? "translate-x-0" : "translate-x-full"}`}
           >
             <Card className={`w-80 h-full shadow-lg border-gray-200 backdrop-blur-sm flex flex-col rounded-3xl overflow-hidden ${
               currentBusinessType === "hotel" ? "bg-blue-100" : "bg-teal-100"
