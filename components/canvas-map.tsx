@@ -1475,7 +1475,7 @@ export default function CanvasMap({
         </Card>
 
         {/* Filter Options */}
-        <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-gray-200">
+        {businessType === 'market' && <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-gray-200">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-3">
             </div>
@@ -1526,7 +1526,7 @@ export default function CanvasMap({
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Upload Controls */}
         <div className="flex flex-col gap-2">
