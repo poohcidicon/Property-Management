@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 import dayjs from "dayjs"
+import { useCustomerStore } from "@/app/customer-store"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -28,6 +29,7 @@ export default function CustomerBookingCard({
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
+    const setCustomer = useCustomerStore((state) => state.setCustomer);
     
     const selectBooking = (booking: PendingBooking) => {
         setSelectedBooking(booking);
@@ -35,6 +37,18 @@ export default function CustomerBookingCard({
         // Use the room type directly from booking
         const bookingRoomType = booking.roomType || null;
         setSelectedRoomType(bookingRoomType);
+        
+        // Store customer data in Zustand store
+        const customerData = {
+            id: booking.id,
+            memberId: booking.guestPhone, // Using phone as memberId since it's unique
+            name: booking.guestName,
+            citizenId: '', // Not available in booking data
+            mobile: booking.guestPhone,
+            type: 'hotel_guest'
+        };
+        setCustomer(customerData);
+        
         if (onRoomTypeChange) {
             onRoomTypeChange(bookingRoomType);
         }

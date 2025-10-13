@@ -1034,11 +1034,23 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       
       // Clear selected property when dialog closes
       setSelectedProperty(null)
+      // Reset selected room type to stop blinking animation
+      setSelectedRoomType(null)
       window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
       
       // Close hotel room dialog
       setShowHotelRoomDialog(false)
+      handleBookUnitHotel()
     }
+  }
+
+  // Handle hotel room dialog close
+  const handleHotelRoomDialogClose = () => {
+    // Clear selected property when dialog closes
+    setSelectedProperty(null)
+    // Reset selected room type to stop blinking animation
+    setSelectedRoomType(null)
+    window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
   }
 
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -2368,10 +2380,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             setShowHotelRoomDialog={setShowHotelRoomDialog}
             selectedProperty={selectedProperty}
             selectedRoomType={selectedRoomType}
-            onConfirmHotelRoom={() => {
-              handleBookUnitHotel()
-              // return "wait api"
-            }}
             onChangeStatus={(status) => {
               if (status) {
                 setSearchUnitMatrix({
@@ -2382,7 +2390,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               }
             }}
             guestList={guestList}
+            onConfirmHotelRoom={handleConfirmHotelRoom}
             statusType={statusType}
+            customerData={customerData}
+            onDialogClose={handleHotelRoomDialogClose}
           />
 
           {/* Detail Panel Toggle Button - แสดงเฉพาะเมื่อไม่มีกรอบใดแสดงอยู่ */}

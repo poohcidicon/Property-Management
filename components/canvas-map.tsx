@@ -200,7 +200,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isHighlighted: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: roomColor.glow,
           }
@@ -216,7 +216,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isActive: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: "rgba(251, 191, 36, 0.6)",
           }
@@ -810,6 +810,7 @@ export default function CanvasMap({
       const style = getCircleStyle(circle)
 
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
+      // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
       if (businessType === "hotel" && style.outerStrokeWidth && style.outerStrokeWidth > 0) {
         ctx.save()
         
@@ -817,22 +818,35 @@ export default function CanvasMap({
           const flashIntensity = Math.sin(flashPhase) * 0.5 + 0.5
           const pulseSize = 10 + flashIntensity * 8
 
+          // เปลี่ยนสีสำหรับห้องที่ active (กำลังเลือก) ระหว่างการกระพริบ
+          const isActiveRoom = selectedProperty?.id === circle.id
+          const flashColor = isActiveRoom ? "#ff6b6b" : (style.outerStrokeColor || "#8b5cf6")
+
+          // ใช้สีจาก flashColor สำหรับ glow effect
+          const glowColor = isActiveRoom ? "#ff6b6b" : (style.glowColor || "#8b5cf6")
+          const glowColorRgba = glowColor.startsWith('rgba') ? glowColor :
+                                glowColor.startsWith('#') ? hexToRgba(glowColor, 0.6) : glowColor
+
+          // วาด glow effect ก่อน (ด้านล่างสุด)
+          ctx.shadowColor = glowColorRgba
+          ctx.shadowBlur = (20 + flashIntensity * 15) / scaleRef.current
           ctx.beginPath()
-          ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
-          ctx.strokeStyle = style.outerStrokeColor || "#8b5cf6"
-          ctx.lineWidth = ((style.outerStrokeWidth || 0) + flashIntensity * 3) / scaleRef.current
+          ctx.arc(circle.x, circle.y, circle.r + pulseSize + 5, 0, Math.PI * 2)
+          ctx.strokeStyle = glowColorRgba
+          ctx.lineWidth = (4 + flashIntensity * 2) / scaleRef.current
+          ctx.globalAlpha = 0.3 + flashIntensity * 0.3
           ctx.stroke()
 
-          if (style.glowColor) {
-            ctx.shadowColor = style.glowColor
-            ctx.shadowBlur = (20 + flashIntensity * 15) / scaleRef.current
-            // Draw glow circle
-            ctx.beginPath()
-            ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
-            ctx.strokeStyle = style.glowColor
-            ctx.lineWidth = 2 / scaleRef.current
-            ctx.stroke()
-          }
+          // รีเซ็ต shadow และ alpha
+          ctx.shadowBlur = 0
+          ctx.globalAlpha = 1
+
+          // วาด outer stroke หลัก (ด้านบนสุด)
+          ctx.beginPath()
+          ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
+          ctx.strokeStyle = flashColor
+          ctx.lineWidth = ((style.outerStrokeWidth || 0) + flashIntensity * 3) / scaleRef.current
+          ctx.stroke()
         } else {
           ctx.shadowBlur = 0
           ctx.beginPath()
@@ -843,6 +857,14 @@ export default function CanvasMap({
         }
         
         ctx.restore()
+      }
+
+      // Helper function to convert hex to rgba
+      function hexToRgba(hex: string, alpha: number): string {
+        const r = parseInt(hex.slice(1, 3), 16)
+        const g = parseInt(hex.slice(3, 5), 16)
+        const b = parseInt(hex.slice(5, 7), 16)
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`
       }
 
       ctx.shadowBlur = 0
@@ -900,26 +922,27 @@ export default function CanvasMap({
   }, [backgroundImage, circles, getCircleStyle, flashPhase, currentUsername, businessType, selectedProperty])
 
    useEffect(() => {
-    let animationId: number
+     let animationId: number
 
-    const animate = () => {
-      setFlashPhase((prev) => prev + 0.15)
-      draw()
-      animationId = requestAnimationFrame(animate)
-    }
+     const animate = () => {
+       setFlashPhase((prev) => prev + 0.15)
+       draw()
+       animationId = requestAnimationFrame(animate)
+     }
 
-    if (businessType === "hotel" && selectedRoomType) {
-      animationId = requestAnimationFrame(animate)
-    } else {
-      draw()
-    }
+     // ให้กระพริบตามปกติเมื่อมีการเลือก room type
+     if (businessType === "hotel" && selectedRoomType) {
+       animationId = requestAnimationFrame(animate)
+     } else {
+       draw()
+     }
 
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [businessType, selectedRoomType, draw])
+     return () => {
+       if (animationId) {
+         cancelAnimationFrame(animationId)
+       }
+     }
+   }, [businessType, selectedRoomType, draw])
 
 
   // Initialize canvas
@@ -1129,9 +1152,9 @@ export default function CanvasMap({
         return
       }
 
-      // For hotel mode, just call onCircleClick with the circle info
-      // Don't modify the status here - let the parent handle it
+      // For hotel mode, update selectedProperty and call onCircleClick
       if (businessType === "hotel") {
+        setSelectedProperty(circle) // Set the selected property to show yellow highlight
         onCircleClick?.(circle)
         return
       }

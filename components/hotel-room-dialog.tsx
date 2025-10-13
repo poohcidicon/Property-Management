@@ -17,6 +17,8 @@ interface HotelRoomDialogProps {
   onChangeStatus?: (status: boolean) => void
   guestList: Guest[]
   statusType?: "available" | "booked" | "checkin"
+  customerData?: any | null
+  onDialogClose?: () => void // Add callback for dialog close
 }
 
 export default function HotelRoomDialog({
@@ -27,7 +29,9 @@ export default function HotelRoomDialog({
   onConfirmHotelRoom,
   onChangeStatus,
   guestList,
-  statusType = "available"
+  statusType = "available",
+  customerData,
+  onDialogClose
 }: HotelRoomDialogProps) {
 
   const [guest, setGuest] = useState<Guest | null>(null);
@@ -52,7 +56,10 @@ export default function HotelRoomDialog({
         <div className="relative">
           <button
             className="absolute top-2 right-2 z-10 p-1 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -71,7 +78,10 @@ export default function HotelRoomDialog({
         <div className="relative">
           <button
             className="absolute top-2 right-2 z-10 p-1 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -109,7 +119,10 @@ export default function HotelRoomDialog({
             </span>
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => setShowHotelRoomDialog(false)}
+              onClick={() => {
+                setShowHotelRoomDialog(false)
+                onDialogClose?.()
+              }}
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -168,23 +181,31 @@ export default function HotelRoomDialog({
 
         {/* Status-specific button */}
         {statusType === "available" ? (
-          <button
-            className="w-full bg-black text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            onClick={onConfirmHotelRoom}
-          >
-            ยืนยันการจอง
-          </button>
+          customerData ? (
+            <button
+              className="w-full bg-black text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
+              onClick={onConfirmHotelRoom}
+            >
+              ยืนยันการจอง
+            </button>
+          ) : null
         ) : statusType === "booked" ? (
           <button
             className="w-full bg-orange-500 text-white rounded-xl py-2.5 hover:bg-orange-600 transition"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             ห้องถูกจองแล้ว
           </button>
         ) : statusType === "checkin" ? (
           <button
             className="w-full bg-red-500 text-white rounded-xl py-2.5 hover:bg-red-600 transition"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             ห้องถูกเช็คอินแล้ว
           </button>
