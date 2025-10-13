@@ -192,7 +192,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isHighlighted: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: roomColor.glow,
           }
@@ -208,7 +208,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isActive: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: "rgba(251, 191, 36, 0.6)",
           }
@@ -891,26 +891,27 @@ export default function CanvasMap({
   }, [backgroundImage, circles, getCircleStyle, flashPhase, currentUsername, businessType, selectedProperty])
 
    useEffect(() => {
-    let animationId: number
+     let animationId: number
 
-    const animate = () => {
-      setFlashPhase((prev) => prev + 0.15)
-      draw()
-      animationId = requestAnimationFrame(animate)
-    }
+     const animate = () => {
+       setFlashPhase((prev) => prev + 0.15)
+       draw()
+       animationId = requestAnimationFrame(animate)
+     }
 
-    if (businessType === "hotel" && selectedRoomType) {
-      animationId = requestAnimationFrame(animate)
-    } else {
-      draw()
-    }
+     // ให้กระพริบตามปกติเมื่อมีการเลือก room type
+     if (businessType === "hotel" && selectedRoomType) {
+       animationId = requestAnimationFrame(animate)
+     } else {
+       draw()
+     }
 
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [businessType, selectedRoomType, draw])
+     return () => {
+       if (animationId) {
+         cancelAnimationFrame(animationId)
+       }
+     }
+   }, [businessType, selectedRoomType, draw])
 
 
   // Initialize canvas
@@ -1120,9 +1121,9 @@ export default function CanvasMap({
         return
       }
 
-      // For hotel mode, just call onCircleClick with the circle info
-      // Don't modify the status here - let the parent handle it
+      // For hotel mode, update selectedProperty and call onCircleClick
       if (businessType === "hotel") {
+        setSelectedProperty(circle) // Set the selected property to show yellow highlight
         onCircleClick?.(circle)
         return
       }
