@@ -14,10 +14,12 @@ import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 import dayjs from "dayjs"
 
 export default function CustomerBookingCard({
+    counter=0,
     onRoomTypeChange,
     onPendingBookingsChange,
     onCheckedInBookingsChange
 }: {
+    counter?: number
     onRoomTypeChange?: (roomType: string | null) => void;
     onPendingBookingsChange?: (guest: any) => void
     onCheckedInBookingsChange?: (guest: any) => void
@@ -102,7 +104,7 @@ export default function CustomerBookingCard({
 
     useEffect(() => {
       loadGuest();
-    }, [])
+    }, [counter])
 
     console.log(selectedBooking, 'selectedRoomType')
 

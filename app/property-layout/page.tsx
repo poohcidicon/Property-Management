@@ -1527,6 +1527,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // {console.log('selectedRoomType', selectedRoomType)}
       ) : (
         <CustomerBookingCard
+          counter={searchUnitMatrix.counter}
           onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "standard" | "family" | null)}
           onPendingBookingsChange={(guest: PendingBooking) => setPendingBookingHotel(guest)}
           onCheckedInBookingsChange={(guest: CheckedInBooking) => setCheckedInBookingHotel(guest)}
