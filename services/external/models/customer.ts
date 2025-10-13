@@ -55,19 +55,20 @@ export interface IGuest {
 
 // from Database
 export interface BookingGuest {
-  bookingID: string,
-  bookRoomID: string,
-  bookUnitID: string,
-  bookUnitNumber: string,
-  leadGuest: string,
-  leadPhone: string,
-  roomType: string,
-  checkIn: string,
-  checkOut: string,
-  night: string,
-  adults: string,
-  children: string,
-  totalAmount: string,
-  statusText: string,
-  roomNumber: string
+  BookingID: string,
+  BookRoomID: string,
+  LeadGuest: string,
+  LeadPhone: string,
+  RoomType: string,
+  CheckIn: string,
+  CheckOut: string,
+  Night: string,
+  Adults: string,
+  Children: string,
+  TotalAmount: string,
+  StatusText: string,
+  BookRoomNumber: string,
+  BookUnitID: string,
+  CheckinUnitID: string,
+  CheckinRoomNumber: string
 }

@@ -14,15 +14,29 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     const query = `
       SELECT DISTINCT g.*
       , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
+      , checkin.UnitID as CheckinUnitID, checkin.RoomNumber as CheckinRoomNumber
       FROM VW_Hotel_BookingStatus g
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
+      LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
       WHERE g.CheckIn = @CheckInDate
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
       .query<BookingGuest>(query)
+    
+    const haveSetCheckin: Record<string, boolean> = {}
 
     const mappingData = result.recordset.map<IGuest>((item) => {
+      let checkin: IGuest['checkin'] | null = null
+      if (item.CheckinUnitID && !haveSetCheckin[item.CheckinUnitID]) {
+        haveSetCheckin[item.CheckinUnitID] = true
+        checkin = {
+          unit_id: item.CheckinUnitID,
+          status: 'checkin',
+          checkin_date: item.CheckIn,
+          checkout_date: item.CheckOut,
+        }
+      }
       return {
         id: item.BookRoomID,
         member_id: item.BookRoomID,
@@ -41,7 +55,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
         } : null,
-        checkin: null,
+        checkin: checkin
       }
     })
 
