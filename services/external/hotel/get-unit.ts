@@ -11,8 +11,11 @@ export const getUnitsHotelService = async (payload: {
   try{
     const pool = await getConnection();
     const query = `
-      SELECT * FROM VW_Hotel_RoomStatus 
-      WHERE ActiveDate = @ActiveDate
+      SELECT DISTINCT u.*
+      , booking.BookingID, Booking.BookRoomID, booking.Status as BookingStatus
+      FROM VW_Hotel_RoomStatus u
+      LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W')
+      WHERE u.ActiveDate = @ActiveDate
     `
     const result = await pool.request()
       .input("ActiveDate", dayjs().format('YYYY-MM-DD'))
@@ -22,10 +25,17 @@ export const getUnitsHotelService = async (payload: {
       return {
         unit_id: item.UnitID,
         unit_number: item.RoomNumber,
-        status: item.Status,
+        status: item.BookingStatus === 'W' ? 2 : item.Status,
         x: item.X || db.units[index+1]?.x || null,
         y: item.Y || db.units[index+1]?.y || null,
-        booking: null,
+        booking: item.BookingID ? {
+          booking_id: item.BookingID,
+          book_room_id: item.BookRoomID,
+          customer_id: '',
+          status: 'booked',
+          start_date: '',
+          end_date: '',
+        } : null,
         d_price: 0,
         floor: "1",
         room_type: 'standard',
