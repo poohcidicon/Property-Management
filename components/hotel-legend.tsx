@@ -34,29 +34,37 @@ export default function HotelLegend({ showLegend, setShowLegend }: HotelLegendPr
             <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition-colors">
               <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-green-500 shadow-sm"></div>
               <div>
-                <span className="text-sm font-medium text-gray-800">ว่างทุกวัน</span>
-                <p className="text-xs text-gray-500">Available</p>
+                <span className="text-sm font-medium text-gray-800">ว่าง</span>
+                <p className="text-xs text-gray-500">Available (Status: 0)</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200 hover:bg-orange-100 transition-colors">
+              <div className="w-5 h-5 bg-orange-400 rounded-full border-2 border-orange-500 shadow-sm"></div>
+              <div>
+                <span className="text-sm font-medium text-gray-800">จองแล้ว</span>
+                <p className="text-xs text-gray-500">Booked (Status: 2)</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition-colors">
               <div className="w-5 h-5 bg-red-400 rounded-full border-2 border-red-500 shadow-sm"></div>
               <div>
-                <span className="text-sm font-medium text-gray-800">จองแล้ว</span>
-                <p className="text-xs text-gray-500">Booked</p>
+                <span className="text-sm font-medium text-gray-800">เช็คอินแล้ว</span>
+                <p className="text-xs text-gray-500">Checkin (Status: 3)</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-100 border border-orange-400 hover:bg-orange-200 transition-colors">
-              <div className="w-5 h-5 bg-orange-500 rounded-full border-2 border-orange-500 shadow-sm"></div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 transition-colors">
+              <div className="w-5 h-5 bg-yellow-400 rounded-full border-2 border-yellow-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">กำลังจอง</span>
                 <p className="text-xs text-gray-500">Pending</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 transition-colors">
-              <div className="w-5 h-5 bg-yellow-400 rounded-full border-2 border-yellow-500 shadow-sm"></div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200 hover:bg-purple-100 transition-colors">
+              <div className="w-5 h-5 bg-purple-400 rounded-full border-2 border-purple-500 shadow-sm"></div>
               <div>
                 <span className="text-sm font-medium text-gray-800">จองได้บางวัน</span>
                 <p className="text-xs text-gray-500">Some available</p>

@@ -9,6 +9,7 @@ import { getOrCreateUsername, getCurrentUsername, setCurrentUsernameStorage } fr
 import { toast } from "sonner"
 import { useRealtimeBooking } from "@/hooks/use-realtime-booking"
 import { getUnitMatrixApi } from "@/lib/api/unit-matrix"
+import { getUnitMatrixHotelApi } from "@/lib/api/hotel/unit-matrix-hotel"
 import { cn } from "@/lib/utils"
 import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
@@ -17,8 +18,8 @@ export interface Circle {
   x: number
   y: number
   r: number
-  status: "available" | "booked" | "pending" | "some available",
-  initStatus: "available" | "booked" | "pending" | "some available", // สถานะเริ่มต้นจาก API
+  status: "available" | "booked" | "pending" | "some available" | "checkin",
+  initStatus: "available" | "booked" | "pending" | "some available" | "checkin", // สถานะเริ่มต้นจาก API
   id: string
   name: string;
   room_type?: string // เพิ่ม
@@ -26,6 +27,12 @@ export interface Circle {
   bookedAt?: number // Timestamp ของการจอง
   m_price: number // ราคาเช่ารายเดือน
   d_price: number // ราคาเช่ารายวัน
+  booking?: {
+    customer_id: string;
+    status: string;
+    start_date: string;
+    end_date: string;
+  } | null
 }
 
 export interface Customer {
@@ -60,34 +67,40 @@ interface CanvasMapProps {
   selectedCustomer?: Customer | null // ลูกค้าที่เลือก
   onCustomerSelect?: (customer: Customer | null) => void // callback เมื่อเลือกลูกค้า
   businessType?: "hotel" | "market" // 🆕 เพิ่ม prop นี้
+  selectedFloor?: number // 🆕 เพิ่ม prop นี้สำหรับเลือกชั้น
 }
 
 export const ROOM_TYPE_COLORS = {
-  Suite: {
+  suite: {
     primary: "#ec4899", // pink-500
     secondary: "#db2777",
     glow: "rgba(236, 72, 153, 0.6)",
   },
-  Standard: {
+  standard: {
     primary: "#8b5cf6", // violet-500
     secondary: "#7c3aed",
     glow: "rgba(139, 92, 246, 0.6)",
   },
-  Deluxe: {
+  deluxe: {
     primary: "#f59e0b", // amber-500
     secondary: "#d97706",
     glow: "rgba(245, 158, 11, 0.6)",
   },
+  family: {
+    primary: "#10b981", // emerald-500
+    secondary: "#059669",
+    glow: "rgba(16, 185, 129, 0.6)",
+  },
 } as const
 
-export default function CanvasMap({ 
+export default function CanvasMap({
   onCircleClick,
   backgroundImageUrl,
-  onImageUpload, 
-  onFilterChange, 
-  selectedPropertyIds, 
-  onExternalCircleUpdate, 
-  onCirclesChange, 
+  onImageUpload,
+  onFilterChange,
+  selectedPropertyIds,
+  onExternalCircleUpdate,
+  onCirclesChange,
   filterUnitMatrix,
   onLoading,
   onChangeFilterDay,
@@ -97,7 +110,21 @@ export default function CanvasMap({
   selectedCustomer,
   onCustomerSelect,
   businessType = "market",
+  selectedFloor = 1,
 }: CanvasMapProps) {
+  // Get selectedProperty from parent
+  const [selectedProperty, setSelectedProperty] = useState<Circle | null>(null)
+  
+  // Listen for selectedProperty changes from parent
+  useEffect(() => {
+    // This will be called when parent updates selectedProperty
+    const handleSelectedPropertyChange = (event: CustomEvent) => {
+      setSelectedProperty(event.detail)
+    }
+    
+    window.addEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
+    return () => window.removeEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
+  }, [])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
@@ -139,6 +166,7 @@ export default function CanvasMap({
   const getCircleStyle = useCallback(
     (circle: Circle) => {
       const isSelectedInList = selectedPropertyIds?.has(circle.id) || false
+      const isActiveRoom = selectedProperty?.id === circle.id // Check if this is the currently active room
 
       // 🏨 Hotel Mode - รองรับ room type highlighting
       if (businessType === "hotel") {
@@ -180,6 +208,22 @@ export default function CanvasMap({
           }
         }
 
+        // ห้องที่ active อยู่ (กำลังเลือก) → สีเหลือง
+        if (isActiveRoom) {
+          return {
+            fillColor: "#fbbf24", // Yellow for active room
+            strokeColor: "#ffffff",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 4,
+            outerStrokeWidth: 6,
+            cursor: "pointer",
+            isActive: true,
+            shouldFlash: true,
+            textColor: "white",
+            glowColor: "rgba(251, 191, 36, 0.6)",
+          }
+        }
+
         // Status colors สำหรับ Hotel
         if (circle.status === "available" && circle.initStatus === "available") {
           if (isSelectedInList) {
@@ -195,7 +239,7 @@ export default function CanvasMap({
             }
           } else {
             return {
-              fillColor: "rgba(0, 200, 0, 0.7)",
+              fillColor: "#10b981", // Green for Available (status: 0)
               strokeColor: "#ffffff",
               outerStrokeColor: roomColor.primary,
               strokeWidth: 2,
@@ -203,6 +247,26 @@ export default function CanvasMap({
               cursor: "pointer",
               textColor: "white",
             }
+          }
+        } else if (circle.status === "booked") {
+          return {
+            fillColor: "#f97316", // Orange for Booked (status: 2)
+            strokeColor: "#ffffff",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 2,
+            outerStrokeWidth: 4,
+            cursor: "default",
+            textColor: "white",
+          }
+        } else if (circle.status === "checkin") {
+          return {
+            fillColor: "#ef4444", // Red for Checkin (status: 3)
+            strokeColor: "#ffffff",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 2,
+            outerStrokeWidth: 4,
+            cursor: "default",
+            textColor: "white",
           }
         } else if (circle.status === "pending") {
           const isOwnBooking = circle.bookedBy === currentUsername
@@ -309,7 +373,7 @@ export default function CanvasMap({
         }
       }
     },
-    [selectedPropertyIds, selectedRoomType, currentUsername, businessType],
+    [selectedPropertyIds, selectedRoomType, currentUsername, businessType, selectedProperty],
   )
 
   // Initialize username and load circles
@@ -321,6 +385,11 @@ export default function CanvasMap({
     const username = userLogin?.username || getOrCreateUsername()
     setCurrentUsername(username)
 
+    // Set hasReceivedSocketData to true for hotel mode to bypass socket dependency
+    if (businessType === "hotel" && !hasReceivedSocketData) {
+      setHasReceivedSocketData(true)
+    }
+
     const loadCircles = async () => {
       try {
         setIsLoadingCircles(true)
@@ -328,38 +397,101 @@ export default function CanvasMap({
           onLoading(true)
         }
 
-        const searchUnitMatrixPayload = {
-          project_id: "M004",
-          year: filterUnitMatrix?.year || 2025,
-          month: filterUnitMatrix?.month || 9,
-          day: filterUnitMatrix?.day || filterDay || 0,
-        }
-        const unitMatrixData = await getUnitMatrixApi(searchUnitMatrixPayload)
+        let circlesData: Circle[] = []
 
-        let circlesData =
-          unitMatrixData.data?.map((item: any) => {
-            // 🏨 Hotel: กำหนด room_type (ควรมาจาก API)
-            let roomType = undefined
-            if (businessType === "hotel") {
-              const roomTypes: ("Suite" | "Standard" | "Deluxe")[] = ["Suite", "Standard", "Deluxe"]
-              roomType = item.room_type || roomTypes[Math.floor(Math.random() * roomTypes.length)]
+        if (businessType === "hotel") {
+          // 🏨 Hotel Mode: Use hotel API
+          try {
+            const hotelUnitsData = await getUnitMatrixHotelApi({
+              project_id: "M004",
+              floor: selectedFloor // Use selected floor
+            })
+            
+            if (hotelUnitsData.data && hotelUnitsData.data.length > 0) {
+              circlesData = hotelUnitsData.data.map((unit, index) => {
+                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" => {
+                  if (unit.status === 0) return 'available';
+                  if (unit.status === 2) return 'booked';
+                  if (unit.status === 3) return 'checkin';
+                  if (unit.status_desc) {
+                    const desc = unit.status_desc.toLowerCase();
+                    if (desc === 'available') return 'available';
+                    if (desc === 'booked') return 'booked';
+                    if (desc === 'checkin') return 'checkin';
+                    if (desc === 'pending') return 'pending';
+                    if (desc === 'some available') return 'some available';
+                  }
+                  return 'available';
+                };
+                
+                return {
+                  id: unit.unit_id,
+                  name: unit.unit_number,
+                  x: unit.x || 0,
+                  y: unit.y || 0,
+                  r: 23,
+                  status: getStatusValue(),
+                  initStatus: getStatusValue(),
+                  bookedBy: unit.booking?.customer_id,
+                  bookedAt: unit.booking ? new Date(unit.booking.start_date).getTime() : undefined,
+                  m_price: unit.d_price, // Using d_price for both since hotel is daily
+                  d_price: unit.d_price,
+                  room_type: unit.room_type,
+                  booking: unit.booking
+                } as Circle;
+              })
+              
+              // Assign default positions for units with x:0, y:0
+              circlesData = circlesData.map((unit, index) => {
+                if (unit.x === 0 && unit.y === 0) {
+                  // Arrange units with no position in a grid on the left side
+                  const row = Math.floor(index / 10)
+                  const col = index % 10
+                  return {
+                    ...unit,
+                    x: 50 + col * 60,
+                    y: 50 + row * 60
+                  }
+                }
+                return unit
+              })
             }
+          } catch (error) {
+            console.error("Error loading hotel units:", error)
+            toast.error("ไม่สามารถโหลดข้อมูลห้องพักได้")
+          }
+        } else {
+          // 🏪 Market Mode: Use regular API
+          const searchUnitMatrixPayload = {
+            project_id: "M004",
+            year: filterUnitMatrix?.year || 2025,
+            month: filterUnitMatrix?.month || 9,
+            day: filterUnitMatrix?.day || filterDay || 0,
+          }
+          const unitMatrixData = await getUnitMatrixApi(searchUnitMatrixPayload)
 
-            return {
-              id: item.unit_id,
-              r: 23,
-              status: item.status_desc.toLowerCase(),
-              initStatus: item.status_desc.toLowerCase(),
-              x: item.x,
-              y: item.y,
-              name: item.unit_number,
-              room_type: roomType, // Hotel มี, Market ไม่มี
-              m_price: item.m_price,
-              d_price: item.d_price,
-            } as Circle
-          }) || []
+          circlesData =
+            unitMatrixData.data?.map((item: any) => {
+              return {
+                id: item.unit_id,
+                r: 23,
+                status: item.status_desc.toLowerCase(),
+                initStatus: item.status_desc.toLowerCase(),
+                x: item.x,
+                y: item.y,
+                name: item.unit_number,
+                m_price: item.m_price,
+                d_price: item.d_price,
+              } as Circle
+            }) || []
+        }
 
         circlesData = circlesData.filter((item: Circle) => {
+          // For hotel mode, we want to include all units, even those with x:0, y:0
+          // as they might be positioned elsewhere or have default positions
+          if (businessType === "hotel") {
+            return true // Include all hotel units
+          }
           return !(!item.x || item.x === 0) && !(!item.y || item.y === 0)
         })
 
@@ -384,6 +516,7 @@ export default function CanvasMap({
               status: "available" as const,
               bookedBy: undefined,
               bookedAt: undefined,
+              booking: null
             }
           })
 
@@ -410,8 +543,11 @@ export default function CanvasMap({
 
     if (hasReceivedSocketData) {
       loadCircles()
+    } else {
+      // Also load circles when business type changes
+      loadCircles()
     }
-  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, businessType, userLogin])
+  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, businessType, userLogin, selectedFloor])
 
   // Listen for real-time circle updates from other clients
   useEffect(() => {
@@ -432,7 +568,11 @@ export default function CanvasMap({
           ? "ว่าง"
           : updatedCircle.status === "pending"
             ? `ถูกจองโดย ${updatedCircle.bookedBy}`
-            : "ขายแล้ว"
+            : updatedCircle.status === "booked"
+              ? "จองแล้ว"
+              : updatedCircle.status === "checkin"
+                ? "เช็คอินแล้ว"
+                : "ขายแล้ว"
       toast.info(`🔄 ${updatedCircle.name} เปลี่ยนเป็น ${statusText}`)
     }
 
@@ -478,6 +618,7 @@ export default function CanvasMap({
                 status: "available" as const,
                 bookedBy: undefined,
                 bookedAt: undefined,
+                booking: null
               }
             }
             return circle
@@ -504,6 +645,7 @@ export default function CanvasMap({
                 status: "available" as const,
                 bookedBy: undefined,
                 bookedAt: undefined,
+                booking: null
               }
             }
             return circle
@@ -547,6 +689,7 @@ export default function CanvasMap({
                 status: "available" as const,
                 bookedBy: undefined,
                 bookedAt: undefined,
+                booking: null
               }
             }
             return circle
@@ -669,6 +812,8 @@ export default function CanvasMap({
 
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
       if (businessType === "hotel" && style.outerStrokeWidth && style.outerStrokeWidth > 0) {
+        ctx.save()
+        
         if (style.shouldFlash) {
           const flashIntensity = Math.sin(flashPhase) * 0.5 + 0.5
           const pulseSize = 10 + flashIntensity * 8
@@ -682,6 +827,12 @@ export default function CanvasMap({
           if (style.glowColor) {
             ctx.shadowColor = style.glowColor
             ctx.shadowBlur = (20 + flashIntensity * 15) / scaleRef.current
+            // Draw glow circle
+            ctx.beginPath()
+            ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
+            ctx.strokeStyle = style.glowColor
+            ctx.lineWidth = 2 / scaleRef.current
+            ctx.stroke()
           }
         } else {
           ctx.shadowBlur = 0
@@ -691,6 +842,8 @@ export default function CanvasMap({
           ctx.lineWidth = (style.outerStrokeWidth || 4) / scaleRef.current
           ctx.stroke()
         }
+        
+        ctx.restore()
       }
 
       ctx.shadowBlur = 0
@@ -745,7 +898,7 @@ export default function CanvasMap({
     })
 
     ctx.restore()
-  }, [backgroundImage, circles, getCircleStyle, flashPhase, currentUsername, businessType])
+  }, [backgroundImage, circles, getCircleStyle, flashPhase, currentUsername, businessType, selectedProperty])
 
    useEffect(() => {
     let animationId: number
@@ -977,6 +1130,14 @@ export default function CanvasMap({
         return
       }
 
+      // For hotel mode, just call onCircleClick with the circle info
+      // Don't modify the status here - let the parent handle it
+      if (businessType === "hotel") {
+        onCircleClick?.(circle)
+        return
+      }
+
+      // For market mode, keep the original logic
       try {
         let newStatus: Circle["status"]
         let newBookedBy: string | undefined
@@ -1080,7 +1241,8 @@ export default function CanvasMap({
             ...circle,
             status: "available",
             bookedBy: undefined,
-            bookedAt: undefined
+            bookedAt: undefined,
+            booking: null
           }
           toast.success(`❌ ${currentUsername} ยกเลิกการจอง ${circle.name}`)
         } else {
