@@ -20,7 +20,7 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
   try{
     // Placeholder for actual booking logic
     const queryUpdateRoom = `
-      UPDATE [dbo].[Sys_Hotel_Room]
+      UPDATE [dbo].[VW_Hotel_RoomStatus]
       SET Status = '1'
       WHERE UnitID = @UnitID
     `
