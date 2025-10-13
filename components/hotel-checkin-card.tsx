@@ -88,7 +88,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาต่อคืน</p>
-              <p className="text-sm font-semibold text-green-600">฿0</p>
+              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount || 0}</p>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
-              <span className="font-bold text-lg text-green-600">฿{selectGuest?.total_amount || 0}</span>
+              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || 0}</span>
             </div>
           </div>
         </div>

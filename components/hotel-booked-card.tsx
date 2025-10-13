@@ -78,7 +78,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาห้องพัก</p>
-              <p className="text-sm font-semibold text-blue-600">฿0</p>
+              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount || '0'}</p>
             </div>
           </div>
         </div>

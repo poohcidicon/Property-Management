@@ -6,6 +6,7 @@ import HotelCheckinCard from "./hotel-checkin-card"
 import HotelBookedCard from "./hotel-booked-card"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { Guest } from "@/lib/api/hotel/get-guest"
+import { useEffect, useState } from "react"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -28,6 +29,20 @@ export default function HotelRoomDialog({
   guestList,
   statusType = "available"
 }: HotelRoomDialogProps) {
+
+  const [guest, setGuest] = useState<Guest | null>(null);
+
+  const handleSetGuest = () => {
+    if (guestList.length > 0) {
+      const guest = guestList.find(g => g.id === selectedProperty?.booking?.booking_id)
+      setGuest(guest || null)
+    }
+  }
+
+  useEffect(() => {
+    handleSetGuest()
+  }, [selectedProperty])
+
   if (!showHotelRoomDialog) return null
   if (statusType === "checkin") {
     return (
@@ -118,10 +133,10 @@ export default function HotelRoomDialog({
               {selectedProperty?.room_type || selectedRoomType || 'standard'}
             </p>
           </div>
-          <div className="text-right">
+          {/* <div className="text-right">
             <p className="text-sm text-gray-500">ราคาต่อคืน</p>
             <p className="text-green-600 font-semibold text-lg">฿{selectedProperty?.d_price?.toLocaleString() || '1,500'}</p>
-          </div>
+          </div> */}
         </div>
 
         {/* Status-specific content */}
