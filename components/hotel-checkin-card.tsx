@@ -35,7 +35,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     const payloadCheckout = {
       unit_id: roomId || '',
       checkout_date: dayjs().format('YYYY-MM-DD'),
-      total_amount: 0
+      total_amount: selectGuest?.total_amount
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
