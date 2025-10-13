@@ -138,7 +138,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     x: null,
     y: null
   })
-  const [selectedRoomType, setSelectedRoomType] = useState<"Suite" | "Standard" | "Deluxe" | null>(null)
+  const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null)
   const [selectedFloor, setSelectedFloor] = useState<number>(1)
   const [isLoadingUnitMatrix, setIsLoadingUnitMatrix] = useState(false)
   
@@ -1474,9 +1474,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
           </Card>
         </div>
       </div>
+      // {console.log('selectedRoomType', selectedRoomType)}
       ) : (
         <CustomerBookingCard
-          onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "Suite" | "Standard" | "Deluxe" | null)}
+          onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "standard" | "family" | null)}
         />
       )}
 

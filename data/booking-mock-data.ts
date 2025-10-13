@@ -2,41 +2,27 @@
 export const ROOM_TYPES = {
   standard: {
     name: "Standard",
-    color: "#3b82f6" // blue-500
-  },
-  deluxe: {
-    name: "Deluxe",
-    color: "#10b981" // green-500
-  },
-  suite: {
-    name: "Suite",
-    color: "#f59e0b" // amber-500
+    color: "#6b7280" // gray-500 - plain, normal color
   },
   family: {
     name: "ห้องครอบครัว",
-    color: "#8b5cf6" // violet-500
+    color: "#f59e0b" // amber-500 - premium color for special privileges
   }
 };
 
 // Hotel room types for selection
 export const HOTEL_ROOM_TYPES = {
-  "Suite": {
-    id: "suite",
-    name: "Suite",
-    color: "#f59e0b", // amber-500
-    description: "ห้องสวีทพร้อมห้องนั่งเล่น"
-  },
-  "Standard": {
+  "standard": {
     id: "standard",
     name: "Standard",
-    color: "#3b82f6", // blue-500
+    color: "#6b7280", // gray-500 - plain, normal color
     description: "ห้องสแตนดาร์ดขนาดพอเหมาะ"
   },
-  "Deluxe": {
-    id: "deluxe",
-    name: "Deluxe",
-    color: "#10b981", // green-500
-    description: "ห้องดีลักซ์ขนาดใหญ่"
+  "family": {
+    id: "family",
+    name: "ห้องครอบครัว",
+    color: "#f59e0b", // amber-500 - premium color for special privileges
+    description: "ห้องพักครอบครัวขนาดใหญ่"
   },
   "null": {
     id: null,
@@ -85,7 +71,7 @@ export const pendingBookings: PendingBooking[] = [
     id: "booking-002",
     guestName: "มานี รักสุข",
     guestPhone: "0823456789",
-    roomType: "deluxe",
+    roomType: "family",
     checkInDate: "2025-10-11",
     checkOutDate: "2025-10-15",
     numberOfDays: 4,
@@ -97,7 +83,7 @@ export const pendingBookings: PendingBooking[] = [
     id: "booking-003",
     guestName: "วีระชัย กำลังมั่น",
     guestPhone: "0834567890",
-    roomType: "suite",
+    roomType: "standard",
     checkInDate: "2025-10-12",
     checkOutDate: "2025-10-14",
     numberOfDays: 2,

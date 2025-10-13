@@ -19,29 +19,22 @@ export default function CustomerBookingCard({
     onRoomTypeChange?: (roomType: string | null) => void;
 }) {
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
-    const [selectedRoomType, setSelectedRoomType] = useState<"Suite" | "Standard" | "Deluxe" | null>(null);
-
+    const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
     
     const selectBooking = (booking: PendingBooking) => {
         setSelectedBooking(booking);
         // When a booking is selected, automatically set the room type filter
-        // Map from lowercase room types to capitalized room types
-        const roomTypeMapping: Record<string, "Suite" | "Standard" | "Deluxe" | null> = {
-            "standard": "Standard",
-            "deluxe": "Deluxe",
-            "suite": "Suite",
-            "family": null // family room type doesn't have a direct mapping in hotel room types
-        };
-        const bookingRoomType = roomTypeMapping[booking.roomType] || null;
+        // Use the room type directly from booking
+        const bookingRoomType = booking.roomType || null;
         setSelectedRoomType(bookingRoomType);
         if (onRoomTypeChange) {
             onRoomTypeChange(bookingRoomType);
         }
     };
 
-    const handleRoomTypeChange = (roomType: "Suite" | "Standard" | "Deluxe" | "null") => {
+    const handleRoomTypeChange = (roomType: "standard" | "family" | "null") => {
         const roomTypeValue = roomType === "null" ? null : roomType;
         setSelectedRoomType(roomTypeValue);
         if (onRoomTypeChange) {
@@ -152,20 +145,9 @@ export default function CustomerBookingCard({
                 <Card
                   key={booking.id}
                   className={`p-3 cursor-pointer transition-all hover:shadow-md flex-shrink-0 w-72 lg:w-auto ${
-                    selectedBooking?.id === booking.id ? "ring-2 ring-primary" : ""
-                  } ${
-                    // Map booking room type to selected room type for comparison
-                    (() => {
-                        const roomTypeMapping: Record<string, "Suite" | "Standard" | "Deluxe" | null> = {
-                            "standard": "Standard",
-                            "deluxe": "Deluxe",
-                            "suite": "Suite",
-                            "family": null
-                        };
-                        const mappedRoomType = roomTypeMapping[booking.roomType] || null;
-                        // return selectedRoomType === mappedRoomType ? "ring-2 ring-blue-400 bg-blue-50" : "";
-                        return ""
-                    })()
+                    selectedBooking?.id === booking.id
+                      ? "ring-2 ring-primary"
+                      : ""
                   }`}
                   onClick={() => selectBooking(booking)}
                 >
