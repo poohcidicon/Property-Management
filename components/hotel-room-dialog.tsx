@@ -1,7 +1,7 @@
 "use client"
 
 import { X, Calendar, CheckCircle } from "lucide-react"
-import { Circle } from "./canvas-map"
+import { Circle, ROOM_TYPE_COLORS } from "./canvas-map"
 import HotelCheckinCard from "./hotel-checkin-card"
 import HotelBookedCard from "./hotel-booked-card"
 
@@ -9,7 +9,7 @@ interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
   setShowHotelRoomDialog: (show: boolean) => void
   selectedProperty: Circle | null
-  selectedRoomType: "Suite" | "Standard" | "Deluxe" | null
+  selectedRoomType: "standard" | "family" | null
   onConfirmHotelRoom: () => void
   statusType?: "available" | "booked" | "checkin"
 }
@@ -93,7 +93,18 @@ export default function HotelRoomDialog({
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div className="text-gray-500">
             <p className="text-sm">ประเภทห้อง</p>
-            <p className="text-blue-600 font-medium capitalize">{selectedProperty?.room_type || selectedRoomType || 'Standard'}</p>
+            <p
+              className="font-medium capitalize"
+              style={{
+                color: selectedProperty?.room_type
+                  ? ROOM_TYPE_COLORS[selectedProperty.room_type as keyof typeof ROOM_TYPE_COLORS]?.primary || "#6b7280"
+                  : selectedRoomType
+                    ? ROOM_TYPE_COLORS[selectedRoomType]?.primary || "#6b7280"
+                    : "#6b7280"
+              }}
+            >
+              {selectedProperty?.room_type || selectedRoomType || 'standard'}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">ราคาต่อคืน</p>

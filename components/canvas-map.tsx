@@ -71,25 +71,15 @@ interface CanvasMapProps {
 }
 
 export const ROOM_TYPE_COLORS = {
-  suite: {
-    primary: "#ec4899", // pink-500
-    secondary: "#db2777",
-    glow: "rgba(236, 72, 153, 0.6)",
-  },
   standard: {
-    primary: "#8b5cf6", // violet-500
-    secondary: "#7c3aed",
-    glow: "rgba(139, 92, 246, 0.6)",
-  },
-  deluxe: {
-    primary: "#f59e0b", // amber-500
-    secondary: "#d97706",
-    glow: "rgba(245, 158, 11, 0.6)",
+    primary: "#6b7280", // gray-500 - plain, normal color
+    secondary: "#4b5563",
+    glow: "rgba(107, 114, 128, 0.6)",
   },
   family: {
-    primary: "#10b981", // emerald-500
-    secondary: "#059669",
-    glow: "rgba(16, 185, 129, 0.6)",
+    primary: "#f59e0b", // amber-500 - premium color for special privileges
+    secondary: "#d97706",
+    glow: "rgba(245, 158, 11, 0.6)",
   },
 } as const
 
