@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X } from 'lucide-react';
 import { CheckoutUnitApi, IPayloadCheckout } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
+import { Guest } from '@/lib/api/hotel/get-guest';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -13,12 +14,14 @@ interface HotelCheckinCardProps {
   roomNumber?: string;
   roomType?: string;
   roomId?: string;
+  guestList: Guest[];
   onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [selectGust, setSelectGust] = useState<Guest | null>(null);
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -34,6 +37,20 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       }
     }
   };
+
+  console.log(booking)
+
+  // const handleSetGuest = (roomNumber) => {
+  //   if (guestList.length > 0) {
+  //     setSelectGust(guestList[0]);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if (roomNumber) {
+  //     handleSetGuest()
+  //   }
+  // }, [booking])
 
   return (
     <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">

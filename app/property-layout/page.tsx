@@ -29,6 +29,7 @@ import HotelRoomDialog from "@/components/hotel-room-dialog"
 import { useAuth } from "@/hooks/use-auth"
 import { BookUnitHotelApi, IPayloadBookUnitHotel } from "@/lib/api/hotel/checkin"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
+import { getGuestListApi, Guest } from "@/lib/api/hotel/get-guest"
 interface Property {
   id: string
   name: string;
@@ -121,6 +122,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
   const [pendingBookingHotel, setPendingBookingHotel] = useState<PendingBooking | null>(null);
   const [checkedInBookingHotel, setCheckedInBookingHotel] = useState<CheckedInBooking | null>(null);
+  const [guestList, setGuestList] = useState<Guest[]>([])
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -151,6 +153,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   
   // State for tracking remaining booking time
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
+
+  const handleGetGuestList = async () => {
+    const guestList = await getGuestListApi({
+      checkin_date: "2025-10-12",
+    })
+    setGuestList(guestList.data || [])
+  }
   
   // Update countdown timers every second
   useEffect(() => {
@@ -273,6 +282,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // The CanvasMap component will handle fetching the appropriate data
       getZoneList()
       getUnitBookingDate({})
+
+      handleGetGuestList()
 
       //init search
       // setSelectedMonth("9")
@@ -2369,6 +2380,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 setShowHotelRoomDialog(false)
               }
             }}
+            guestList={guestList}
             statusType={statusType}
           />
 

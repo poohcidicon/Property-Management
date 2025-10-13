@@ -4,6 +4,8 @@ import { X, Calendar, CheckCircle } from "lucide-react"
 import { Circle, ROOM_TYPE_COLORS } from "./canvas-map"
 import HotelCheckinCard from "./hotel-checkin-card"
 import HotelBookedCard from "./hotel-booked-card"
+import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
+import { Guest } from "@/lib/api/hotel/get-guest"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -12,6 +14,7 @@ interface HotelRoomDialogProps {
   selectedRoomType: "standard" | "family" | null
   onConfirmHotelRoom: () => void
   onChangeStatus?: (status: boolean) => void
+  guestList: Guest[]
   statusType?: "available" | "booked" | "checkin"
 }
 
@@ -22,6 +25,7 @@ export default function HotelRoomDialog({
   selectedRoomType,
   onConfirmHotelRoom,
   onChangeStatus,
+  guestList,
   statusType = "available"
 }: HotelRoomDialogProps) {
   if (!showHotelRoomDialog) return null
@@ -38,7 +42,7 @@ export default function HotelRoomDialog({
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelCheckinCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus}/>
+          <HotelCheckinCard booking={selectedProperty?.booking} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus} guestList={guestList}/>
         </div>
       </div>
     )
@@ -63,6 +67,7 @@ export default function HotelRoomDialog({
             roomType={selectedProperty?.room_type} 
             roomId={selectedProperty?.id}
             onChangeStatus={onChangeStatus} 
+            guestList={guestList}
           />
         </div>
       </div>

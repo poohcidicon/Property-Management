@@ -1,6 +1,7 @@
 import { CheckinUnitApi, IPayloadCheckin } from '@/lib/api/hotel/checkin';
+import { Guest } from '@/lib/api/hotel/get-guest';
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -14,10 +15,12 @@ interface HotelBookedCardProps {
   roomNumber?: string;
   roomId?: string;
   roomType?: string;
+  guestList: Guest[];
   onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus }: HotelBookedCardProps) {
+export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
+  const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const handleCheckIn = async () => {
     const payloadCheckin = {
       unit_id: roomId,
@@ -34,6 +37,19 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       onChangeStatus(false)
     }
   };
+
+  const handleSetGuest = () => {
+    if (guestList.length > 0) {
+      const guest = guestList.find(g => g.id === booking?.booking_id)
+      setSelectGuest(guest || null)
+    }
+  }
+
+  useEffect(() => {
+    if (guestList.length > 0){
+      handleSetGuest()
+    }
+  }, [booking])
 
   return (
     <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
@@ -62,7 +78,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาห้องพัก</p>
-              <p className="text-sm font-semibold text-blue-600">฿2,500</p>
+              <p className="text-sm font-semibold text-blue-600">฿0</p>
             </div>
           </div>
         </div>
@@ -74,31 +90,31 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">ชื่อ:</span>
-              <span className="font-medium text-gray-800">{booking?.customer_id || 'สมศรี โชติ'}</span>
+              <span className="font-medium text-gray-800">{selectGuest?.full_name || ''}</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เบอร์โทร:</span>
-              <span className="font-medium text-gray-800">081-234-5678</span>
+              <span className="font-medium text-gray-800">{selectGuest?.mobile || ''}</span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
-                {booking?.start_date ? new Date(booking.start_date).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
-                {booking?.end_date ? new Date(booking.end_date).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                {selectGuest?.end_booking ? new Date(selectGuest?.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
               </span>
             </div>
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ค่าจองทั้งหมด:</span>
-              <span className="font-bold text-lg text-green-600">฿7,500</span>
+              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || '0'}</span>
             </div>
           </div>
         </div>
