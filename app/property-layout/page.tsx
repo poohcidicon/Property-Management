@@ -158,8 +158,18 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
 
   const handleGetGuestList = async () => {
+    let checkDate = dayjs().format('YYYY-MM-DD')
+
+    const params = new URLSearchParams(window.location.search);
+    const selectDate = params.get('date');
+    const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
+
+    if (isValidDate && selectDate) {
+      checkDate = selectDate
+    }
+
     const guestList = await getGuestListApi({
-      checkin_date: "2025-10-12",
+      checkin_date: checkDate,
     })
     setGuestList(guestList.data || [])
   }

@@ -70,7 +70,16 @@ export default function CustomerBookingCard({
 
     const loadGuest = async () => {
       // test checkin date 2025-10-12
-      const checkinDate = '2025-10-12';
+      // const checkinDate = '2025-10-12';)
+      let checkinDate = dayjs().format('YYYY-MM-DD')
+      
+      const params = new URLSearchParams(window.location.search);
+      const selectDate = params.get('date');
+      const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
+  
+      if (isValidDate && selectDate) {
+        checkinDate = selectDate
+      }
       const guestList = await getGuestListApi({
         checkin_date: checkinDate
       });

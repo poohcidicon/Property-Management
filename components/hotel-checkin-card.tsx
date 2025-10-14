@@ -71,7 +71,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       handleSetGuest()
       handleSetOtherGuest()
     }
-  }, [booking, checkin_customers])
+  }, [booking, checkin_customers, guestList])
 
   return (
     <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
@@ -121,7 +121,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </div> */}
             {otherGuests.map((guest) => {
               return (
-                <div className='border-b mb-2 py-3'>
+                <div className='border-b mb-2 py-3' id={guest.GuestID}>
                   <div className="flex justify-between">
                     <span className="text-gray-600">ชื่อ:</span>
                     <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
