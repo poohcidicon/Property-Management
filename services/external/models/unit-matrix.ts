@@ -27,6 +27,7 @@ export interface UnitMatrixHotel{
   room_type: string;
   status_desc: string;
   floor: string;
+  total_amount: number;
   booking: {
     customer_id: string;
     status: string;

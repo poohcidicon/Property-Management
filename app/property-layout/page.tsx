@@ -879,7 +879,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       bookedAt: undefined,
       m_price: 0,
       d_price: 0,
-      booking: null
+      booking: null,
+      total_amount: 0
     }
     
     // อัปเดต Canvas Map โดยตรงผ่าน external update handler
@@ -916,7 +917,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         bookedAt: undefined,
         m_price: propertyToRemove.m_price,
         d_price: propertyToRemove.d_price,
-        booking: null
+        booking: null,
+        total_amount: 0
       }
       
       // Find the actual circle data to preserve position

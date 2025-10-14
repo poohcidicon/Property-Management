@@ -43,6 +43,8 @@ export default function HotelRoomDialog({
     }
   }
 
+  console.log(selectedProperty)
+
   useEffect(() => {
     handleSetGuest()
   }, [selectedProperty])
@@ -63,7 +65,16 @@ export default function HotelRoomDialog({
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelCheckinCard booking={selectedProperty?.booking} checkin_customers={selectedProperty?.checkin_customers || []} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus} guestList={guestList}/>
+          <HotelCheckinCard 
+            booking={selectedProperty?.booking}
+            total_amount={selectedProperty?.total_amount || 0}
+            checkin_customers={selectedProperty?.checkin_customers || []} 
+            roomNumber={selectedProperty?.name} 
+            roomType={selectedProperty?.room_type} 
+            roomId={selectedProperty?.id} 
+            onChangeStatus={onChangeStatus} 
+            guestList={guestList}
+          />
         </div>
       </div>
     )

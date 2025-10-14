@@ -41,6 +41,7 @@ export interface Circle {
     booking_id: string; 
     book_room_id: string 
   }>
+  total_amount: number
 }
 
 export interface Customer {
@@ -436,7 +437,8 @@ export default function CanvasMap({
                   d_price: unit.d_price,
                   room_type: unit.room_type,
                   booking: unit.booking,
-                  checkin_customers: unit.checkin_customers
+                  checkin_customers: unit.checkin_customers,
+                  total_amount: unit.total_amount
                 } as Circle;
               })
               

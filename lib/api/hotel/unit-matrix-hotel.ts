@@ -9,6 +9,7 @@ export interface UnitMatrixHotel{
   d_price: number;
   room_type: string;
   status_desc: string;
+  total_amount: number;
   booking: {
     customer_id: string;
     status: string;

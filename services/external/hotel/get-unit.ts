@@ -80,6 +80,7 @@ export const getUnitsHotelService = async (payload: {
         floor: "1",
         room_type: item.RoomType.toLocaleLowerCase(),
         status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : 'Available',
+        total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,
         checkin_customers: checkin_customers.map((c) => {
           return {
             book_room_id: c.book_room_id,

@@ -23,10 +23,11 @@ interface HotelCheckinCardProps {
   roomType?: string;
   roomId?: string;
   guestList: Guest[];
+  total_amount: number;
   onChangeStatus?: (status: boolean) => void;
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
@@ -67,8 +68,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   }
 
   useEffect(() => {
-    if (guestList.length > 0 && checkin_customers.length > 0) {
+    if (guestList.length > 0) {
       handleSetGuest()
+    }
+    if (checkin_customers.length > 0){
       handleSetOtherGuest()
     }
   }, [booking, checkin_customers, guestList])
@@ -100,7 +103,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคา</p>
-              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount || 0}</p>
+              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</p>
             </div>
           </div>
         </div>
@@ -121,7 +124,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </div> */}
             {otherGuests.map((guest) => {
               return (
-                <div className='border-b mb-2 py-3' id={guest.GuestID}>
+                <div className='border-b mb-2 py-3' key={guest.GuestID}>
                   <div className="flex justify-between">
                     <span className="text-gray-600">ชื่อ:</span>
                     <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
@@ -151,7 +154,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
-              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || 0}</span>
+              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</span>
             </div>
           </div>
         </div>
