@@ -24,14 +24,14 @@ export interface Guest {
   night: number;
   booking: {
     unit_id: string;
-    unit_name: string;
+    room_number: string;
     status: string;
     start_date: string;
     end_date: string;
   } | null;
   checkin: {
     unit_id: string;
-    unit_name: string;
+    room_number: string;
     status: string;
     checkin_date: string;
     checkout_date: string;

@@ -2,6 +2,7 @@ import { ApiResponse, axiosPublic } from "@/lib/axios";
 
 export interface IPayloadBookUnitHotel {
   unit_id: string;
+  room_number: string;
   booking_date: string;
   start_date: string;
   end_date: string;

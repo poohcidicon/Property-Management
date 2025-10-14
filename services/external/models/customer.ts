@@ -45,12 +45,14 @@ export interface IGuest {
     status: string;
     checkin_date: string; // ISO date string
     checkout_date: string; // ISO date string
+    room_number: string
   } | null;
   checkin: {
     unit_id: string;
     status: string;
     checkin_date: string; // ISO date string
     checkout_date: string; // ISO date string
+    room_number: string
   } | null;
 }
 

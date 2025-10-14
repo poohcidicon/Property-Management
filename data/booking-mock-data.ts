@@ -59,6 +59,7 @@ export interface PendingBooking {
   totalAmount: number;
   status: "confirmed" | "pending";
   assignedRoomId?: string;
+  assignedRoomName?: string;
 }
 
 export interface CheckedInBooking {
@@ -66,6 +67,7 @@ export interface CheckedInBooking {
   guestName: string;
   assignedRoomId: string;
   checkOutDate: string;
+  assignedRoomName?: string;
 }
 
 // Mock data for pending bookings

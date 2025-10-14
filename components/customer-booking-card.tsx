@@ -105,6 +105,7 @@ export default function CustomerBookingCard({
           totalAmount,
           status: "pending",
           assignedRoomId: g.booking ? g.booking.unit_id : undefined,
+          assignedRoomName: g.booking ? g.booking.room_number : undefined
         };
       })
       const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
@@ -119,6 +120,7 @@ export default function CustomerBookingCard({
           numberOfDays: 0,
           totalAmount: 0,
           checkInDate: new Date().toISOString(),
+          assignedRoomName: g.checkin && g.checkin.room_number ? g.checkin.room_number : ""
         }
       })
       setPendingBookings(pendingList);
@@ -129,7 +131,8 @@ export default function CustomerBookingCard({
       loadGuest();
     }, [counter])
 
-    console.log(pendingBookings[1]?.roomType, 'pendingBookings')
+    console.log(pendingBookings, 'pendingBookings')
+
 
     return (
         <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
@@ -230,7 +233,7 @@ export default function CustomerBookingCard({
 
                     {booking.assignedRoomId && (
                       <div className="text-xs text-muted-foreground">
-                        ห้อง: {booking.assignedRoomId.replace("room-", "")}
+                        ห้อง: {booking.assignedRoomName?.replace("room-", "")}
                       </div>
                     )}
                   </div>
@@ -262,9 +265,9 @@ export default function CustomerBookingCard({
                         </Badge>
                       </div>
 
-                      {booking.assignedRoomId && (
+                      {booking.assignedRoomName && (
                         <div className="text-xs md:text-sm font-medium">
-                          ห้อง: {booking.assignedRoomId.replace("room-", "")}
+                          ห้อง: {booking.assignedRoomName.replace("room-", "")}
                         </div>
                       )}
 

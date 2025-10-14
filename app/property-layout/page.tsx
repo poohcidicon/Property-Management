@@ -1360,7 +1360,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       booking_date: dayjs().format('YYYY-MM-DD'),
       start_date: dayjs(pendingBookingHotel.checkInDate).format('YYYY-MM-DD'),
       end_date: dayjs(pendingBookingHotel.checkOutDate).format('YYYY-MM-DD'),
-      unit_id: selectedProperty?.id
+      unit_id: selectedProperty?.id,
+      room_number: selectedProperty.name
     } as IPayloadBookUnitHotel
     const result = await BookUnitHotelApi(payloadBookUnit)
     if (result.data) {

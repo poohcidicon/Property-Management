@@ -36,6 +36,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           status: 'checkin',
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
+          room_number: item.CheckinRoomNumber
         }
       }
       return {
@@ -56,6 +57,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           status: 'booked',
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
+          room_number: item.BookRoomNumber
         } : null,
         checkin: checkin
       }

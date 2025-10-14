@@ -10,6 +10,7 @@ export interface IPayloadBookUnit {
   end_date: string; // ISO date string
   booking_id: string;
   book_room_id: string;
+  room_number: string;
 }
 export const bookUnitController = async (payload: IPayloadBookUnit): Promise<IResponse<boolean>> => {
   try{
