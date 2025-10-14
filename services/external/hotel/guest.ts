@@ -1,5 +1,5 @@
 import { IResponse } from "../models/master";
-import { BookingGuest, IGuest } from "../models/customer";
+import { BookingGuest, IGuest, SysHotelGuests } from "../models/customer";
 
 import { db } from "./mock/guest-data"
 import { getConnection } from "@/lib/db";
@@ -69,6 +69,40 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     return {
       success: true,
       data: mappingData,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}
+
+export interface IPayloadGetOtherGuestListController {
+  keyword?: string; // ISO date string
+}
+
+export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListController): Promise<IResponse<SysHotelGuests[]>> => {
+  try{
+    const pool = await getConnection();
+    const query = `
+      SELECT * FROM Sys_Hotel_Guests
+      WHERE GuestFirstName LIKE '%@Keyword%' 
+      or GuestLastName LIKE '%@Keyword%'
+      or GuestMobileNumber LIKE '%@Keyword%'
+      or GuestNationalityID = @Keyword
+    `
+    const result = await pool.request()
+      .input("Keyword", payload.keyword || null)
+      .query<SysHotelGuests>(query)
+    return {
+      success: true,
+      data: result.recordset,
       message: "Success",
       error: ""
     }

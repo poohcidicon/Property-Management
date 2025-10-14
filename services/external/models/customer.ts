@@ -73,3 +73,22 @@ export interface BookingGuest {
   CheckinUnitID: string,
   CheckinRoomNumber: string
 }
+
+export interface SysHotelGuests {
+  GuestID: string;
+  GuestCode: string;
+  GuestTitle: string;
+  GuestFirstName: string;
+  GuestLastName: string;
+  GuestPassport: string;
+  GuestNationalityID: string;
+  GuestMobileNumber: string;
+  GuestAddress: string;
+  GuestEmail: string;
+  GuestPhone: string;
+  CreateDate: string;
+  CreateBy: string;
+  ModifyDate: string;
+  ModifyBy: string;
+  IsDeleted: boolean;
+}
