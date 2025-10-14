@@ -26,7 +26,7 @@ export default function CustomerBookingCard({
     onCheckedInBookingsChange?: (guest: any) => void
 }) {
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
-    const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null);
+    const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
     const setCustomer = useCustomerStore((state) => state.setCustomer);
@@ -129,7 +129,7 @@ export default function CustomerBookingCard({
       loadGuest();
     }, [counter])
 
-    console.log(selectedBooking, 'selectedRoomType')
+    console.log(pendingBookings[1]?.roomType, 'pendingBookings')
 
     return (
         <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
@@ -196,13 +196,13 @@ export default function CustomerBookingCard({
 
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                       <Phone className="w-3 h-3" />
-                      <span>{booking.guestPhone}</span>
+                      <span>{booking.guestPhone || '-'}</span>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs md:text-sm">
                       <Bed className="w-3 h-3" />
-                      <span className="font-medium" style={{ color: ROOM_TYPES[booking.roomType].color }}>
-                        {ROOM_TYPES[booking.roomType].name}
+                      <span className="font-medium" style={{ color: ROOM_TYPES[booking.roomType]?.color || '#222222' }}>
+                        {ROOM_TYPES[booking.roomType]?.name || booking.roomType}
                       </span>
                     </div>
 

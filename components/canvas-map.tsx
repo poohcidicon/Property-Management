@@ -90,6 +90,16 @@ export const ROOM_TYPE_COLORS = {
     secondary: "#d97706",
     glow: "rgba(245, 158, 11, 0.6)",
   },
+  superior: {
+    primary: "#3b82f6" ,
+    secondary: "#3baef6ff",
+    glow: "rgba(112, 11, 245, 0.6)",
+  },
+  deluxe: {
+    primary: "#7b0f81ff" ,
+    secondary: "#ca3bf6ff",
+    glow: "rgba(105, 11, 245, 0.6)",
+  }
 } as const
 
 export default function CanvasMap({
