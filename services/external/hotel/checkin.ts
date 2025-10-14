@@ -62,7 +62,7 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       delete updateRequest.parameters['BookRoomID']
     }
 
-    if (payload.other_guests) {
+    if (payload.other_guests && payload.other_guests.length > 0) {
       const insertGuests = transaction.request()
       const query = `
         INSERT INTO [dbo].[Sys_Hotel_BookGuest]

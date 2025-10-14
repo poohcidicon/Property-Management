@@ -7,11 +7,13 @@ import { getOtherGuestListApi } from "@/lib/api/hotel/get-guest";
 import { Circle } from "./canvas-map";
 
 export interface SelectHotelOtherGuestProps {
+  setShowModal: (show: boolean) => void;
   setOtherGuest: (customer: SysHotelGuests) => void;
   selectedProperty?: Circle | null
 }
 
 export default function SelectHotelOtherGuest({
+  setShowModal,
   setOtherGuest,
   selectedProperty
 }: SelectHotelOtherGuestProps) {
@@ -47,13 +49,17 @@ export default function SelectHotelOtherGuest({
     }
   }
 
+  const closeModal = () => {
+    setShowModal(false);  
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-xl font-medium text-gray-800">ค้นหาชื่อลูกค้า</h2>
-          <button className="text-gray-400 hover:text-gray-600">
+          <button className="text-gray-400 hover:text-gray-600" onClick={closeModal}>
             <X size={24} />
           </button>
         </div>
@@ -132,7 +138,7 @@ export default function SelectHotelOtherGuest({
 
         {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t bg-gray-50">
-          <button className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          <button className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={closeModal}>
             ยกเลิก
           </button>
         </div>

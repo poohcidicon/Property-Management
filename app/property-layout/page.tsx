@@ -2437,6 +2437,11 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               modalOtherGuests.onClose()
             }}
             selectedProperty={selectedProperty}
+            setShowModal={(c) => {
+              if (!c) {
+                modalOtherGuests.onClose()
+              }
+            }}
           />}
 
           {/* Hotel Room Dialog - Only for hotel business type */}
