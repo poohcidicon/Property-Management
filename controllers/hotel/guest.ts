@@ -1,4 +1,4 @@
-import { getGuestList, getOtherGuestList } from "@/services/external/hotel/guest";
+import { getGuestList, getOtherBookingGuest, getOtherGuestList } from "@/services/external/hotel/guest";
 import { IGuest, SysHotelGuests } from "@/services/external/models/customer";
 import { IResponse } from "@/services/external/models/master";
 import dayjs from "dayjs";
@@ -32,6 +32,27 @@ export const getOtherGuestListController = async (payload: IPayloadGetOtherGuest
   try {
     const result = await getOtherGuestList({
       keyword: payload.keyword
+    })
+    return result
+  }
+  catch (err: any) {
+    return {
+      success: false,
+      error: err.message,
+      data: [],
+      message: err.message
+    }
+  }
+}
+
+export interface IPayloadGetOtherBookingGuest {
+  book_room_id: string;
+}
+
+export const getOtherBookingGuestController = async (payload: IPayloadGetOtherBookingGuest): Promise<IResponse<SysHotelGuests[]>> => {
+  try {
+    const result = await getOtherBookingGuest({
+      book_room_id: payload.book_room_id
     })
     return result
   }

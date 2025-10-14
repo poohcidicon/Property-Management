@@ -62,7 +62,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   }, [booking])
 
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
         <h2 className="text-2xl font-bold text-gray-800">ห้อง {roomNumber || '202'}</h2>
@@ -95,7 +95,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
 
         {/* Booking Information */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้เข้าพัก</h3>
+          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้จอง</h3>
           
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">

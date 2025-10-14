@@ -116,3 +116,34 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
     }
   }
 }
+
+export interface IPayloadGetOtherBookingGuest {
+  book_room_id: string
+}
+export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest): Promise<IResponse<SysHotelGuests[]>> => {
+  try{
+    const pool = await getConnection();
+    const query = `
+      SELECT * FROM Sys_Hotel_Guests g
+      INNER JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+      WHERE bg.BookRoomID = @BookRoomID
+    `
+    const result = await pool.request()
+      .input("BookRoomID", payload.book_room_id || null)
+      .query<SysHotelGuests>(query)
+    return {
+      success: true,
+      data: result.recordset,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}
