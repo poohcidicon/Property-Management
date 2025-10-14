@@ -209,7 +209,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       <div className="px-6 pb-6">
         <button
           onClick={() => {
-            setShowDialogCheckout(true)
+            // setShowDialogCheckout(true)
+            handleCheckout()
           }}
           className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
         >

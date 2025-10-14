@@ -79,10 +79,11 @@ export interface SysHotelGuests {
 }
 
 
-export const getOtherGuestListApi = async (payload: { keyword: string }): Promise<ApiResponse<SysHotelGuests[]>> => {
+export const getOtherGuestListApi = async (payload: { keyword: string, exclue_book_room_id?: string }): Promise<ApiResponse<SysHotelGuests[]>> => {
   try{
     const response = await axiosPublic.post('/api/hotel/get-other-guests', {
-      keyword: payload.keyword
+      keyword: payload.keyword,
+      exclue_book_room_id: payload.exclue_book_room_id
     });
     return response.data
   }

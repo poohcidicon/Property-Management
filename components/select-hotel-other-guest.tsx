@@ -4,13 +4,16 @@ import { useRouter } from "next/navigation";
 import { axiosPublic } from "@/lib/axios";
 import { SysHotelGuests } from "@/services/external/models/customer";
 import { getOtherGuestListApi } from "@/lib/api/hotel/get-guest";
+import { Circle } from "./canvas-map";
 
 export interface SelectHotelOtherGuestProps {
   setOtherGuest: (customer: SysHotelGuests) => void;
+  selectedProperty?: Circle | null
 }
 
 export default function SelectHotelOtherGuest({
   setOtherGuest,
+  selectedProperty
 }: SelectHotelOtherGuestProps) {
   const router = useRouter();
   const [customers, setCustomers] = useState<SysHotelGuests[]>([]);
@@ -20,7 +23,10 @@ export default function SelectHotelOtherGuest({
   // Search API
   async function handleSearch() {
     setLoading(true);
-    const data = await getOtherGuestListApi({ keyword });
+    const data = await getOtherGuestListApi({ 
+      keyword: keyword,
+      exclue_book_room_id: selectedProperty?.booking?.book_room_id
+    });
     if (data.success) setCustomers(data.data || []);
     else setCustomers([]);
     setLoading(false);

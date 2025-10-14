@@ -2436,6 +2436,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               modalOtherGuests.setLastOtherGuest(c)
               modalOtherGuests.onClose()
             }}
+            selectedProperty={selectedProperty}
           />}
 
           {/* Hotel Room Dialog - Only for hotel business type */}

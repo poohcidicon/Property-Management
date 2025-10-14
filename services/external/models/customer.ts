@@ -91,4 +91,5 @@ export interface SysHotelGuests {
   ModifyDate: string;
   ModifyBy: string;
   IsDeleted: boolean;
+  IsBooked?: number;
 }

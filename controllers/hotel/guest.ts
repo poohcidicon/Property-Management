@@ -26,12 +26,14 @@ export const getGuestListController = async (payload: IPayloadGetGuestListContro
 
 export interface IPayloadGetOtherGuestListController {
   keyword: string;
+  exclue_book_room_id?: string;
 }
 
 export const getOtherGuestListController = async (payload: IPayloadGetOtherGuestListController): Promise<IResponse<SysHotelGuests[]>> => {
   try {
     const result = await getOtherGuestList({
-      keyword: payload.keyword
+      keyword: payload.keyword,
+      exclue_book_room_id: payload.exclue_book_room_id
     })
     return result
   }

@@ -85,21 +85,38 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
 
 export interface IPayloadGetOtherGuestListController {
   keyword?: string; // ISO date string
+  exclue_book_room_id?: string
 }
 
 export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListController): Promise<IResponse<SysHotelGuests[]>> => {
   try{
     const pool = await getConnection();
     const query = `
-      SELECT * FROM Sys_Hotel_Guests
-      WHERE GuestFirstName LIKE '%'+@Keyword+'%' 
-      or GuestLastName LIKE '%'+@Keyword+'%'
-      or GuestMobileNumber LIKE '%'+@Keyword+'%'
-      or GuestNationalityID = @Keyword
+      SELECT DISTINCT g.*
+      ${payload.exclue_book_room_id ? `, (
+        SELECT COUNT(*) FROM Sys_Hotel_BookGuest 
+        WHERE BookRoomID = @ExcludeBookRoomID AND GuestID = g.GuestID
+      ) as IsBooked` : ``}
+      FROM Sys_Hotel_Guests g
+      LEFT JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+      WHERE (g.GuestFirstName LIKE '%'+@Keyword+'%' 
+      or g.GuestLastName LIKE '%'+@Keyword+'%'
+      or g.GuestMobileNumber LIKE '%'+@Keyword+'%'
+      or g.GuestNationalityID = @Keyword)
     `
     const result = await pool.request()
       .input("Keyword", payload.keyword || null)
+      .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
       .query<SysHotelGuests>(query)
+    if (payload.exclue_book_room_id && result.recordset.length > 0){
+      const availableList = result.recordset.filter((item) => item.IsBooked === 0)
+      return {
+        success: true,
+        data: availableList,
+        message: "Success",
+        error: ""
+      }
+    }
     return {
       success: true,
       data: result.recordset,

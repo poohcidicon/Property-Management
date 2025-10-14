@@ -189,7 +189,7 @@ export default function CanvasMap({
 
       // 🏨 Hotel Mode - รองรับ room type highlighting
       if (businessType === "hotel") {
-        const isMatchingRoomType = selectedRoomType ? circle.room_type === selectedRoomType : false
+        const isMatchingRoomType = selectedRoomType ? circle.room_type === selectedRoomType && circle.initStatus === 'available' : false
         const hasRoomTypeFilter = selectedRoomType !== null && selectedRoomType !== undefined
 
         const roomColor =
