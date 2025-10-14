@@ -31,6 +31,11 @@ export interface IPayloadCheckin {
     booking_id: string;
     book_room_id: string;
   }>;
+  other_guests?: Array<{
+    book_room_id: string;
+    guest_id: string;
+    gest_name: string;
+  }>
 }
 
 export const CheckinUnitApi = async (payload: IPayloadCheckin): Promise<ApiResponse<boolean>> => {

@@ -92,9 +92,9 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
     const pool = await getConnection();
     const query = `
       SELECT * FROM Sys_Hotel_Guests
-      WHERE GuestFirstName LIKE '%@Keyword%' 
-      or GuestLastName LIKE '%@Keyword%'
-      or GuestMobileNumber LIKE '%@Keyword%'
+      WHERE GuestFirstName LIKE '%'+@Keyword+'%' 
+      or GuestLastName LIKE '%'+@Keyword+'%'
+      or GuestMobileNumber LIKE '%'+@Keyword+'%'
       or GuestNationalityID = @Keyword
     `
     const result = await pool.request()

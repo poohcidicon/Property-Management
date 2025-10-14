@@ -30,6 +30,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { BookUnitHotelApi, IPayloadBookUnitHotel } from "@/lib/api/hotel/checkin"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { getGuestListApi, Guest } from "@/lib/api/hotel/get-guest"
+import SelectHotelOtherGuest from "@/components/select-hotel-other-guest"
+import { useModalOtherGuestStore } from "../modal-other-guest-store"
 interface Property {
   id: string
   name: string;
@@ -96,6 +98,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
+  const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
   const { isLoading: isLoadingUser } = useAuth()
@@ -2373,6 +2376,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               </CardContent>
             </Card>
           </div>
+
+          {modalOtherGuests.isOpen && <SelectHotelOtherGuest 
+            setOtherGuest={(c) => {
+              modalOtherGuests.setLastOtherGuest(c)
+              modalOtherGuests.onClose()
+            }}
+          />}
 
           {/* Hotel Room Dialog - Only for hotel business type */}
           <HotelRoomDialog
