@@ -1866,7 +1866,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         {/* Interactive Map Area */}
         <div className="flex-1 relative overflow-hidden bg-gray-50 min-h-[300px] lg:min-h-0">
           <div className="absolute inset-0">
-            <div className="w-full h-full bg-white rounded-lg shadow-inner m-2 lg:m-4 overflow-hidden">
+            <div className="w-full h-[85%] bg-white rounded-lg shadow-inner m-2 lg:m-4 overflow-hidden">
               <Spinner loading={isLoadingUnitMatrix} showSVG={isShowOverlay}>
                 <CanvasMap
                   backgroundImageUrl={canvasBackgroundImage}
@@ -1890,13 +1890,49 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 />
               </Spinner>
             </div>
+            <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center mb-2">
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-green-500"></div>
+                <span>ว่าง</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500"></div>
+                <span>เข้าพัก</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-amber-500"></div>
+                <span>จองแล้ว</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-500"></div>
+                <span>ซ่อมบำรุง</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center">
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#4b5563]"></div>
+                <span>Standard</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-purple-500"></div>
+                <span>Deluxe</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-pink-500"></div>
+                <span>Suite</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#3b82f6]"></div>
+                <span>Superior</span>
+              </div>
+            </div>
           </div>
 
           {/* Floating Legend Panel */}
           {currentBusinessType === "market" ? (
             <MarketLegend showLegend={showLegend} setShowLegend={setShowLegend} />
           ) : (
-            <HotelLegend showLegend={showLegend} setShowLegend={setShowLegend} />
+            <HotelLegend showLegend={false} setShowLegend={setShowLegend} />
           )}
 
           {/* Toggle Button when Legend is hidden */}

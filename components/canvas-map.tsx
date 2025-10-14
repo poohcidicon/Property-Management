@@ -99,6 +99,11 @@ export const ROOM_TYPE_COLORS = {
     primary: "#7b0f81ff" ,
     secondary: "#ca3bf6ff",
     glow: "rgba(105, 11, 245, 0.6)",
+  },
+  suite: {
+    primary: "#FF1493",
+    secondary: "#ca3bf6ff",
+    glow: "rgba(206, 11, 245, 0.6)",
   }
 } as const
 
@@ -130,6 +135,11 @@ export default function CanvasMap({
     const handleSelectedPropertyChange = (event: CustomEvent) => {
       setSelectedProperty(event.detail)
     }
+
+    // remove manaul
+    setTimeout(() => {
+      setShowInstructions(false)
+    }, 60000*1)
     
     window.addEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
     return () => window.removeEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
@@ -1615,7 +1625,7 @@ export default function CanvasMap({
 
       {/* Enhanced Instructions */}
       {showInstructions && (
-        <div className="absolute bottom-4 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
+        <div className="absolute bottom-16 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
           <Button
             variant="ghost"
             size="sm"

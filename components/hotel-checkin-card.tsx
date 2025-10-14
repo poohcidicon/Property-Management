@@ -3,6 +3,8 @@ import { Plus, Clock, X } from 'lucide-react';
 import { CheckoutUnitApi, IPayloadCheckout } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
+import Spinner from './ui/Spinner';
+import SpinnerSmall from './ui/spinner-small';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -32,6 +34,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [showNotes, setShowNotes] = useState(false);
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
+  const [isLoadingOtherGuests, setIsLoadingOtherGuests] = useState(false)
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -59,12 +62,14 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
 
   const handleSetOtherGuest = async () => {
     const checkin_customer = checkin_customers[0]
+    setIsLoadingOtherGuests(true)
     const result = await getOtherBookingGuestsApi({
       book_room_id: checkin_customer?.book_room_id || ''
     })
     if (result.data) {
       setOtherGuests(result.data)
     }
+    setIsLoadingOtherGuests(false)
   }
 
   useEffect(() => {
@@ -122,21 +127,24 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <span className="text-gray-600">เบอร์โทร:</span>
               <span className="font-medium text-gray-800">{selectGuest?.mobile || ''}</span>
             </div> */}
-            {otherGuests.map((guest) => {
-              return (
-                <div className='border-b mb-2 py-3' key={guest.GuestID}>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">ชื่อ:</span>
-                    <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
+            <SpinnerSmall loading={isLoadingOtherGuests}>
+              {isLoadingOtherGuests && <div className='w-3 h-4'></div>}
+            </SpinnerSmall>
+              {otherGuests.map((guest) => {
+                return (
+                  <div className='border-b mb-2 py-3' key={guest.GuestID}>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">ชื่อ:</span>
+                      <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">เบอร์โทร:</span>
+                      <span className="font-medium text-gray-800">{guest?.GuestPhone || '-'}</span>
+                    </div>
                   </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">เบอร์โทร:</span>
-                    <span className="font-medium text-gray-800">{guest?.GuestPhone || '-'}</span>
-                  </div>
-                </div>
-              )
-            })}
+                )
+              })}
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
