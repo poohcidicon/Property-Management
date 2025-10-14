@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
 import SpinnerSmall from './ui/spinner-small';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -35,6 +37,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
   const [isLoadingOtherGuests, setIsLoadingOtherGuests] = useState(false)
+  const [showDialogCheckout, setShowDialogCheckout] = useState(false)
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -205,12 +208,111 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       {/* Action Buttons */}
       <div className="px-6 pb-6">
         <button
-          onClick={handleCheckout}
+          onClick={() => {
+            setShowDialogCheckout(true)
+          }}
           className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
         >
           เช็คเอาท์
         </button>
       </div>
+      <Dialog open={showDialogCheckout} onOpenChange={(open) => {
+        setShowDialogCheckout(open);
+      }}>
+        <DialogContent 
+          className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <DialogTitle className="text-xl flex items-center gap-2 flex flex-col items-start">
+              <div>เช็คเอาท์</div>
+              <div className='text-[#888888] text-sm'>
+                <span>กรุณาระบุค่าใช้จ่ายเพิ่มเติม (ถ้ามี)</span>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto p-1">
+            <div className='flex flex-col gap-1'>
+              <div className='flex flex-col gap-2 text-sm'>
+                <label>ค่าความเสียหาย (บาท)</label>
+                <input
+                  type="number"
+                  defaultValue={0}
+                  // value={keyword}
+                  // onChange={e => setKeyword(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className='flex flex-col gap-2 text-sm'>
+                <label>ค่า Minibar (บาท)</label>
+                <input
+                  type="number"
+                  defaultValue={0}
+                  // value={keyword}
+                  // onChange={e => setKeyword(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className='flex flex-col gap-2 text-sm'>
+                <label>หมายเหตุ</label>
+                <textarea
+                  // value={keyword}
+                  // onChange={e => setKeyword(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="border-t border-gray-300 mt-6 pt-4 pb-4 flex flex-col gap-1 text-sm">
+              <div className='flex justify-between'>
+                <div>
+                  ค่าห้องพัก
+                </div>
+                <div>฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</div>
+              </div>
+              <div className='flex justify-between'>
+                <div>
+                  ค่าบริการเพิ่มเติม
+                </div>
+                <div>฿ 0</div>
+              </div>
+              <div className='flex justify-between'>
+                <div>
+                  ค่าความเสียหาย
+                </div>
+                <div>฿ 0</div>
+              </div>
+              <div className='flex justify-between'>
+                <div>
+                  ค่า Minibar
+                </div>
+                <div>฿ 0</div>
+              </div>
+            </div>
+            <div className="border-t border-gray-300 mt-2 pt-4 pb-4 flex flex-col gap-4 text-xl">
+              <div className='flex justify-between'>
+                <div className='font-semibold'>ยอดรวมทั้งหมด</div>
+                <div className='text-green-600 font-semibold'>฿ 0</div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  // onClick={() => setShowDialog(false)}
+                >
+                  ยกเลิก
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="mt-2"
+                  // onClick={() => setShowDialog(false)}
+                >
+                  ยืนยันเช็คเอาท์
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
