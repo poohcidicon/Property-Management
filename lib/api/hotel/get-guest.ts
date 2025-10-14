@@ -96,3 +96,21 @@ export const getOtherGuestListApi = async (payload: { keyword: string }): Promis
     }
   }
 }
+
+export const getOtherBookingGuestsApi = async (payload: { book_room_id: string }): Promise<ApiResponse<SysHotelGuests[]>> => {
+  try{
+    const response = await axiosPublic.post('/api/hotel/get-other-booking-guests', {
+      book_room_id: payload.book_room_id
+    });
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching guest list:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching guest list',
+      message: 'Error fetching guest list'
+    }
+  }
+}

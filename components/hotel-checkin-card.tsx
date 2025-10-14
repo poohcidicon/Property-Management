@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X } from 'lucide-react';
 import { CheckoutUnitApi, IPayloadCheckout } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
-import { Guest } from '@/lib/api/hotel/get-guest';
+import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -30,6 +30,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
+  const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -55,11 +56,22 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     }
   }
 
-  useEffect(() => {
-    if (guestList.length > 0){
-      handleSetGuest()
+  const handleSetOtherGuest = async () => {
+    const checkin_customer = checkin_customers[0]
+    const result = await getOtherBookingGuestsApi({
+      book_room_id: checkin_customer?.book_room_id || ''
+    })
+    if (result.data) {
+      setOtherGuests(result.data)
     }
-  }, [booking])
+  }
+
+  useEffect(() => {
+    if (guestList.length > 0 && checkin_customers.length > 0) {
+      handleSetGuest()
+      handleSetOtherGuest()
+    }
+  }, [booking, checkin_customers])
 
   return (
     <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
@@ -95,10 +107,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
 
         {/* Booking Information */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้จอง</h3>
+          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้เข้าพัก</h3>
           
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="text-gray-600">ชื่อ:</span>
               <span className="font-medium text-gray-800">{selectGuest?.full_name || ''}</span>
             </div>
@@ -106,7 +118,22 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <div className="flex justify-between">
               <span className="text-gray-600">เบอร์โทร:</span>
               <span className="font-medium text-gray-800">{selectGuest?.mobile || ''}</span>
-            </div>
+            </div> */}
+            {otherGuests.map((guest) => {
+              return (
+                <div className='border-b mb-2 py-3'>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">ชื่อ:</span>
+                    <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">เบอร์โทร:</span>
+                    <span className="font-medium text-gray-800">{guest?.GuestPhone || '-'}</span>
+                  </div>
+                </div>
+              )
+            })}
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>

@@ -124,7 +124,7 @@ export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest
   try{
     const pool = await getConnection();
     const query = `
-      SELECT * FROM Sys_Hotel_Guests g
+      SELECT g.* FROM Sys_Hotel_Guests g
       INNER JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
       WHERE bg.BookRoomID = @BookRoomID
     `
