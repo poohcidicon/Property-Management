@@ -171,7 +171,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         </div>
 
         {/* Expandable Section: Payment Details */}
-        {/* <div className="border-t border-gray-200 mt-4">
+        <div className="border-t border-gray-200 mt-4">
           <button 
             onClick={() => setShowPaymentDetails(!showPaymentDetails)}
             className="w-full flex items-center justify-between py-3 text-left"
@@ -185,7 +185,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               ไม่มีรายการชำระเงิน
             </div>
           )}
-        </div> */}
+        </div>
 
         {/* Expandable Section: Notes */}
         {/* <div className="border-t border-gray-200">

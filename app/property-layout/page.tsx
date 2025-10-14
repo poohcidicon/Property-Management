@@ -1059,6 +1059,12 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
   }
 
+  const clearRoomSelect = () => {
+    setSelectedProperty(null)
+    setSelectedRoomType(null)
+    window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
+  }
+
   // Handle hotel room dialog close
   const handleHotelRoomDialogClose = () => {
     // Clear selected property when dialog closes
@@ -2445,6 +2451,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   counter: searchUnitMatrix.counter ? searchUnitMatrix.counter + 1 : 1
                 })
                 setShowHotelRoomDialog(false)
+                clearRoomSelect()
               }
             }}
             guestList={guestList}

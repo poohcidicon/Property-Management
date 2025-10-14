@@ -13,7 +13,6 @@ export const getUnitsHotelService = async (payload: {
     const query = `
       SELECT DISTINCT u.*
       , booking.BookingID, Booking.BookRoomID, booking.Status as BookingStatus
-      , room.RoomType
       FROM VW_Hotel_RoomStatus u
       LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W')
       LEFT JOIN Sys_Hotel_Room room ON (u.UnitID = room.UnitID)
@@ -78,7 +77,7 @@ export const getUnitsHotelService = async (payload: {
         } : null,
         d_price: 0,
         floor: "1",
-        room_type: item.RoomType.toLocaleLowerCase(),
+        room_type: item.RoomType?.toLocaleLowerCase() || 'other',
         status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : 'Available',
         total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,
         checkin_customers: checkin_customers.map((c) => {
