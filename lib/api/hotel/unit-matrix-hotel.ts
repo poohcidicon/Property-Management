@@ -27,6 +27,7 @@ export interface UnitMatrixHotel{
 export interface IPayloadGetUnitHotel {
   project_id: string;
   floor: number;
+  active_date: string
 }
 
 export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Promise<ApiResponse<UnitMatrixHotel[]>> => {

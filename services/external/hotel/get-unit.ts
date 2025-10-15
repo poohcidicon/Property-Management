@@ -2,11 +2,11 @@ import { getConnection } from "@/lib/db";
 import { IResponse } from "../models/master";
 import { IUnitMatrixHotelDB, UnitMatrixHotel } from "../models/unit-matrix";
 import { db } from './mock/units'
-import dayjs from "dayjs";
 
 export const getUnitsHotelService = async (payload: {
   project_id: string;
   floor: number;
+  active_date: string;
 }): Promise<IResponse<UnitMatrixHotel[]>> => {
   try{
     const pool = await getConnection();
@@ -16,14 +16,17 @@ export const getUnitsHotelService = async (payload: {
       FROM VW_Hotel_RoomStatus u
       LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W')
       LEFT JOIN Sys_Hotel_Room room ON (u.UnitID = room.UnitID)
-      WHERE u.ActiveDate = @ActiveDate
+      WHERE u.ActiveDate = @ActiveDate and isNull(u.FloorID, 0) = @Floor
+      AND u.ProjectID = @ProjectID
     `
     const result = await pool.request()
-      .input("ActiveDate", dayjs().format('YYYY-MM-DD'))
+      .input("ActiveDate", payload.active_date)
+      .input("Floor", payload.floor)
+      .input("ProjectID", payload.project_id)
       .query<IUnitMatrixHotelDB>(query)
     
     const checkinList = await pool.request()
-      .input("CheckInDate", dayjs().format('YYYY-MM-DD'))
+      .input("CheckInDate", payload.active_date)
       .query<{
         UnitID: string;
         RoomNumber: string;
@@ -76,7 +79,7 @@ export const getUnitsHotelService = async (payload: {
           end_date: '',
         } : null,
         d_price: 0,
-        floor: "1",
+        floor: item.FloorID?.toString() || '0',
         room_type: item.RoomType?.toLocaleLowerCase() || 'other',
         status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : 'Available',
         total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,

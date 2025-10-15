@@ -5,6 +5,7 @@ import { UnitMatrixHotel } from "@/services/external/models/unit-matrix"
 export interface IPayloadGetUnitMatrixHotelController {
   project_id: string;
   floor: number;
+  active_date: string
 }
 
 export const getUnitMatrixHotelController = async (payload: IPayloadGetUnitMatrixHotelController): Promise<IResponse<UnitMatrixHotel[]>> => {

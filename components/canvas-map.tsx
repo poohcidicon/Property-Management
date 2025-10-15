@@ -13,6 +13,8 @@ import { getUnitMatrixHotelApi } from "@/lib/api/hotel/unit-matrix-hotel"
 import { cn } from "@/lib/utils"
 import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
+import { useProjectStore } from "@/app/project-store"
+import { useFilterStore } from "@/app/filter-store"
 
 export interface Circle {
   x: number
@@ -126,6 +128,8 @@ export default function CanvasMap({
   businessType = "market",
   selectedFloor = 1,
 }: CanvasMapProps) {
+  const { projectId } = useProjectStore()
+  const { activeDate, floor } = useFilterStore()
   // Get selectedProperty from parent
   const [selectedProperty, setSelectedProperty] = useState<Circle | null>(null)
   
@@ -436,8 +440,9 @@ export default function CanvasMap({
           // 🏨 Hotel Mode: Use hotel API
           try {
             const hotelUnitsData = await getUnitMatrixHotelApi({
-              project_id: "M004",
-              floor: selectedFloor // Use selected floor
+              project_id: projectId!,
+              floor: selectedFloor, // Use selected floor
+              active_date: activeDate
             })
             
             if (hotelUnitsData.data && hotelUnitsData.data.length > 0) {

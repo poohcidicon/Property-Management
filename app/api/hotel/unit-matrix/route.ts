@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export const POST = async (request: Request) => {
   try {
     const body = await request.json();
-    const { project_id, floor } = body;
+    const { project_id, floor, active_date } = body;
     if (typeof project_id !== 'string' || typeof floor !== 'number') {
       return NextResponse.json({
         message: "project_id and floor are required",
@@ -13,7 +13,8 @@ export const POST = async (request: Request) => {
     }
     const result = await getUnitMatrixHotelController({
       project_id,
-      floor: Number(floor)
+      floor: Number(floor),
+      active_date
     })
     return NextResponse.json(result, { status: 200 });
   }

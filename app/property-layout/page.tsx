@@ -32,6 +32,7 @@ import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { getGuestListApi, Guest } from "@/lib/api/hotel/get-guest"
 import SelectHotelOtherGuest from "@/components/select-hotel-other-guest"
 import { useModalOtherGuestStore } from "../modal-other-guest-store"
+import { useFilterStore } from "../filter-store"
 interface Property {
   id: string
   name: string;
@@ -98,6 +99,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
+  const {} = useFilterStore()
   const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
