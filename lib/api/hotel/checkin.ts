@@ -107,9 +107,18 @@ export const GetMaterialApi = async (): Promise<ApiResponse<IMaterial[]>> => {
   }
 }
 
-export const GetBookMaterialOptionApi = async (payload: { book_room_id: string; booking_id: string }): Promise<ApiResponse<IMaterial[]>> => {
+export interface IBookMaterialOption {
+  BookingID: string;
+  BookRoomID: string;
+  MaterialID: string;
+  Price: number;
+  Quantity: number;
+  CreateDate: Date;
+}
+
+export const GetBookMaterialOptionApi = async (payload: { book_room_id: string; booking_id: string }): Promise<ApiResponse<IBookMaterialOption[]>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<IMaterial[]>>('/api/hotel/get-book-material', payload);
+    const res = await axiosPublic.post<ApiResponse<IBookMaterialOption[]>>('/api/hotel/get-book-material', payload);
     return res.data
   }
   catch (error: any) {

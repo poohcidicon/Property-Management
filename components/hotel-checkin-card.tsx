@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X } from 'lucide-react';
-import { CheckoutUnitApi, GetMaterialApi, IMaterial, IPayloadCheckout } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadInsertMaterialOption } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -42,6 +42,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [showDialogMaterial, setShowDialogMaterial] = useState(false)
   const [materialMas, setMeterialMas] = useState<IMaterial[]>([])
   const [selectMaterialId, setSelectMaterialId] = useState<string | null>(null)
+  const [materialPrice, setMaterialPrice] = useState<number>(0)
+  const [bookMaterialList, setBookMaterialList] = useState<IBookMaterialOption[]>([])
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -89,12 +91,49 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     }
   }
 
+  const loadBookMaterialOption = async () => {
+    const checkinData = checkin_customers[0]
+    if (!checkinData){
+      return
+    }
+    const result = await GetBookMaterialOptionApi({
+      book_room_id: checkinData.book_room_id,
+      booking_id: checkinData.booking_id
+    })
+    if (result.data && result.data?.length > 0){
+      setBookMaterialList(result.data)
+    }
+    else{
+      setBookMaterialList([])
+    }
+  }
+
+  const handleBookMaterial = async () => {
+    if (!selectMaterialId){
+      return
+    }
+    const checkinData = checkin_customers[0]
+    const payload = {
+      book_room_id: checkinData.book_room_id,
+      booking_id: checkinData.booking_id,
+      material_id: selectMaterialId,
+      price: materialPrice || 0,
+      qty: 1
+    } as IPayloadInsertMaterialOption
+
+    const result = await InsBookMaterialOptionApi(payload)
+    if (result.data){
+      setShowDialogMaterial(false)
+    }
+  }
+
   useEffect(() => {
     if (guestList.length > 0) {
       handleSetGuest()
     }
     if (checkin_customers.length > 0){
       handleSetOtherGuest()
+      loadBookMaterialOption()
     }
   }, [booking, checkin_customers, guestList])
 
@@ -353,13 +392,13 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div style={{ width: "100%" }}>
                   <Select
                     value={selectMaterialId || undefined} 
-                    onValueChange={(value) => setSelectMaterialId(value)}>
+                    onValueChange={(value) => setSelectMaterialId(value)}
+                  >
                     <SelectTrigger className="w-full h-8 text-sm">
-                      <SelectValue />
+                      <SelectValue placeholder="ยังไม่ได้เลือกบริการเสริม..."/>
                     </SelectTrigger>
                     <SelectContent className='w-full'>
                       {materialMas.map((m, index) => {
-                        console.log(m)
                         return (
                           <SelectItem key={index} value={m.MaterialID}>
                             {m.MaterialName}
@@ -369,21 +408,13 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     </SelectContent>
                   </Select>
                 </div>
-                {/* <input
-                  type="number"
-                  defaultValue={0}
-                  // value={keyword}
-                  // onChange={e => setKeyword(e.target.value)}
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                /> */}
               </div>
               <div className='flex flex-col gap-2 text-sm'>
                 <label>ราคา (บาท)</label>
                 <input
                   type="number"
-                  defaultValue={0}
-                  // value={keyword}
-                  // onChange={e => setKeyword(e.target.value)}
+                  value={materialPrice}
+                  onChange={e => setMaterialPrice(Number(e.target.value))}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -393,7 +424,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                // onClick={() => setShowDialog(false)}
+                onClick={() => setShowDialogMaterial(false)}
               >
                 ยกเลิก
               </Button>
@@ -401,7 +432,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 variant="default"
                 size="sm"
                 className="mt-2"
-                // onClick={() => setShowDialog(false)}
+                onClick={() => handleBookMaterial()}
               >
                 ยืนยัน
               </Button>
