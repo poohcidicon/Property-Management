@@ -76,3 +76,33 @@ export const CheckoutUnitApi = async (payload: IPayloadCheckout): Promise<ApiRes
     }
   }
 }
+
+export interface IMaterial {
+  MaterialID: string;
+  MaterialName: string;
+  MaterialNameEN: string;
+  MaterialTypeID: string;
+  CategoryID: string;
+  IsDelete: boolean;
+  IsShow: boolean;
+  CreateDate: Date;
+  CreateBy: string;
+  ModifyDate: Date;
+  ModifyBy: string;
+}
+
+export const GetMaterialApi = async (): Promise<ApiResponse<IMaterial[]>> => {
+  try{
+    const res = await axiosPublic.get<ApiResponse<IMaterial[]>>('/api/hotel/get-material');
+    return res.data
+  }
+  catch (error: any) {
+    console.error('Error fetching circles:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}

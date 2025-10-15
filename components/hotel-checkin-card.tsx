@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X } from 'lucide-react';
-import { CheckoutUnitApi, IPayloadCheckout } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, GetMaterialApi, IMaterial, IPayloadCheckout } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
 import SpinnerSmall from './ui/spinner-small';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -38,6 +39,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
   const [isLoadingOtherGuests, setIsLoadingOtherGuests] = useState(false)
   const [showDialogCheckout, setShowDialogCheckout] = useState(false)
+  const [showDialogMaterial, setShowDialogMaterial] = useState(false)
+  const [materialMas, setMeterialMas] = useState<IMaterial[]>([])
+  const [selectMaterialId, setSelectMaterialId] = useState<string | null>(null)
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -75,6 +79,16 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     setIsLoadingOtherGuests(false)
   }
 
+  const loadMaterial = async () => {
+    const result = await GetMaterialApi()
+    if (result.data && result.data?.length > 0){
+      setMeterialMas(result.data)
+    }
+    else{
+      setMeterialMas([])
+    }
+  }
+
   useEffect(() => {
     if (guestList.length > 0) {
       handleSetGuest()
@@ -83,6 +97,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       handleSetOtherGuest()
     }
   }, [booking, checkin_customers, guestList])
+
+  useEffect(() => {
+    loadMaterial()
+  }, [])
 
   return (
     <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
@@ -173,7 +191,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         {/* Expandable Section: Payment Details */}
         <div className="border-t border-gray-200 mt-4">
           <button 
-            onClick={() => setShowPaymentDetails(!showPaymentDetails)}
+            // onClick={() => setShowPaymentDetails(!showPaymentDetails)}
+            onClick={() => setShowDialogMaterial(true)}
             className="w-full flex items-center justify-between py-3 text-left"
           >
             <h3 className="text-base font-bold text-gray-800">บริการเพิ่มเติม</h3>
@@ -310,6 +329,82 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   ยืนยันเช็คเอาท์
                 </Button>
               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showDialogMaterial} onOpenChange={(open) => {
+        setShowDialogMaterial(open);
+      }}>
+        <DialogContent 
+          className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <DialogTitle className="text-xl flex items-center gap-2 flex flex-col items-start">
+              <div>เพิ่มบริการ</div>
+              <div className='text-[#888888] text-sm'>
+                <span>บันทึกบริการเพิ่มเติม</span>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col flex-1 overflow-auto p-1 gap-8">
+            <div className='flex flex-col gap-4'>
+              <div className='flex flex-col gap-2 text-sm'>
+                <label>ชื่อบริการ</label>
+                <div style={{ width: "100%" }}>
+                  <Select
+                    value={selectMaterialId || undefined} 
+                    onValueChange={(value) => setSelectMaterialId(value)}>
+                    <SelectTrigger className="w-full h-8 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className='w-full'>
+                      {materialMas.map((m, index) => {
+                        console.log(m)
+                        return (
+                          <SelectItem key={index} value={m.MaterialID}>
+                            {m.MaterialName}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* <input
+                  type="number"
+                  defaultValue={0}
+                  // value={keyword}
+                  // onChange={e => setKeyword(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                /> */}
+              </div>
+              <div className='flex flex-col gap-2 text-sm'>
+                <label>ราคา (บาท)</label>
+                <input
+                  type="number"
+                  defaultValue={0}
+                  // value={keyword}
+                  // onChange={e => setKeyword(e.target.value)}
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                // onClick={() => setShowDialog(false)}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="mt-2"
+                // onClick={() => setShowDialog(false)}
+              >
+                ยืนยัน
+              </Button>
             </div>
           </div>
         </DialogContent>
