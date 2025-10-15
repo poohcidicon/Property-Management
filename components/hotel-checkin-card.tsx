@@ -10,6 +10,7 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { DayPicker } from 'react-day-picker';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -49,6 +50,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [damagesPrice, setDamagesPrice] = useState<number>(0)
   const [minibarPrice, setMinibarPrice] = useState<number>(0)
   const [summaryMaterialPrice, setSummaryMaterialPrice] = useState<number>(0)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [payInDate, setPayInDate] = useState<any>(null)
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
+  const [paymentRemark, setPaymentRemark] = useState<string | null>()
 
   const summaryPrice = (
     selectGuest?.total_amount || total_amount || 0
@@ -393,7 +398,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   variant="default"
                   size="sm"
                   className="mt-2"
-                  onClick={() => handleCheckout()}
+                  onClick={() => {
+                    setShowDialogCheckout(false)
+                    setShowPaymentDialog(true)
+                  }}
                 >
                   ยืนยันเช็คเอาท์
                 </Button>
@@ -466,6 +474,98 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               >
                 ยืนยัน
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showPaymentDialog} onOpenChange={(open) => {
+        setShowPaymentDialog(open);
+      }}>
+        <DialogContent 
+          className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <DialogTitle className="text-xl flex items-center gap-2 flex flex-col items-start">
+              <div>Checkout</div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col flex-1 overflow-auto p-1 gap-8">
+            <div>
+              <div className='flex flex-col gap-4'>
+                <div className='flex flex-col gap-2 text-sm'>
+                  <label>วันที่</label>
+                  <div className='flex flex-col gap-2 text-sm'>
+                    <input
+                      type='text'
+                      defaultValue={dayjs().format('YYYY-MM-DD')}
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className='flex flex-col gap-2 text-sm'>
+                  <label>ประเภท</label>
+                  <div className='flex flex-col gap-2 text-sm'>
+                    <Select
+                      value={paymentMethod || undefined} 
+                      onValueChange={(value) => setPaymentMethod(value)}
+                    >
+                      <SelectTrigger className="w-full h-8 text-sm">
+                        <SelectValue placeholder="เลือกช่องทางขำระเงิน..."/>
+                      </SelectTrigger>
+                      <SelectContent className='w-full'>
+                        <SelectItem value="cash">
+                          เงินสด
+                        </SelectItem>
+                        <SelectItem value="credit-card">
+                          บัตรเครดิต
+                        </SelectItem>
+                        <SelectItem value="transfer">
+                          เงินโอน
+                        </SelectItem>
+                        <SelectItem value="qr">
+                          QR Code
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className='flex flex-col gap-2 text-sm'>
+                  <label>จำนวนเงิน</label>
+                  <div className='flex flex-col gap-2 text-sm'>
+                    <input
+                      type='number'
+                      value={summaryPrice}
+                      onChange={() => {}}
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className='flex flex-col gap-2 text-sm'>
+                  <label>หมายเหตุ</label>
+                  <textarea
+                    value={paymentRemark || ""}
+                    onChange={e => setPaymentRemark(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => setShowPaymentDialog(false)}
+                >
+                  ยกเลิก
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => handleCheckout()}
+                >
+                  ยืนยันการชำระ
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
