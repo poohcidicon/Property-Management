@@ -108,6 +108,7 @@ export const GetMaterialApi = async (): Promise<ApiResponse<IMaterial[]>> => {
 }
 
 export interface IBookMaterialOption {
+  ID: number;
   BookingID: string;
   BookRoomID: string;
   MaterialID: string;

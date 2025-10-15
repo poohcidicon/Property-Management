@@ -46,6 +46,19 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [selectMaterialId, setSelectMaterialId] = useState<string | null>(null)
   const [materialPrice, setMaterialPrice] = useState<number>(0)
   const [bookMaterialList, setBookMaterialList] = useState<IBookMaterialOption[]>([])
+  const [damagesPrice, setDamagesPrice] = useState<number>(0)
+  const [minibarPrice, setMinibarPrice] = useState<number>(0)
+  const [summaryMaterialPrice, setSummaryMaterialPrice] = useState<number>(0)
+
+  const summaryPrice = (
+    selectGuest?.total_amount || total_amount || 0
+  ) + (
+    damagesPrice
+  ) + (
+    minibarPrice
+  ) + (
+    summaryMaterialPrice
+  )
 
   const handleCheckout = async () => {
     const payloadCheckout = {
@@ -104,6 +117,10 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     })
     if (result.data && result.data?.length > 0){
       setBookMaterialList(result.data)
+      const summaryPrice = result.data.reduce<number>((acc, curr) => {
+        return acc + (curr.Price || 0)
+      }, 0)
+      setSummaryMaterialPrice(summaryPrice)
     }
     else{
       setBookMaterialList([])
@@ -245,7 +262,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <div className="pb-3 text-sm text-gray-600">
               {bookMaterialList.map((bm) => {
                 return (
-                  <div className="flex justify-between pt-2 border-gray-200">
+                  <div className="flex justify-between pt-2 border-gray-200" key={bm.ID}>
                     <div className="text-sm flex flex-col gap-2">
                       <span>{bm.MaterialName}</span>
                       <span className='text-xs'>{format(new Date(bm.CreateDate), "dd MMM yyyy HH:mm", { locale: th })}</span>
@@ -280,8 +297,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       <div className="px-6 pb-6">
         <button
           onClick={() => {
-            // setShowDialogCheckout(true)
-            handleCheckout()
+            setShowDialogCheckout(true)
+            // handleCheckout()
           }}
           className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
         >
@@ -307,9 +324,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <label>ค่าความเสียหาย (บาท)</label>
                 <input
                   type="number"
-                  defaultValue={0}
-                  // value={keyword}
-                  // onChange={e => setKeyword(e.target.value)}
+                  value={damagesPrice}
+                  onChange={e => setDamagesPrice(Number(e.target.value))}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -317,9 +333,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <label>ค่า Minibar (บาท)</label>
                 <input
                   type="number"
-                  defaultValue={0}
-                  // value={keyword}
-                  // onChange={e => setKeyword(e.target.value)}
+                  value={minibarPrice}
+                  onChange={e => setMinibarPrice(Number(e.target.value))}
                   className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -343,25 +358,25 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div>
                   ค่าบริการเพิ่มเติม
                 </div>
-                <div>฿ 0</div>
+                <div>฿ {summaryMaterialPrice?.toLocaleString() || 0}</div>
               </div>
               <div className='flex justify-between'>
                 <div>
                   ค่าความเสียหาย
                 </div>
-                <div>฿ 0</div>
+                <div>฿ {damagesPrice?.toLocaleString() || 0}</div>
               </div>
               <div className='flex justify-between'>
                 <div>
                   ค่า Minibar
                 </div>
-                <div>฿ 0</div>
+                <div>฿ {minibarPrice?.toLocaleString() || 0}</div>
               </div>
             </div>
             <div className="border-t border-gray-300 mt-2 pt-4 pb-4 flex flex-col gap-4 text-xl">
               <div className='flex justify-between'>
                 <div className='font-semibold'>ยอดรวมทั้งหมด</div>
-                <div className='text-green-600 font-semibold'>฿ 0</div>
+                <div className='text-green-600 font-semibold'>฿ {summaryPrice?.toLocaleString() || 0}</div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button
