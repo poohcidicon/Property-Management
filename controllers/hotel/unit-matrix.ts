@@ -23,10 +23,27 @@ export const getUnitMatrixHotelController = async (payload: IPayloadGetUnitMatri
   }
 }
 
-export const getFloorMasController = async (payload: { project_id: string }): Promise<IResponse<IFloorMas[]>> => {
+export interface IFloorMasController {
+  FloorID: number;
+  FloorName: string;
+  FileID: string
+  ImagePath: string
+}
+
+export const getFloorMasController = async (payload: { project_id: string }): Promise<IResponse<IFloorMasController[]>> => {
   try{
     const unitMatrix = await getFloorMas(payload)
-    return unitMatrix
+    const mappingData = unitMatrix.data?.map((item) => {
+      return {
+        ...item,
+        ImagePath: `${process.env.NEXT_PUBLIC_SERVER_HOST}/api/image/plan/${item.FileID}`
+      } as IFloorMasController
+    }) || []
+    return {
+      success: true,
+      data: mappingData,
+      message: "Success"
+    }
   }
   catch (err: any) {
     return {

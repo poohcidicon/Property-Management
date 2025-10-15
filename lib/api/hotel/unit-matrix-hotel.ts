@@ -44,6 +44,8 @@ export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Prom
 export interface IFloorMas {
   FloorID: number;
   FloorName: string;
+  FileID: string;
+  ImagePath: string;
 }
 
 export interface IGetFloorMas {

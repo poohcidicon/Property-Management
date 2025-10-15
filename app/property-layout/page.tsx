@@ -324,7 +324,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // set init 
       const lengthZone = zoneData.data.length
       // setSelectedZone(zoneData.data[lengthZone].zone_id)
-      setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
+      // setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
     }
     else{
       setZoneList([])
@@ -336,6 +336,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     if (floorData.data && floorData.data?.length > 0){
       setFloorList(floorData.data)
       setSelectedFloor(floorData.data[0].FloorID)
+      setCanvasBackgroundImage(floorData.data[0].ImagePath)
     }
     else{
       setFloorList([])
@@ -1856,7 +1857,16 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             {currentBusinessType === "hotel" && (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">ชั้น:</span>
-                <Select value={selectedFloor.toString()} onValueChange={(value) => setSelectedFloor(parseInt(value))}>
+                <Select value={selectedFloor.toString()} onValueChange={(value) => {
+                  const floor = floorList.find((f) => f.FloorID.toString() === value);
+                  if (floor) {
+                    setSelectedFloor(floor.FloorID);
+                    setCanvasBackgroundImage(floor.ImagePath);
+                  }
+                  else {
+                    setSelectedFloor(0);
+                  }
+                }}>
                   <SelectTrigger className="w-24 h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
