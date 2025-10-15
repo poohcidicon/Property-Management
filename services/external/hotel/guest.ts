@@ -15,11 +15,12 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       SELECT DISTINCT g.*
       , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
       , checkin.UnitID as CheckinUnitID, checkin.RoomNumber as CheckinRoomNumber
+      , gbr.Status as BookingRoomStatus
       FROM VW_Hotel_BookingStatus g
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
-      INNER JOIN Sys_Hotel_Booking gb ON (g.BookingID = gb.BookingID)
-      WHERE g.CheckIn = @CheckInDate
+      INNER JOIN Sys_Hotel_BookRoom gbr ON (g.BookRoomID = gbr.BookRoomID)
+      WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P'
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
@@ -59,7 +60,8 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           checkout_date: item.CheckOut,
           room_number: item.BookRoomNumber
         } : null,
-        checkin: checkin
+        checkin: checkin,
+        book_status: item.BookingRoomStatus
       }
     })
 
@@ -76,6 +78,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     }
   }
   catch (err) {
+    console.log(err)
     return {
       success: false,
       error: (err as Error).message,

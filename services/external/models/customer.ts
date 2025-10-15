@@ -54,6 +54,7 @@ export interface IGuest {
     checkout_date: string; // ISO date string
     room_number: string
   } | null;
+  book_status: string;
 }
 
 // from Database
@@ -73,7 +74,8 @@ export interface BookingGuest {
   BookRoomNumber: string,
   BookUnitID: string,
   CheckinUnitID: string,
-  CheckinRoomNumber: string
+  CheckinRoomNumber: string,
+  BookingRoomStatus: string
 }
 
 export interface SysHotelGuests {
