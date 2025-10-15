@@ -7,7 +7,8 @@ import HotelBookedCard from "./hotel-booked-card"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { Guest } from "@/lib/api/hotel/get-guest"
 import { useEffect, useState } from "react"
-import { format } from "date-fns"
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -172,7 +173,8 @@ export default function HotelRoomDialog({
             <span>
               {selectedProperty?.booking?.start_date && selectedProperty?.booking?.end_date
                 ? `${new Date(selectedProperty.booking.start_date).toLocaleDateString('th-TH')} - ${new Date(selectedProperty.booking.end_date).toLocaleDateString('th-TH')}`
-                : `${new Intl.DateTimeFormat('th-TH', { month: 'short', day: 'numeric' }).format(new Date())}  -  ${new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))}`
+                // : `${new Intl.DateTimeFormat('th-TH', { month: 'short', day: 'numeric' }).format(new Date())}  -  ${new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))}`
+                : `${format(new Date(), "dd MMM", { locale: th })} - ${format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "dd MMM yyyy", { locale: th })}`
               }
             </span>
           </div>

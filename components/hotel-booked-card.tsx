@@ -4,6 +4,8 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import SelectHotelOtherGuest from './select-hotel-other-guest';
 import { useModalOtherGuestStore } from '@/app/modal-other-guest-store';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -113,7 +115,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาห้องพัก</p>
-              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount || '0'}</p>
+              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</p>
             </div>
           </div>
         </div>
@@ -138,14 +140,15 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                {/* {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
+                {selectGuest?.start_booking ? format(new Date(selectGuest?.start_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.end_booking ? new Date(selectGuest?.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                {selectGuest?.end_booking ? format(new Date(selectGuest?.end_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
           </div>
@@ -203,7 +206,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
           })}
           <div className="flex justify-between pt-2 border-t border-gray-200">
             <span className="text-gray-800 font-semibold">ค่าจองทั้งหมด:</span>
-            <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || '0'}</span>
+            <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</span>
           </div>
         </div>
       </div>

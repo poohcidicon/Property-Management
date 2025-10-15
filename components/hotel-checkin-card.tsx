@@ -64,7 +64,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     const payloadCheckout = {
       unit_id: roomId || '',
       checkout_date: dayjs().format('YYYY-MM-DD'),
-      total_amount: selectGuest?.total_amount
+      total_amount: summaryPrice
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
@@ -229,14 +229,16 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.start_booking ? new Date(selectGuest.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                {/* {selectGuest?.start_booking ? new Date(selectGuest.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
+                {selectGuest?.start_booking ? format(new Date(selectGuest.start_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.end_booking ? new Date(selectGuest.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                {/* {selectGuest?.end_booking ? new Date(selectGuest.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'} */}
+                {selectGuest?.end_booking ? format(new Date(selectGuest.end_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
@@ -383,7 +385,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   variant="outline"
                   size="sm"
                   className="mt-2"
-                  // onClick={() => setShowDialog(false)}
+                  onClick={() => setShowDialogCheckout(false)}
                 >
                   ยกเลิก
                 </Button>
@@ -391,7 +393,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   variant="default"
                   size="sm"
                   className="mt-2"
-                  // onClick={() => setShowDialog(false)}
+                  onClick={() => handleCheckout()}
                 >
                   ยืนยันเช็คเอาท์
                 </Button>
