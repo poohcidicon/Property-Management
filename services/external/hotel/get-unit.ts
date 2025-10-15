@@ -112,3 +112,35 @@ export const getUnitsHotelService = async (payload: {
     }
   }
 }
+
+export interface IFloorMas {
+  FloorID: number;
+  FloorName: string;
+}
+
+export const getFloorMas = async (payload: { project_id: string }): Promise<IResponse<IFloorMas[]>> => {
+  try{
+    const pool = await getConnection();
+    const result = await pool.request()
+      .input("ProjectID", payload.project_id)
+      .query<IFloorMas>(`
+        select FloorID, FloorName from VW_Hotel_RoomStatus
+        where ProjectID = @ProjectID
+        group by FloorID, FloorName
+      `)
+    return {
+      success: true,
+      data: result.recordset,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}

@@ -40,3 +40,28 @@ export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Prom
     throw error;
   }
 }
+
+export interface IFloorMas {
+  FloorID: number;
+  FloorName: string;
+}
+
+export interface IGetFloorMas {
+  project_id: string
+}
+
+export const getFloorMasApi = async (payload: IGetFloorMas): Promise<ApiResponse<IFloorMas[]>> => {
+  try{
+    const response = await axiosPublic.post<ApiResponse<IFloorMas[]>>('/api/hotel/get-floors', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching unit matrix hotel:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}

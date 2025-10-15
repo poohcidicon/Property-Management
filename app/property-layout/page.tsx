@@ -18,7 +18,7 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getUnitMatrixHotelApi } from "@/lib/api/hotel/unit-matrix-hotel"
+import { getFloorMasApi, getUnitMatrixHotelApi, IFloorMas } from "@/lib/api/hotel/unit-matrix-hotel"
 import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
@@ -99,7 +99,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
-  const {} = useFilterStore()
+  const {  } = useFilterStore()
   const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
@@ -128,6 +128,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [pendingBookingHotel, setPendingBookingHotel] = useState<PendingBooking | null>(null);
   const [checkedInBookingHotel, setCheckedInBookingHotel] = useState<CheckedInBooking | null>(null);
   const [guestList, setGuestList] = useState<Guest[]>([])
+  const [floorList, setFloorList] = useState<IFloorMas[]>([])
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -292,6 +293,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   useEffect(() => {
     const init = async () => {
       setIsLoadingUnitMatrix(true)
+      await getFloor()
       
       // For all business types, get zones and booking dates
       // The CanvasMap component will handle fetching the appropriate data
@@ -326,6 +328,18 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
     else{
       setZoneList([])
+    }
+  }
+
+  const getFloor = async () => {
+    const floorData = await getFloorMasApi({ project_id: projectId })
+    if (floorData.data && floorData.data?.length > 0){
+      setFloorList(floorData.data)
+      setSelectedFloor(floorData.data[0].FloorID)
+    }
+    else{
+      setFloorList([])
+      setSelectedFloor(0)
     }
   }
 
@@ -1847,9 +1861,14 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 10 }, (_, i) => (
+                    {/* {Array.from({ length: 10 }, (_, i) => (
                       <SelectItem key={i + 1} value={(i + 1).toString()}>
                         ชั้น {i + 1}
+                      </SelectItem>
+                    ))} */}
+                    {floorList.map((floor) => (
+                      <SelectItem key={floor.FloorID} value={floor.FloorID.toString()}>
+                        {floor.FloorID === 0 ? `ไม่ระบุชั้น` : `ชั้น ${floor.FloorName}` }
                       </SelectItem>
                     ))}
                   </SelectContent>
