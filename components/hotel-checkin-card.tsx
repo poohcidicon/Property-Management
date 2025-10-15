@@ -8,6 +8,8 @@ import SpinnerSmall from './ui/spinner-small';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -124,6 +126,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     const result = await InsBookMaterialOptionApi(payload)
     if (result.data){
       setShowDialogMaterial(false)
+      loadBookMaterialOption()
     }
   }
 
@@ -150,7 +153,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       </div>
 
       {/* Room Details */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 overflow-auto h-full max-h-[450px]">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-start">
             <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +171,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคา</p>
-              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</p>
+              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p>
             </div>
           </div>
         </div>
@@ -222,7 +225,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
-              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</span>
+              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</span>
             </div>
           </div>
         </div>
@@ -238,9 +241,19 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <Plus className={`w-5 h-5 text-gray-600 transition-transform ${showPaymentDetails ? 'rotate-45' : ''}`} />
           </button>
           
-          {showPaymentDetails && (
+          {bookMaterialList.length > 0 && (
             <div className="pb-3 text-sm text-gray-600">
-              ไม่มีรายการชำระเงิน
+              {bookMaterialList.map((bm) => {
+                return (
+                  <div className="flex justify-between pt-2 border-gray-200">
+                    <div className="text-sm flex flex-col gap-2">
+                      <span>{bm.MaterialName}</span>
+                      <span className='text-xs'>{format(new Date(bm.CreateDate), "dd MMM yyyy HH:mm", { locale: th })}</span>
+                    </div>
+                    <div className="text-sm font-bold text-lg text-green-600">฿ {bm.Price?.toLocaleString() || 0 }</div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

@@ -85,6 +85,7 @@ export interface IBookMaterialOption {
   BookingID: string;
   BookRoomID: string;
   MaterialID: string;
+  MaterialName: string;
   Price: number;
   Quantity: number;
   CreateDate: Date;
@@ -92,7 +93,11 @@ export interface IBookMaterialOption {
 export const getBookMaterialOption = async (payload: IPayloadGetBookMaterialOption): Promise<IBookMaterialOption[]> => {
   const pool = await getConnection();
   const query = `
-    SELECT * FROM Sys_Hotel_BookOptions WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
+    SELECT bo.*
+    , m.MaterialName
+    FROM Sys_Hotel_BookOptions bo
+    INNER JOIN Sys_Hotel_Material m ON bo.MaterialID = m.MaterialID
+    WHERE bo.BookingID = @BookingID AND bo.BookRoomID = @BookRoomID
   `
   const result = await pool.request()
     .input("BookingID", payload.booking_id)

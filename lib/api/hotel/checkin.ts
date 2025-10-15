@@ -111,6 +111,7 @@ export interface IBookMaterialOption {
   BookingID: string;
   BookRoomID: string;
   MaterialID: string;
+  MaterialName: string;
   Price: number;
   Quantity: number;
   CreateDate: Date;
