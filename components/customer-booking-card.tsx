@@ -32,7 +32,7 @@ export default function CustomerBookingCard({
     const { customer, setCustomer } = useCustomerStore();
     
     const selectBooking = (booking: PendingBooking) => {
-      if (!customer){
+      if (!customer || (customer.book_room_id !== booking.book_room_id)) {
         setSelectedBooking(booking);
         // When a booking is selected, automatically set the room type filter
         // Use the room type directly from booking
@@ -46,7 +46,8 @@ export default function CustomerBookingCard({
             name: booking.guestName,
             citizenId: '', // Not available in booking data
             mobile: booking.guestPhone,
-            type: 'hotel_guest'
+            type: 'hotel_guest',
+            book_room_id: booking.book_room_id
         };
         setCustomer(customerData);
         
@@ -60,7 +61,7 @@ export default function CustomerBookingCard({
           onCheckedInBookingsChange(booking);
         }
       }
-      else{
+      else if (booking.book_room_id === customer.book_room_id){
         // console.log('eeee')
         setCustomer(null);
         setSelectedBooking(null)

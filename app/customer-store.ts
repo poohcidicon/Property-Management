@@ -7,6 +7,7 @@ type Customer = {
   citizenId: string;
   mobile: string;
   type: string;
+  book_room_id?: string;
 }
 
 type CustomerState = {

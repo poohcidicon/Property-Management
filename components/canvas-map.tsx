@@ -198,7 +198,21 @@ export default function CanvasMap({
             : { primary: "#8b5cf6", secondary: "#7c3aed", glow: "rgba(139, 92, 246, 0.6)" }
 
         // ห้องที่ไม่ตรงกับ filter → จาง
-        if (hasRoomTypeFilter && !isMatchingRoomType) {
+        // if (hasRoomTypeFilter && !isMatchingRoomType) {
+        //   return {
+        //     fillColor: "rgba(156, 163, 175, 0.3)",
+        //     strokeColor: "rgba(107, 114, 128, 0.4)",
+        //     outerStrokeColor: "rgba(156, 163, 175, 0.3)",
+        //     strokeWidth: 2,
+        //     outerStrokeWidth: 0,
+        //     cursor: "not-allowed",
+        //     isDimmed: true,
+        //     textColor: "rgba(255, 255, 255, 0.5)",
+        //   }
+        // }
+
+        //ห้องไม่ว่างและมี filter
+        if (hasRoomTypeFilter && circle.initStatus !== 'available') {
           return {
             fillColor: "rgba(156, 163, 175, 0.3)",
             strokeColor: "rgba(107, 114, 128, 0.4)",
@@ -1169,7 +1183,7 @@ export default function CanvasMap({
   const handleCircleClick = useCallback(
     async (circle: Circle) => {
       // 🏨 Hotel Mode: เช็คว่าห้องตรงกับ room type ที่เลือกหรือไม่
-      if (businessType === "hotel" && selectedRoomType && circle.room_type !== selectedRoomType) {
+      if (businessType === "hotel" && selectedRoomType && circle.status !== "available") {
         toast.error(`ห้องนี้เป็นประเภท ${circle.room_type} ไม่ตรงกับที่ต้องการ (${selectedRoomType})`)
         return
       }
