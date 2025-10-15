@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { DayPicker } from 'react-day-picker';
+import { useProjectStore } from '@/app/project-store';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -54,6 +55,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [payInDate, setPayInDate] = useState<any>(null)
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
   const [paymentRemark, setPaymentRemark] = useState<string | null>()
+  const { projectId } = useProjectStore()
 
   const summaryPrice = (
     selectGuest?.total_amount || total_amount || 0
@@ -66,10 +68,14 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   )
 
   const handleCheckout = async () => {
+    const checkin_customer = checkin_customers[0]
     const payloadCheckout = {
       unit_id: roomId || '',
       checkout_date: dayjs().format('YYYY-MM-DD'),
-      total_amount: summaryPrice
+      total_amount: summaryPrice,
+      project_id: projectId,
+      payment_method: paymentMethod,
+      book_room_id: checkin_customer.book_room_id
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
@@ -507,21 +513,22 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     <Select
                       value={paymentMethod || undefined} 
                       onValueChange={(value) => setPaymentMethod(value)}
+                      required
                     >
                       <SelectTrigger className="w-full h-8 text-sm">
                         <SelectValue placeholder="เลือกช่องทางขำระเงิน..."/>
                       </SelectTrigger>
                       <SelectContent className='w-full'>
-                        <SelectItem value="cash">
+                        <SelectItem value="CR">
                           เงินสด
                         </SelectItem>
-                        <SelectItem value="credit-card">
+                        <SelectItem value="CA">
                           บัตรเครดิต
                         </SelectItem>
-                        <SelectItem value="transfer">
+                        <SelectItem value="TR">
                           เงินโอน
                         </SelectItem>
-                        <SelectItem value="qr">
+                        <SelectItem value="QR">
                           QR Code
                         </SelectItem>
                       </SelectContent>
@@ -558,6 +565,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   ยกเลิก
                 </Button>
                 <Button
+                  disabled={!paymentMethod}
                   variant="default"
                   size="sm"
                   className="mt-2"

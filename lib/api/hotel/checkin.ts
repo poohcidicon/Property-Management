@@ -59,6 +59,9 @@ export interface IPayloadCheckout {
   unit_id: string;
   checkout_date: string;
   total_amount: number;
+  project_id?: string;
+  payment_method: string;
+  book_room_id: string;
 }
 
 export const CheckoutUnitApi = async (payload: IPayloadCheckout): Promise<ApiResponse<boolean>> => {

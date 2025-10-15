@@ -95,6 +95,9 @@ export interface IPayloadCheckoutUnit {
   unit_id: string;
   checkout_date: string; // ISO date string
   total_amount: number
+  project_id: string;
+  payment_method: string
+  book_room_id: string
 }
 
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {

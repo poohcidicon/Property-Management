@@ -142,8 +142,8 @@ export const getRunNumberHotel = async (
 
       const { recordset: [runningScalar] } = await pool.query(EXEC);
 
-      const running = String(runningScalar ?? "");
-      if (!running) {
+      const running = String(Object.values(runningScalar)[0])
+      if (!running || running === "null" || running === "undefined" || running === "NaN") {
         throw new Error(
           "System can't genarate running because store procedure return null value."
         );
@@ -172,6 +172,9 @@ export const getRunNumberHotel = async (
       result = replaceAll(result, "[YYMMDD]", fmtDate(runningDate, "yyMMdd"));
       result = replaceAll(result, "[BBBBMMDD]", fmtDate(bbDate, "yyyyMMdd"));
       result = replaceAll(result, "[BBMMDD]", fmtDate(bbDate, "yyMMdd"));
+      if (ProjectID){
+        result = replaceAll(result, "[PROJ]", ProjectID);
+      }
 
       // Fixed word token
       result = replaceAll(result, "[F]", fixWord ?? "");
