@@ -11,7 +11,7 @@ type Customer = {
 
 type CustomerState = {
   customer: Customer | null;
-  setCustomer: (customer: Customer) => void;
+  setCustomer: (customer: Customer | null) => void;
 };
 
 export const useCustomerStore = create<CustomerState>((set) => ({

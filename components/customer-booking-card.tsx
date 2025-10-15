@@ -29,9 +29,10 @@ export default function CustomerBookingCard({
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
-    const setCustomer = useCustomerStore((state) => state.setCustomer);
+    const { customer, setCustomer } = useCustomerStore();
     
     const selectBooking = (booking: PendingBooking) => {
+      if (!customer){
         setSelectedBooking(booking);
         // When a booking is selected, automatically set the room type filter
         // Use the room type directly from booking
@@ -50,7 +51,7 @@ export default function CustomerBookingCard({
         setCustomer(customerData);
         
         if (onRoomTypeChange) {
-            onRoomTypeChange(bookingRoomType);
+          onRoomTypeChange(bookingRoomType);
         }
         if (onPendingBookingsChange) {
           onPendingBookingsChange(booking);
@@ -58,6 +59,21 @@ export default function CustomerBookingCard({
         if (onCheckedInBookingsChange) {
           onCheckedInBookingsChange(booking);
         }
+      }
+      else{
+        // console.log('eeee')
+        setCustomer(null);
+        setSelectedBooking(null)
+        if (onRoomTypeChange) {
+          onRoomTypeChange(null);
+        }
+        if (onPendingBookingsChange) {
+          onPendingBookingsChange(null);
+        }
+        if (onCheckedInBookingsChange) {
+          onCheckedInBookingsChange(null);
+        }
+      }
     };
 
     const handleRoomTypeChange = (roomType: "standard" | "family" | "null") => {
@@ -130,8 +146,6 @@ export default function CustomerBookingCard({
     useEffect(() => {
       loadGuest();
     }, [counter])
-
-    console.log(pendingBookings, 'pendingBookings')
 
 
     return (
