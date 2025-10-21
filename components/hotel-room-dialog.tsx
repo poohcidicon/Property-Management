@@ -9,6 +9,7 @@ import { Guest } from "@/lib/api/hotel/get-guest"
 import { useEffect, useState } from "react"
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import HotelClearingCard from "./hotel-clearing-card"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -18,7 +19,7 @@ interface HotelRoomDialogProps {
   onConfirmHotelRoom: () => void
   onChangeStatus?: (status: boolean) => void
   guestList: Guest[]
-  statusType?: "available" | "booked" | "checkin"
+  statusType?: "available" | "booked" | "checkin" | "clearing"
   customerData?: any | null
   onDialogClose?: () => void // Add callback for dialog close
 }
@@ -108,6 +109,15 @@ export default function HotelRoomDialog({
           />
         </div>
       </div>
+    )
+  }
+
+  if (statusType === 'clearing') {
+    return (
+      <HotelClearingCard
+        selectedProperty={selectedProperty}
+        selectedRoomType={selectedRoomType}
+      />
     )
   }
 
