@@ -20,8 +20,8 @@ export interface Circle {
   x: number
   y: number
   r: number
-  status: "available" | "booked" | "pending" | "some available" | "checkin",
-  initStatus: "available" | "booked" | "pending" | "some available" | "checkin", // สถานะเริ่มต้นจาก API
+  status: "available" | "booked" | "pending" | "some available" | "checkin" |  'clearing',
+  initStatus: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing', // สถานะเริ่มต้นจาก API
   id: string
   name: string;
   room_type?: string // เพิ่ม
@@ -226,6 +226,21 @@ export default function CanvasMap({
             cursor: "not-allowed",
             isDimmed: true,
             textColor: "rgba(255, 255, 255, 0.5)",
+          }
+        }
+
+        if (circle.initStatus === 'clearing'){
+          return {
+            fillColor: "rgba(0, 0, 0, 0.3)",
+            strokeColor: "rgba(7, 7, 7, 0.4)",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 3,
+            outerStrokeWidth: 6,
+            cursor: "pointer",
+            isHighlighted: false,
+            shouldFlash: false, // เปิดการกระพริบตามปกติ
+            textColor: "white",
+            glowColor: roomColor.glow,
           }
         }
 
@@ -447,10 +462,11 @@ export default function CanvasMap({
             
             if (hotelUnitsData.data && hotelUnitsData.data.length > 0) {
               circlesData = hotelUnitsData.data.map((unit, index) => {
-                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" => {
+                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' => {
                   if (unit.status === 0) return 'available';
                   if (unit.status === 2) return 'booked';
                   if (unit.status === 3) return 'checkin';
+                  if (unit.status === 4) return 'clearing'
                   if (unit.status_desc) {
                     const desc = unit.status_desc.toLowerCase();
                     if (desc === 'available') return 'available';
@@ -458,6 +474,7 @@ export default function CanvasMap({
                     if (desc === 'checkin') return 'checkin';
                     if (desc === 'pending') return 'pending';
                     if (desc === 'some available') return 'some available';
+                    if (desc === 'clearing') return 'clearing'
                   }
                   return 'available';
                 };

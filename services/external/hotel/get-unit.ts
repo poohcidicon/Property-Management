@@ -67,6 +67,7 @@ export const getUnitsHotelService = async (payload: {
         unit_number: item.RoomNumber,
         status: checkin_customers.length > 0 ? 3
           : item.BookingStatus === 'W' ? 2 
+          : Number(item.Status) === 3 ? 4
           : item.Status,
         x: item.X || db.units[index+1]?.x || null,
         y: item.Y || db.units[index+1]?.y || null,
@@ -81,7 +82,7 @@ export const getUnitsHotelService = async (payload: {
         d_price: 0,
         floor: item.FloorID?.toString() || '0',
         room_type: item.RoomType?.toLocaleLowerCase() || 'other',
-        status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : 'Available',
+        status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : Number(item.Status) === 3 ? 'Clearing' : 'Available',
         total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,
         checkin_customers: checkin_customers.map((c) => {
           return {

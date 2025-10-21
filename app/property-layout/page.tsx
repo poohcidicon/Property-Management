@@ -37,7 +37,7 @@ interface Property {
   id: string
   name: string;
   price: string
-  status: "available" | "booked" | "pending" | "some available" | "checkin"
+  status: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing'
   bookedAt?: number
   bookedBy?: string
   remainingTime?: number
