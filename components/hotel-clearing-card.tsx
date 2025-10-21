@@ -11,10 +11,10 @@ interface HotelClearingCardProps {
 
 export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus }: HotelClearingCardProps) {
 
-  const handleOpenRoom = async () => {
+  const handleChangeStatusRoom = async (status: number) => {
     const payload = {
       active_date: dayjs().format('YYYY-MM-DD'),
-      status: 0,
+      status: status,
       unit_id: selectedProperty?.id
     } as IUpdateRoomStatus
     const result = await updateRoomStatusApi(payload)
@@ -81,16 +81,16 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
         <div className="flex gap-2">
           <button
             className="w-full bg-green-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            onClick={handleOpenRoom}
+            onClick={() => handleChangeStatusRoom(0)}
           >
             เปิดห้อง
           </button>
-          <button
+          {/* <button
             className="w-full bg-gray-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            // onClick={onConfirmHotelRoom}
+            onClick={() => handleChangeStatusRoom(4)}
           >
             ซ่อมบำรุง
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
