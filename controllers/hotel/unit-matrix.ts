@@ -1,4 +1,4 @@
-import { getFloorMas, getUnitsHotelService, IFloorMas } from "@/services/external/hotel/get-unit"
+import { getFloorMas, getUnitsHotelService, IFloorMas, IUpdateRoomStatus, updateRoomStatusService } from "@/services/external/hotel/get-unit"
 import { IResponse } from "@/services/external/models/master"
 import { UnitMatrixHotel } from "@/services/external/models/unit-matrix"
 
@@ -54,3 +54,18 @@ export const getFloorMasController = async (payload: { project_id: string }): Pr
     }
   }
 }
+
+export const updateRoomStatusController = async (payload: IUpdateRoomStatus): Promise<IResponse<boolean>> => {
+  try{
+    const updateRoomStatus = await updateRoomStatusService(payload);
+    return updateRoomStatus;
+  }
+  catch (err: any) {
+    return {
+      success: false,
+      data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+};

@@ -117,6 +117,12 @@ export default function HotelRoomDialog({
       <HotelClearingCard
         selectedProperty={selectedProperty}
         selectedRoomType={selectedRoomType}
+        onChangeStatus={(status) => {
+          if (status && onChangeStatus){
+            onChangeStatus(status)
+          }
+          onDialogClose?.()
+        }}
       />
     )
   }

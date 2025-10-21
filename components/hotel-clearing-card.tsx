@@ -1,12 +1,35 @@
 import { X } from "lucide-react"
 import { Circle, ROOM_TYPE_COLORS } from "./canvas-map"
+import { IUpdateRoomStatus, updateRoomStatusApi } from "@/lib/api/hotel/unit-matrix-hotel"
+import dayjs from "dayjs"
 
 interface HotelClearingCardProps {
   selectedProperty: Circle | null
-  selectedRoomType: "standard" | "family" | null 
+  selectedRoomType: "standard" | "family" | null
+  onChangeStatus?: (status: boolean) => void
 }
 
-export default function HotelClearingCard ({ selectedProperty, selectedRoomType }: HotelClearingCardProps) {
+export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus }: HotelClearingCardProps) {
+
+  const handleOpenRoom = async () => {
+    const payload = {
+      active_date: dayjs().format('YYYY-MM-DD'),
+      status: 0,
+      unit_id: selectedProperty?.id
+    } as IUpdateRoomStatus
+    const result = await updateRoomStatusApi(payload)
+    if (result.data){
+      if (onChangeStatus){
+        onChangeStatus(true)
+      }
+    }
+    else{
+      if (onChangeStatus){
+        onChangeStatus(false)
+      }
+    }
+  }
+
   return (
     <div
       className={`absolute top-4 right-4 transition-all duration-300 translate-x-0`}
@@ -58,7 +81,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType 
         <div className="flex gap-2">
           <button
             className="w-full bg-green-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            // onClick={onConfirmHotelRoom}
+            onClick={handleOpenRoom}
           >
             เปิดห้อง
           </button>

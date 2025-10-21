@@ -67,3 +67,25 @@ export const getFloorMasApi = async (payload: IGetFloorMas): Promise<ApiResponse
     }
   }
 }
+
+export interface IUpdateRoomStatus {
+  unit_id: string;
+  status: number;
+  active_date: string
+}
+
+export const updateRoomStatusApi = async (payload: IUpdateRoomStatus): Promise<ApiResponse<boolean>> => {
+  try{
+    const response = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/update-room-status', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching unit matrix hotel:', error);
+    return {
+      success: false,
+      data: false,
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}

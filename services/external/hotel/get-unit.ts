@@ -2,6 +2,7 @@ import { getConnection } from "@/lib/db";
 import { IResponse } from "../models/master";
 import { IUnitMatrixHotelDB, UnitMatrixHotel } from "../models/unit-matrix";
 import { db } from './mock/units'
+import sql from 'mssql';
 
 export const getUnitsHotelService = async (payload: {
   project_id: string;
@@ -150,6 +151,44 @@ export const getFloorMas = async (payload: { project_id: string }): Promise<IRes
       success: false,
       error: (err as Error).message,
       data: [],
+      message: (err as Error).message
+    }
+  }
+}
+
+export interface IUpdateRoomStatus {
+  unit_id: string;
+  status: number
+  active_date: string
+}
+export const updateRoomStatusService = async (payload: IUpdateRoomStatus): Promise<IResponse<boolean>> => {
+  const pool = await getConnection();
+  let transaction = new sql.Transaction(pool);
+  await transaction.begin();
+  try{
+    const queryUpdateRoomStatus = `
+      UPDATE [dbo].[Sys_Hotel_RoomStatus]
+      SET Status = @Status
+      WHERE UnitID = @UnitID and CONVERT(date, ActiveDate) = @ActiveDate
+    `
+    await transaction.request()
+      .input("UnitID", payload.unit_id)
+      .input("Status", payload.status)
+      .input("ActiveDate", payload.active_date)
+      .query(queryUpdateRoomStatus)
+    await transaction.commit();
+    return {
+      success: true,
+      data: true,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: false,
       message: (err as Error).message
     }
   }
