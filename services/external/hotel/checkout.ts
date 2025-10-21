@@ -194,10 +194,11 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     // set unint
     await transaction.request()
       .input("UnitID", payload.unit_id)
+      .input("ActiveDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
       .query(`
-        UPDATE Sys_Hotel_Room
+        UPDATE Sys_Hotel_RoomStatus
         SET Status = '3'
-        WHERE UnitID = @UnitID
+        WHERE UnitID = @UnitID AND ActiveDate = @ActiveDate
       `)
     
     // set checkin
