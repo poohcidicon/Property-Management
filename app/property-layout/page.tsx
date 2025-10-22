@@ -2098,7 +2098,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     {/* Form Fields */}
                     <div className="space-y-3">
                       {/* Customer Type Group */}
-                      <div>
+                      {/* <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทลูกค้า</label>
                         <Select defaultValue="อาหารอีสาน">
                           <SelectTrigger className="w-full bg-white border-teal-300">
@@ -2110,15 +2110,15 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                             <SelectItem value="อาหารจีน">อาหารจีน</SelectItem>
                           </SelectContent>
                         </Select>
-                      </div>
+                      </div> */}
 
                       {/* Product Type */}
-                      <div>
+                      {/* <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">ประเภทสินค้า</label>
                         <div className="bg-white border border-teal-300 rounded-md p-2">
                           <span className="text-sm text-gray-600">สินค้า, ลาน, น้ำตก</span>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Customer */}
                         <div>
