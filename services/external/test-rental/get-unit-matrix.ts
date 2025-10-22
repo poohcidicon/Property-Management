@@ -67,6 +67,7 @@ export const getFloorPlanService = async ({ project_id }: IPayloadGetFloorPlanSe
         AND ISNULL(F.Isdelete,0) = 0
         AND F.Process = 'floorplan'
       WHERE P1.ParentID <> 0 ${project_id ? 'AND P1.ProjectID = @ProjectID' : ''}
+      AND F.Id is not null
     `)
     return {
       success: true,
