@@ -1,9 +1,11 @@
+import { autherizeUser } from "@/controllers/auth";
 import { bookUnitController } from "@/controllers/book-unit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try{
     const payload = await request.json();
+    const userSession = await autherizeUser()
     if (!payload) {
       return {
         success: false,
@@ -12,7 +14,10 @@ export async function POST(request: Request) {
         message: 'Missing required parameters payload'
       }
     }
-    const response = await bookUnitController(payload);
+    const response = await bookUnitController({
+      ...payload,
+      created_by: userSession.data?.user_id
+    });
     return NextResponse.json({
       success: true,
       data: response.data,

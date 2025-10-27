@@ -16,6 +16,7 @@ interface IPayloadBookUnitsService {
     book_date: string;
     amount: number;
   }[];
+  created_by?: string
 }
 
 export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promise<IResponse<boolean>> => {
@@ -46,6 +47,8 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
       ,[StatusDate]
       ,[PaidStatus]
       ,[PaidDate]
+      ,[CreatedBy]
+      ,[UpdatedBy]
       ,[CreatedAt])
     OUTPUT INSERTED.BookingID
     VALUES
@@ -60,6 +63,8 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
       ,GETDATE()
       ,null
       ,null
+      ,@UserID
+      ,@UserID
       ,GETDATE())
     `
     const bookingResult = await transaction.request()
@@ -69,23 +74,28 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
       .input("Amount", sql.Decimal(18,2), payload.amount)
       .input("BookingID", sql.NVarChar, bookingIdRunning)
       .input("ProjectID", sql.NVarChar, payload.project_id)
+      .input("UserID", sql.NVarChar, payload.created_by)
       .query<{ BookingID: string }>(bookingQuery);
     const bookingId = bookingResult.recordset[0].BookingID;
 
     const bookingUnitsRequest = transaction.request()
+    bookingUnitsRequest.input("UserID", sql.NVarChar, payload.created_by);
     const bookingUnitsQuery = `
       INSERT INTO [dbo].[Sys_Daily_Booking_Unit]
         ([BookingID]
         ,[UnitID]
         ,[BookingDate]
         ,[Amount]
+        ,[CreatedBy]
+        ,[UpdatedBy]
+        ,[Status]
         ,[CreatedAt])
       VALUES
         ${payload.daily_booking_units.map((unit, index) => {
           bookingUnitsRequest.input(`UnitID${index}`, sql.NVarChar, unit.unit_id);
           bookingUnitsRequest.input(`BookingDate${index}`, sql.NVarChar, unit.book_date);
           bookingUnitsRequest.input(`Amount${index}`, sql.Decimal(18,2), unit.amount);
-          return `(@BookingID, @UnitID${index}, @BookingDate${index}, @Amount${index}, GETDATE())`
+          return `(@BookingID, @UnitID${index}, @BookingDate${index}, @Amount${index}, @UserID, @UserID, 'A', GETDATE())`
         }).join(",")}
     `
     bookingUnitsRequest.input("BookingID", sql.NVarChar, bookingId);

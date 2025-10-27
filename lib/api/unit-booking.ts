@@ -1,4 +1,4 @@
-import { ApiResponse, axiosPublic } from "../axios";
+import { ApiResponse, axiosPrivate, axiosPublic } from "../axios";
 
 export interface UnitBookingDate {
   unit_number: string
@@ -40,7 +40,7 @@ export interface IPayloadBookUnit {
 
 export async function bookUnitApi (payload: IPayloadBookUnit): Promise<ApiResponse<boolean>> {
   try{
-    const response = await axiosPublic.post<ApiResponse<boolean>>('/api/book-unit', payload);
+    const response = await axiosPrivate.post<ApiResponse<boolean>>('/api/book-unit', payload);
     return response.data
   }
   catch (error: any) {
