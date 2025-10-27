@@ -35,6 +35,8 @@ export interface IPayloadBookUnit {
     unit_id: string;
     book_date: string;
     amount: number;
+    product_group: string
+    product_type: string
   }[];
 }
 

@@ -15,6 +15,8 @@ interface IPayloadBookUnitsService {
     unit_id: string;
     book_date: string;
     amount: number;
+    product_group: string;
+    product_type: string
   }[];
   created_by?: string
 }
@@ -89,13 +91,17 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
         ,[CreatedBy]
         ,[UpdatedBy]
         ,[Status]
+        ,[ProductGroup]
+        ,[ProductType]
         ,[CreatedAt])
       VALUES
         ${payload.daily_booking_units.map((unit, index) => {
           bookingUnitsRequest.input(`UnitID${index}`, sql.NVarChar, unit.unit_id);
           bookingUnitsRequest.input(`BookingDate${index}`, sql.NVarChar, unit.book_date);
           bookingUnitsRequest.input(`Amount${index}`, sql.Decimal(18,2), unit.amount);
-          return `(@BookingID, @UnitID${index}, @BookingDate${index}, @Amount${index}, @UserID, @UserID, 'A', GETDATE())`
+          bookingUnitsRequest.input(`ProductGroup${index}`, sql.NVarChar, unit.product_group);
+          bookingUnitsRequest.input(`ProductType${index}`, sql.NVarChar, unit.product_type);
+          return `(@BookingID, @UnitID${index}, @BookingDate${index}, @Amount${index}, @UserID, @UserID, 'A', @ProductGroup${index}, @ProductType${index}, GETDATE())`
         }).join(",")}
     `
     bookingUnitsRequest.input("BookingID", sql.NVarChar, bookingId);

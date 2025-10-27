@@ -49,6 +49,8 @@ interface BookingDetail {
   date: string
   type: "monthly" | "daily"
   amount: number
+  product_type: string;
+  product_group: string;
 }
 
 interface ZoneDetail {
@@ -120,6 +122,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   // Mock property data for the selected area
   const [propertyList, setPropertyList] = useState<Property[]>([])
   const [bookingData, setBookingData] = useState<Property[]>([])
+  const [shopType, setShopType] = useState<string | null>("Food")
+  const [productType, setProductType] = useState<string | null>(null)
   
   // Ref for external circle update handler
   const externalCircleUpdateRef = useRef<((circles: Circle[]) => void) | null>(null)
@@ -1034,6 +1038,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
           date: dayjs(new Date(currentYear, currentMonth - 1, bookDate)).format('YYYY-MM-DD'),
           type: activeTab === 'monthly' ? 'monthly' : 'daily',
           cartId: unit.cartId!,
+          product_group: shopType!,
+          product_type: productType!
         })
       }
     }
@@ -1062,6 +1068,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setIsLoadingUnitMatrix(false)
     setSelectedPropertyIds(new Set())
     setSelectedDates([])
+    setShopType('Food')
+    setProductType(null)
     if (externalCircleUpdateRef.current){
       const resetProperties = circles.map((property) => {
         return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
@@ -1111,6 +1119,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             amount: item.amount,
             book_date: item.date,
             type: item.type,
+            product_group: item.product_group,
+            product_type: item.product_type
           }
         })
       } as IPayloadBookUnit
@@ -1202,8 +1212,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   //   }
   //   setShowCustomerDialog(false)
   // }
-
-  console.log(bookingData, 'bookingData')
 
   return (
     <ConnectionGuard
@@ -2142,34 +2150,29 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                       {/* Customer Type Group */}
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทร้านค้า</label>
-                        <Select defaultValue="อาหารอีสาน">
+                        <Select value={shopType || undefined} onValueChange={(val) => setShopType(val)}>
                           <SelectTrigger className="w-full bg-white border-teal-300">
-                            <SelectValue />
+                            <SelectValue/>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="อาหารอีสาน">อาหารอีสาน</SelectItem>
-                            <SelectItem value="อาหารไทย">อาหารไทย</SelectItem>
-                            <SelectItem value="อาหารจีน">อาหารจีน</SelectItem>
+                            <SelectItem value="Food">ร้านอาหาร</SelectItem>
+                            <SelectItem value="Toy">ร้านของเล่น</SelectItem>
+                            <SelectItem value="Other">ร้านขายของ</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       {/* Product Type */}
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1">ประเภทสินค้า</label>
-                        {/* <div className="bg-white border border-teal-300 rounded-md p-2">
-                          <span className="text-sm text-gray-600">สินค้า, ลาน, น้ำตก</span>
-                        </div> */}
-                        <Select defaultValue="อาหารอีสาน">
-                          <SelectTrigger className="w-full bg-white border-teal-300">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="อาหารอีสาน">อาหารอีสาน</SelectItem>
-                            <SelectItem value="อาหารไทย">อาหารไทย</SelectItem>
-                            <SelectItem value="อาหารจีน">อาหารจีน</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <label className="text-sm font-medium text-gray-700 block mb-1">ประเภทสินค้า<label className="text-red-500">*</label></label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="ระบุประเภทสินค้า"
+                          value={productType || ""}
+                          onChange={e => setProductType(e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                        />
                       </div>
 
                       {/* Customer */}
