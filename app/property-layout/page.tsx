@@ -23,6 +23,8 @@ import { useCustomerStore } from "../customer-store"; // เพิ่มบร�
 import { axiosPublic } from "@/lib/axios"
 import CustomerBookingCard from "@/components/customer-booking-card"
 import { useAuth } from "@/hooks/use-auth"
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
 interface Property {
   id: string
   name: string;
@@ -1199,6 +1201,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   //   setShowCustomerDialog(false)
   // }
 
+  console.log(bookingData, 'bookingData')
+
   return (
     <ConnectionGuard
       isLoading={isLoading || isLoadingUser}
@@ -1425,32 +1429,33 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             </div>
 
             {/* Detailed Booking List */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-blue-100 mb-4">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-blue-100 mb-4 overflow-auto">
               <div className="bg-blue-500 text-white py-2 px-3">
-                <h3 className="text-sm font-medium">รายละเอียดวันที่จอง</h3>
+                <h3 className="text-sm font-medium">สรุปรายการจอง</h3>
               </div>
               
-              <div className="p-3 space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">วันที่เลือก:</span>
-                  <span className="text-gray-700">
-                    {selectedDates.length > 0 
-                      ? selectedDates.length <= 5
-                        ? selectedDates.map(day => `${day}/${currentMonth}/${currentYear}`).join(", ")
-                        : `${selectedDates[0]}/${currentMonth}/${currentYear} - ${selectedDates[selectedDates.length - 1]}/${currentMonth}/${currentYear} (${selectedDates.length} วัน)`
-                      : "ไม่มีวันที่เลือก"}
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">จำนวนแปลง:</span>
-                  <span className="text-gray-700">{confirmedProperties.length} แปลง</span>
-                </div>
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-blue-50">
+                    <TableHead className="text-xs font-medium text-blue-700">เลขที่แปลง</TableHead>
+                    <TableHead className="text-xs font-medium text-blue-700">วันที่จอง</TableHead>
+                    <TableHead className="text-xs font-medium text-blue-700">ราคาจอง</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingBookingList.map((property, index) => {
+                    return (
+                      <TableRow key={index} className="hover:bg-blue-50 transition-colors">
+                        <TableCell className="text-sm font-medium text-blue-800">{property.unit_number}</TableCell>
+                        <TableCell className="text-sm">{format(new Date(property.date), "dd MMM yyyy", { locale: th })}</TableCell>
+                        <TableCell className="text-sm">{property.amount.toLocaleString()}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
               
-              <div className="bg-blue-50 p-3 border-t border-blue-100">
+              {/* <div className="bg-blue-50 p-3 border-t border-blue-100">
                 <div className="grid grid-cols-2 gap-2">
                   {confirmedProperties.map((property, index) => (
                     <div key={index} className="flex items-center gap-2">
@@ -1459,7 +1464,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Total */}
