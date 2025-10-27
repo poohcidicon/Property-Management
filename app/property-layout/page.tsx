@@ -934,6 +934,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [confirmedProperties, setConfirmedProperties] = useState<CartProperty[]>([])
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showClearConfirmDialog, setShowClearConfirmDialog] = useState(false)
+  const [showConfirmBookDialog, setShowConfirmBookDialog] = useState(false)
   
   // Sync propertyList กับ circles ที่มีสถานะ pending และถูกเลือกโดย user
   useEffect(() => {
@@ -1177,6 +1178,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       setShowPropertyList(false)
       setShowConfirmation(false)
       setConfirmedProperties([])
+      setPendingBookingList([])
     }
   }
 
@@ -1483,7 +1485,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 ยกเลิก
               </Button>
               <Button
-                onClick={handleConfirmBooking}
+                onClick={() => {
+                  setShowConfirmBookDialog(true)
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all duration-200 transform hover:translate-y-[-2px]"
               >
                 ยืนยันการจอง
@@ -1521,6 +1525,39 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               onClick={confirmClearAllDates}
             >
               ยืนยันการล้าง
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Book Dialog */}
+      <Dialog open={showConfirmBookDialog} onOpenChange={setShowConfirmBookDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันการจอง
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">คุณต้องการยืนยันการจองใช่หรือไม่?</p>
+          </div>
+          <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowConfirmBookDialog(false)
+                }}
+              >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowConfirmBookDialog(false)
+                handleConfirmBooking()
+              }}
+            >
+              ยืนยันกาจอง
             </Button>
           </div>
         </DialogContent>
