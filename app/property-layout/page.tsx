@@ -2113,12 +2113,22 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                       </div> */}
 
                       {/* Product Type */}
-                      {/* <div>
+                      <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">ประเภทสินค้า</label>
-                        <div className="bg-white border border-teal-300 rounded-md p-2">
+                        {/* <div className="bg-white border border-teal-300 rounded-md p-2">
                           <span className="text-sm text-gray-600">สินค้า, ลาน, น้ำตก</span>
-                        </div>
-                      </div> */}
+                        </div> */}
+                        <Select defaultValue="อาหารอีสาน">
+                          <SelectTrigger className="w-full bg-white border-teal-300">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="อาหารอีสาน">อาหารอีสาน</SelectItem>
+                            <SelectItem value="อาหารไทย">อาหารไทย</SelectItem>
+                            <SelectItem value="อาหารจีน">อาหารจีน</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
                       {/* Customer */}
                         <div>
