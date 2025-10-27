@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "set PORT=3005 && next build",
     "build:uat": "env-cmd -f ./env/.env.uat next build",
+    "build:number-uat": "env-cmd -f ./env/.env.numberone-uat next build",
+    "build:local": "env-cmd -f ./env/.env.local next build",
     "dev": "next dev",
+    "dev:number": "env-cmd -f ./env/.env.numberone next dev",
     "lint": "next lint",
     "start": "next start"
   },
