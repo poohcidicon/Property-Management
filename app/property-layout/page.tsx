@@ -141,6 +141,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     y: null
   })
   const [isLoadingUnitMatrix, setIsLoadingUnitMatrix] = useState(false)
+  const [showRequireField, setShowRequireField] = useState<{ productType: boolean }>({
+    productType: false
+  })
   
   // State for tracking remaining booking time
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
@@ -2173,6 +2176,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                           onChange={e => setProductType(e.target.value)}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                         />
+                        {showRequireField.productType && (
+                          <p className="text-red-500">กรุณาระบุประเภทสินค้า</p>
+                        )}
                       </div>
 
                       {/* Customer */}
@@ -2218,7 +2224,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     <div className="pt-4">
                       <Button
                         onClick={handleConfirm}
-                        disabled={bookingData.length === 0 || !customerData}
+                        disabled={bookingData.length === 0 || !customerData || !productType}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg disabled:opacity-50"
                       >
                         Confirm
