@@ -16,3 +16,12 @@ export interface FloorPlan {
   FloorPlanPath: string;
   FileID: string;
 }
+
+export interface CompensateUnit {
+  CompUnitID: string;
+  CompensateID: string;
+  BookingID: string;
+  UnitID: string;
+  BookingDate: string;
+  CompenDate: string;
+}

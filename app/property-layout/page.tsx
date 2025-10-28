@@ -1452,6 +1452,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   <TableRow className="bg-blue-50">
                     <TableHead className="text-xs font-medium text-blue-700">เลขที่แปลง</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">วันที่จอง</TableHead>
+                    <TableHead className="text-xs font-medium text-blue-700">ชดเชย</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">ราคาจอง</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1461,6 +1462,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                       <TableRow key={index} className="hover:bg-blue-50 transition-colors">
                         <TableCell className="text-sm font-medium text-blue-800">{property.unit_number}</TableCell>
                         <TableCell className="text-sm">{format(new Date(property.date), "dd MMM yyyy", { locale: th })}</TableCell>
+                        <TableCell className="text-sm"></TableCell>
                         <TableCell className="text-sm">{property.amount.toLocaleString()}</TableCell>
                       </TableRow>
                     )
