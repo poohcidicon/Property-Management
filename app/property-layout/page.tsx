@@ -1096,7 +1096,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         })
       }
     }
-    setPendingBookingList([...pendingBookingList, ...resultPendingBooking])
+    // sort pending booking unit
+    const newPendingBookingList = [...pendingBookingList, ...resultPendingBooking].sort((a, b) => a.unit_number.localeCompare(b.unit_number))
+    setPendingBookingList(newPendingBookingList)
   }
 
   const handleSetSummaryConfirmedProperties = (data: Property[]) => {
