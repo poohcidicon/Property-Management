@@ -4,9 +4,9 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    if (!body.start_date || !body.end_date) {
+    if (!body.customer_id) {
       return NextResponse.json({
-        message: "❌ Missing required parameters",
+        message: "❌ Missing required parameters customer_id",
         error: 'failed',
       }, { status: 400 });
     }

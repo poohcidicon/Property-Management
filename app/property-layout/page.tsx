@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon } from "lucide-react"
+import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -18,13 +18,15 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit } from "@/lib/api/unit-booking"
+import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit, compensateUnitsApi, CompensateUnit } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
 import CustomerBookingCard from "@/components/customer-booking-card"
 import { useAuth } from "@/hooks/use-auth"
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
 interface Property {
   id: string
   name: string;
@@ -51,6 +53,7 @@ interface BookingDetail {
   amount: number
   product_type: string;
   product_group: string;
+  compensate_id: string | null;
 }
 
 interface ZoneDetail {
@@ -117,6 +120,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [disableDateList, setDisableDateList] = useState<{[key: string]: number}>({})
   const [availableDateList, setAvilableDateList] = useState<{[key: string]: number}>({})
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
+  const [compensateUnitist, setCompensateUnitist] = useState<CompensateUnit[]>([])
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -294,6 +298,28 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     else{
       setZoneList([])
     }
+  }
+
+  const getCompensateUnits = async (customerId: string): Promise<CompensateUnit[]> => {
+    const result = await compensateUnitsApi({
+      customer_id: customerId
+    })
+    if (result.data){
+      setCompensateUnitist(result.data)
+      return result.data
+    }
+    else{
+      setCompensateUnitist([])
+      return []
+    }
+  }
+
+  const getCompensateInfo = (compensateId: string) => {
+    const info = compensateUnitist.find((item) => item.CompensateID === compensateId)
+    if (info){
+      return `ชดเชยจากวันที่ ${format(info.BookingDate, "dd MMM yyyy", { locale: th })}`
+    }
+    return ""
   }
 
   const getUnitBookingDate = async (filter: { day?: number; month?: number; year?: number }) => {
@@ -1029,20 +1055,29 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     // You can add additional logic here to filter data based on the mode
   }
 
-  const handleSetBookingUnitData = (data: CartProperty[]) => {
+  const handleSetBookingUnitData = async (data: CartProperty[]) => {
     // Set pending booking with booking data and select dates
+    let compensateData: CompensateUnit[] = []
+    if (activeTab === 'monthly' && customerData?.memberId){
+      compensateData = await getCompensateUnits(customerData?.memberId)
+    }
     let resultPendingBooking: BookingDetail[] = []
     for (const bookDate of selectedDates){
       for (const unit of data){
+        const bookUnitDate = dayjs(new Date(currentYear, currentMonth - 1, bookDate)).format('YYYY-MM-DD')
+        const foundCompensate = compensateData.find((item) => {
+          return item.UnitID === unit.name && dayjs(item.CompenDate).format('YYYY-MM-DD') === bookUnitDate
+        })
         resultPendingBooking.push({
           unit_id: unit.id,
           unit_number: unit.name,
-          amount: activeTab === 'monthly' ? unit.m_price : unit.d_price,
-          date: dayjs(new Date(currentYear, currentMonth - 1, bookDate)).format('YYYY-MM-DD'),
+          amount: foundCompensate?.CompensateID ? 0 : activeTab === 'monthly' ? unit.m_price : unit.d_price,
+          date: bookUnitDate,
           type: activeTab === 'monthly' ? 'monthly' : 'daily',
           cartId: unit.cartId!,
           product_group: shopType!,
-          product_type: productType!
+          product_type: productType!,
+          compensate_id: foundCompensate?.CompensateID || null
         })
       }
     }
@@ -1452,7 +1487,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   <TableRow className="bg-blue-50">
                     <TableHead className="text-xs font-medium text-blue-700">เลขที่แปลง</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">วันที่จอง</TableHead>
-                    <TableHead className="text-xs font-medium text-blue-700">ชดเชย</TableHead>
+                    {activeTab === 'monthly' && <TableHead className="text-xs font-medium text-blue-700">ชดเชย</TableHead>}
                     <TableHead className="text-xs font-medium text-blue-700">ราคาจอง</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1462,7 +1497,24 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                       <TableRow key={index} className="hover:bg-blue-50 transition-colors">
                         <TableCell className="text-sm font-medium text-blue-800">{property.unit_number}</TableCell>
                         <TableCell className="text-sm">{format(new Date(property.date), "dd MMM yyyy", { locale: th })}</TableCell>
-                        <TableCell className="text-sm"></TableCell>
+                        {activeTab === 'monthly' && (
+                          <TableCell className="text-sm">
+                            {property.compensate_id && (
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <CircleAlert strokeWidth={3} className="text-white" style={{ backgroundColor: 'blue', borderRadius: 50 }} />
+                                  </TooltipTrigger>
+                                  <TooltipPortal>
+                                  <TooltipContent className="TooltipContent" sideOffset={5}>
+                                    {getCompensateInfo(property.compensate_id)}
+                                  </TooltipContent>
+                                </TooltipPortal>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </TableCell>
+                        )}
                         <TableCell className="text-sm">{property.amount.toLocaleString()}</TableCell>
                       </TableRow>
                     )
@@ -1952,15 +2004,15 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
                     {/* Calendar Controls */}
                     <div className="flex gap-2 mb-2">
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setIsSelectingRange(!isSelectingRange)}
                         className={`text-xs px-2 py-1 ${isSelectingRange ? "bg-blue-100 border-blue-300" : ""}`}
                       >
                         {isSelectingRange ? "ยกเลิกช่วง" : "เลือกช่วง"}
-                      </Button>
-                      <Button
+                      </Button> */}
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         onClick={selectWeekdays}
@@ -1975,7 +2027,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                         className="text-xs px-2 py-1 bg-transparent"
                       >
                         วันหยุด
-                      </Button>
+                      </Button> */}
                       <Button
                         variant="outline"
                         size="sm"

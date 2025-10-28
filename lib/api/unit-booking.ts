@@ -50,3 +50,27 @@ export async function bookUnitApi (payload: IPayloadBookUnit): Promise<ApiRespon
     throw error;
   }
 }
+
+export interface IPayloadGetCompensateUnits {
+  customer_id: string;
+}
+
+export interface CompensateUnit {
+  CompUnitID: string;
+  CompensateID: string;
+  BookingID: string;
+  UnitID: string;
+  BookingDate: string;
+  CompenDate: string;
+}
+
+export async function compensateUnitsApi (payload: IPayloadGetCompensateUnits): Promise<ApiResponse<CompensateUnit[]>> {
+  try{
+    const response = await axiosPublic.post<ApiResponse<CompensateUnit[]>>('/api/compensate-units', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching circles:', error);
+    throw error;
+  }
+}
