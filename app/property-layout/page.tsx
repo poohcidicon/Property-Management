@@ -127,7 +127,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [propertyList, setPropertyList] = useState<Property[]>([])
   const [bookingData, setBookingData] = useState<Property[]>([])
   const [productGroupMas, setProductGroupMas] = useState<ProductGroupMaster[]>([])
-  const [shopType, setShopType] = useState<string | null>("Food")
+  const [shopType, setShopType] = useState<string | undefined>()
   const [productType, setProductType] = useState<string | null>(null)
   
   // Ref for external circle update handler
@@ -320,7 +320,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     const result = await getProductGroupApi()
     if (result.data){
       setProductGroupMas(result.data)
-      setShopType(result.data[0].Value)
     }
     else{
       setProductGroupMas([])
@@ -535,6 +534,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       })
       externalCircleUpdateRef.current(resetProperties)
     }
+    setCurrentYear(Number(value))
   }
 
   const onChangeSearchMonth = (value: string) => {
@@ -554,6 +554,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       })
       externalCircleUpdateRef.current(resetProperties)
     }
+    setCurrentMonth(Number(value))
   }
 
   const onChangeSearchZone = (zone_id: string) => {
@@ -718,6 +719,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setUnitBookingDateList([])
     setAvilableDateList({})
     setDisableDateList({})
+    setPendingBookingList([])
   }
 
   const handleClearAllDates = () => {
@@ -2223,7 +2225,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                         <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทร้านค้า</label>
                         <Select value={shopType || undefined} onValueChange={(val) => setShopType(val)}>
                           <SelectTrigger className="w-full bg-white border-teal-300">
-                            <SelectValue/>
+                            <SelectValue placeholder="เลือกประเภทร้านค้า"/>
                           </SelectTrigger>
                           <SelectContent>
                             {/* <SelectItem value="Food">ร้านอาหาร</SelectItem>
@@ -2297,7 +2299,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     <div className="pt-4">
                       <Button
                         onClick={handleConfirm}
-                        disabled={bookingData.length === 0 || !customerData || !productType}
+                        disabled={bookingData.length === 0 || !customerData || !productType || !shopType}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg disabled:opacity-50"
                       >
                         Confirm
