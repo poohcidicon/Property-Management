@@ -1,7 +1,7 @@
 import { getConnection } from "@/lib/db"
 import { IResponse } from "../models/master"
 import sql from "mssql"
-import { CompensateUnit } from "../models/unit-matrix"
+import { CompensateUnit, ProductGroupMaster } from "../models/unit-matrix"
 
 export interface IPayloadGetUnitBookingDateService {
   project_id: string
@@ -66,6 +66,30 @@ export const getCompensateUnits = async (payload: IPayloadGetmpensateUnits): Pro
       error: err.message,
       data: [],
       message: 'Not found booking date'
+    }
+  }
+}
+
+export const getProductGroupMaster = async (): Promise<IResponse<ProductGroupMaster[]>> => {
+  try{
+    const pool = await getConnection()
+    const result = await pool.request()
+      .query(`
+        select * from Sys_Master_AllType where Groups = 'ProductGroup'
+      `)
+    
+    return {
+      success: true,
+      data: result.recordset,
+      message: "Success"
+    }
+  }
+  catch (err: any) {
+    return {
+      success: false,
+      error: err.message,
+      data: [],
+      message: 'Not found Product Group Master'
     }
   }
 }

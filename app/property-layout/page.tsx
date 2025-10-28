@@ -18,7 +18,7 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit, compensateUnitsApi, CompensateUnit } from "@/lib/api/unit-booking"
+import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit, compensateUnitsApi, CompensateUnit, getProductGroupApi, ProductGroupMaster } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
 import CustomerBookingCard from "@/components/customer-booking-card"
@@ -126,6 +126,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   // Mock property data for the selected area
   const [propertyList, setPropertyList] = useState<Property[]>([])
   const [bookingData, setBookingData] = useState<Property[]>([])
+  const [productGroupMas, setProductGroupMas] = useState<ProductGroupMaster[]>([])
   const [shopType, setShopType] = useState<string | null>("Food")
   const [productType, setProductType] = useState<string | null>(null)
   
@@ -270,6 +271,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       setIsLoadingUnitMatrix(true)
       getZoneList()
       getUnitBookingDate({})
+      getProductGroup()
 
       //init search
       // setSelectedMonth("9")
@@ -311,6 +313,17 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     else{
       setCompensateUnitist([])
       return []
+    }
+  }
+
+  const getProductGroup = async () => {
+    const result = await getProductGroupApi()
+    if (result.data){
+      setProductGroupMas(result.data)
+      setShopType(result.data[0].Value)
+    }
+    else{
+      setProductGroupMas([])
     }
   }
 
@@ -1158,7 +1171,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             book_date: item.date,
             type: item.type,
             product_group: item.product_group,
-            product_type: item.product_type
+            product_type: item.product_type,
+            compensate_id: item.compensate_id
           }
         })
       } as IPayloadBookUnit
@@ -2212,9 +2226,14 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                             <SelectValue/>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Food">ร้านอาหาร</SelectItem>
+                            {/* <SelectItem value="Food">ร้านอาหาร</SelectItem>
                             <SelectItem value="Toy">ร้านของเล่น</SelectItem>
-                            <SelectItem value="Other">ร้านขายของ</SelectItem>
+                            <SelectItem value="Other">ร้านขายของ</SelectItem> */}
+                            {productGroupMas.map((item) => {
+                              return (
+                                <SelectItem key={item.ID} value={item.Value}>{item.Name}</SelectItem>
+                              )
+                            })}
                           </SelectContent>
                         </Select>
                       </div>

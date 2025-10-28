@@ -13,7 +13,8 @@ interface IPayloadBookUnit {
     book_date: string;
     amount: number;
     product_group: string;
-    product_type: string
+    product_type: string;
+    compensate_id?: string | null
   }[];
   created_by?: string
 }

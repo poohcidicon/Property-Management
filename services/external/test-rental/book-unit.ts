@@ -16,7 +16,8 @@ interface IPayloadBookUnitsService {
     book_date: string;
     amount: number;
     product_group: string;
-    product_type: string
+    product_type: string;
+    compensate_id?: string | null
   }[];
   created_by?: string
 }
@@ -82,6 +83,7 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
 
     const bookingUnitsRequest = transaction.request()
     bookingUnitsRequest.input("UserID", sql.NVarChar, payload.created_by);
+    let compensateList: string[] = [];
     const bookingUnitsQuery = `
       INSERT INTO [dbo].[Sys_Daily_Booking_Unit]
         ([BookingID]
@@ -96,6 +98,9 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
         ,[CreatedAt])
       VALUES
         ${payload.daily_booking_units.map((unit, index) => {
+          if (unit.compensate_id){
+            compensateList.push(unit.compensate_id);
+          }
           bookingUnitsRequest.input(`UnitID${index}`, sql.NVarChar, unit.unit_id);
           bookingUnitsRequest.input(`BookingDate${index}`, sql.NVarChar, unit.book_date);
           bookingUnitsRequest.input(`Amount${index}`, sql.Decimal(18,2), unit.amount);
@@ -107,6 +112,16 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
     bookingUnitsRequest.input("BookingID", sql.NVarChar, bookingId);
     
     await bookingUnitsRequest.query(bookingUnitsQuery);
+
+    const updateCompensateRequest = transaction.request()
+    const updateCompensateQuery = `
+      UPDATE Sys_Daily_Compensate_Unit SET Status = 'P' 
+      WHERE CompensateID IN (${compensateList.map((id, index) => {
+        updateCompensateRequest.input(`CompensateID${index}`, sql.NVarChar, id);
+        return `@CompensateID${index}`
+      }).join(",")}) AND IsDeleted = 0
+    `
+    await updateCompensateRequest.query(updateCompensateQuery);
 
     await transaction.commit();
     return {

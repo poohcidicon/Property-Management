@@ -37,6 +37,7 @@ export interface IPayloadBookUnit {
     amount: number;
     product_group: string
     product_type: string
+    compensate_id?: string | null
   }[];
 }
 
@@ -67,6 +68,29 @@ export interface CompensateUnit {
 export async function compensateUnitsApi (payload: IPayloadGetCompensateUnits): Promise<ApiResponse<CompensateUnit[]>> {
   try{
     const response = await axiosPublic.post<ApiResponse<CompensateUnit[]>>('/api/compensate-units', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching circles:', error);
+    throw error;
+  }
+}
+
+export interface ProductGroupMaster {
+  ID: string;
+  Name: string;
+  NameEng: string;
+  Value: string;
+  Groups: string;
+  isDelete: number;
+  Sequence: number;
+  UpdatedBy: string;
+  UpdatedDate: string;
+}
+
+export async function getProductGroupApi (): Promise<ApiResponse<ProductGroupMaster[]>> {
+  try{
+    const response = await axiosPublic.get<ApiResponse<ProductGroupMaster[]>>('/api/product-group');
     return response.data
   }
   catch (error: any) {

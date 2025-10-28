@@ -25,3 +25,15 @@ export interface CompensateUnit {
   BookingDate: string;
   CompenDate: string;
 }
+
+export interface ProductGroupMaster {
+  ID: string;
+  Name: string;
+  NameEng: string;
+  Value: number;
+  Groups: string;
+  isDelete: number;
+  Sequence: number;
+  UpdatedBy: string;
+  UpdatedDate: string;
+}
