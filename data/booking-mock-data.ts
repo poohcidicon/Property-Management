@@ -7,6 +7,14 @@ export const ROOM_TYPES = {
   family: {
     name: "ห้องครอบครัว",
     color: "#f59e0b" // amber-500 - premium color for special privileges
+  },
+  superior: {
+    name: "Superior",
+    color: "#3b82f6" // blue-500
+  },
+  deluxe: {
+    name: "Deluxe",
+    color: "#7b0f81ff" // red-500
   }
 };
 
@@ -23,6 +31,12 @@ export const HOTEL_ROOM_TYPES = {
     name: "ห้องครอบครัว",
     color: "#f59e0b", // amber-500 - premium color for special privileges
     description: "ห้องพักครอบครัวขนาดใหญ่"
+  },
+  "superior": {
+    id: "superior",
+    name: "Superior",
+    color: "#3b82f6", // blue-500
+    description: "ห้องพักสูงสุด"
   },
   "null": {
     id: null,
@@ -45,6 +59,7 @@ export interface PendingBooking {
   totalAmount: number;
   status: "confirmed" | "pending";
   assignedRoomId?: string;
+  assignedRoomName?: string;
 }
 
 export interface CheckedInBooking {
@@ -52,6 +67,7 @@ export interface CheckedInBooking {
   guestName: string;
   assignedRoomId: string;
   checkOutDate: string;
+  assignedRoomName?: string;
 }
 
 // Mock data for pending bookings

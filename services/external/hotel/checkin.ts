@@ -11,6 +11,11 @@ export interface IPayloadCheckinUnitService {
     booking_id: string; 
     book_room_id: string
   }>;
+  other_guests?: Array<{
+    book_room_id: string;
+    guest_id: string;
+    gest_name: string;
+  }>
   checkin_date: string; // ISO date string
 }
 
@@ -55,6 +60,32 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       delete updateRequest.parameters['UnitID']
       delete updateRequest.parameters['BookingID']
       delete updateRequest.parameters['BookRoomID']
+    }
+
+    if (payload.other_guests && payload.other_guests.length > 0) {
+      const insertGuests = transaction.request()
+      const query = `
+        INSERT INTO [dbo].[Sys_Hotel_BookGuest]
+        ([BookRoomID]
+        ,[GuestID]
+        ,[GuestName]
+        ,[MainGuest]
+        ,[CreateDate])
+        VALUES
+        ${payload.other_guests.map((guest, index) => {
+          insertGuests.input(`BookRoomID_${index}`, guest.book_room_id)
+          insertGuests.input(`GuestID_${index}`, guest.guest_id)
+          insertGuests.input(`GuestName_${index}`, guest.gest_name)
+          if (index === 0){
+            insertGuests.input(`MainGuest_${index}`, 1)
+          }
+          else{
+            insertGuests.input(`MainGuest_${index}`, 0)
+          }
+          return `(@BookRoomID_${index}, @GuestID_${index}, @GuestName_${index}, @MainGuest_${index}, GETDATE())`
+        }).join(',')}
+      `
+      await insertGuests.query(query)
     }
 
     await transaction.commit();

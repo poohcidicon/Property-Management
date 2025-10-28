@@ -13,13 +13,15 @@ import { getUnitMatrixHotelApi } from "@/lib/api/hotel/unit-matrix-hotel"
 import { cn } from "@/lib/utils"
 import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
+import { useProjectStore } from "@/app/project-store"
+import { useFilterStore } from "@/app/filter-store"
 
 export interface Circle {
   x: number
   y: number
   r: number
-  status: "available" | "booked" | "pending" | "some available" | "checkin",
-  initStatus: "available" | "booked" | "pending" | "some available" | "checkin", // สถานะเริ่มต้นจาก API
+  status: "available" | "booked" | "pending" | "some available" | "checkin" |  'clearing',
+  initStatus: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing', // สถานะเริ่มต้นจาก API
   id: string
   name: string;
   room_type?: string // เพิ่ม
@@ -41,6 +43,7 @@ export interface Circle {
     booking_id: string; 
     book_room_id: string 
   }>
+  total_amount: number
 }
 
 export interface Customer {
@@ -89,6 +92,21 @@ export const ROOM_TYPE_COLORS = {
     secondary: "#d97706",
     glow: "rgba(245, 158, 11, 0.6)",
   },
+  superior: {
+    primary: "#3b82f6" ,
+    secondary: "#3baef6ff",
+    glow: "rgba(112, 11, 245, 0.6)",
+  },
+  deluxe: {
+    primary: "#7b0f81ff" ,
+    secondary: "#ca3bf6ff",
+    glow: "rgba(105, 11, 245, 0.6)",
+  },
+  suite: {
+    primary: "#FF1493",
+    secondary: "#ca3bf6ff",
+    glow: "rgba(206, 11, 245, 0.6)",
+  }
 } as const
 
 export default function CanvasMap({
@@ -110,6 +128,8 @@ export default function CanvasMap({
   businessType = "market",
   selectedFloor = 1,
 }: CanvasMapProps) {
+  const { projectId } = useProjectStore()
+  const { activeDate, floor } = useFilterStore()
   // Get selectedProperty from parent
   const [selectedProperty, setSelectedProperty] = useState<Circle | null>(null)
   
@@ -119,6 +139,11 @@ export default function CanvasMap({
     const handleSelectedPropertyChange = (event: CustomEvent) => {
       setSelectedProperty(event.detail)
     }
+
+    // remove manaul
+    setTimeout(() => {
+      setShowInstructions(false)
+    }, 60000*1)
     
     window.addEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
     return () => window.removeEventListener("selectedPropertyChanged", handleSelectedPropertyChange as EventListener)
@@ -168,7 +193,7 @@ export default function CanvasMap({
 
       // 🏨 Hotel Mode - รองรับ room type highlighting
       if (businessType === "hotel") {
-        const isMatchingRoomType = selectedRoomType ? circle.room_type === selectedRoomType : false
+        const isMatchingRoomType = selectedRoomType ? circle.room_type === selectedRoomType && circle.initStatus === 'available' : false
         const hasRoomTypeFilter = selectedRoomType !== null && selectedRoomType !== undefined
 
         const roomColor =
@@ -177,7 +202,21 @@ export default function CanvasMap({
             : { primary: "#8b5cf6", secondary: "#7c3aed", glow: "rgba(139, 92, 246, 0.6)" }
 
         // ห้องที่ไม่ตรงกับ filter → จาง
-        if (hasRoomTypeFilter && !isMatchingRoomType) {
+        // if (hasRoomTypeFilter && !isMatchingRoomType) {
+        //   return {
+        //     fillColor: "rgba(156, 163, 175, 0.3)",
+        //     strokeColor: "rgba(107, 114, 128, 0.4)",
+        //     outerStrokeColor: "rgba(156, 163, 175, 0.3)",
+        //     strokeWidth: 2,
+        //     outerStrokeWidth: 0,
+        //     cursor: "not-allowed",
+        //     isDimmed: true,
+        //     textColor: "rgba(255, 255, 255, 0.5)",
+        //   }
+        // }
+
+        //ห้องไม่ว่างและมี filter
+        if (hasRoomTypeFilter && circle.initStatus !== 'available') {
           return {
             fillColor: "rgba(156, 163, 175, 0.3)",
             strokeColor: "rgba(107, 114, 128, 0.4)",
@@ -187,6 +226,21 @@ export default function CanvasMap({
             cursor: "not-allowed",
             isDimmed: true,
             textColor: "rgba(255, 255, 255, 0.5)",
+          }
+        }
+
+        if (circle.initStatus === 'clearing'){
+          return {
+            fillColor: "rgba(0, 0, 0, 0.3)",
+            strokeColor: "rgba(7, 7, 7, 0.4)",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 3,
+            outerStrokeWidth: 6,
+            cursor: "pointer",
+            isHighlighted: false,
+            shouldFlash: false, // เปิดการกระพริบตามปกติ
+            textColor: "white",
+            glowColor: roomColor.glow,
           }
         }
 
@@ -200,7 +254,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isHighlighted: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: roomColor.glow,
           }
@@ -216,7 +270,7 @@ export default function CanvasMap({
             outerStrokeWidth: 6,
             cursor: "pointer",
             isActive: true,
-            shouldFlash: true,
+            shouldFlash: true, // เปิดการกระพริบตามปกติ
             textColor: "white",
             glowColor: "rgba(251, 191, 36, 0.6)",
           }
@@ -401,16 +455,18 @@ export default function CanvasMap({
           // 🏨 Hotel Mode: Use hotel API
           try {
             const hotelUnitsData = await getUnitMatrixHotelApi({
-              project_id: "M004",
-              floor: selectedFloor // Use selected floor
+              project_id: projectId!,
+              floor: selectedFloor, // Use selected floor
+              active_date: activeDate
             })
             
             if (hotelUnitsData.data && hotelUnitsData.data.length > 0) {
               circlesData = hotelUnitsData.data.map((unit, index) => {
-                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" => {
+                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' => {
                   if (unit.status === 0) return 'available';
                   if (unit.status === 2) return 'booked';
                   if (unit.status === 3) return 'checkin';
+                  if (unit.status === 4) return 'clearing'
                   if (unit.status_desc) {
                     const desc = unit.status_desc.toLowerCase();
                     if (desc === 'available') return 'available';
@@ -418,6 +474,7 @@ export default function CanvasMap({
                     if (desc === 'checkin') return 'checkin';
                     if (desc === 'pending') return 'pending';
                     if (desc === 'some available') return 'some available';
+                    if (desc === 'clearing') return 'clearing'
                   }
                   return 'available';
                 };
@@ -436,7 +493,8 @@ export default function CanvasMap({
                   d_price: unit.d_price,
                   room_type: unit.room_type,
                   booking: unit.booking,
-                  checkin_customers: unit.checkin_customers
+                  checkin_customers: unit.checkin_customers,
+                  total_amount: unit.total_amount
                 } as Circle;
               })
               
@@ -810,6 +868,7 @@ export default function CanvasMap({
       const style = getCircleStyle(circle)
 
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
+      // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
       if (businessType === "hotel" && style.outerStrokeWidth && style.outerStrokeWidth > 0) {
         ctx.save()
         
@@ -817,22 +876,35 @@ export default function CanvasMap({
           const flashIntensity = Math.sin(flashPhase) * 0.5 + 0.5
           const pulseSize = 10 + flashIntensity * 8
 
+          // เปลี่ยนสีสำหรับห้องที่ active (กำลังเลือก) ระหว่างการกระพริบ
+          const isActiveRoom = selectedProperty?.id === circle.id
+          const flashColor = isActiveRoom ? "#ff6b6b" : (style.outerStrokeColor || "#8b5cf6")
+
+          // ใช้สีจาก flashColor สำหรับ glow effect
+          const glowColor = isActiveRoom ? "#ff6b6b" : (style.glowColor || "#8b5cf6")
+          const glowColorRgba = glowColor.startsWith('rgba') ? glowColor :
+                                glowColor.startsWith('#') ? hexToRgba(glowColor, 0.6) : glowColor
+
+          // วาด glow effect ก่อน (ด้านล่างสุด)
+          ctx.shadowColor = glowColorRgba
+          ctx.shadowBlur = (20 + flashIntensity * 15) / scaleRef.current
           ctx.beginPath()
-          ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
-          ctx.strokeStyle = style.outerStrokeColor || "#8b5cf6"
-          ctx.lineWidth = ((style.outerStrokeWidth || 0) + flashIntensity * 3) / scaleRef.current
+          ctx.arc(circle.x, circle.y, circle.r + pulseSize + 5, 0, Math.PI * 2)
+          ctx.strokeStyle = glowColorRgba
+          ctx.lineWidth = (4 + flashIntensity * 2) / scaleRef.current
+          ctx.globalAlpha = 0.3 + flashIntensity * 0.3
           ctx.stroke()
 
-          if (style.glowColor) {
-            ctx.shadowColor = style.glowColor
-            ctx.shadowBlur = (20 + flashIntensity * 15) / scaleRef.current
-            // Draw glow circle
-            ctx.beginPath()
-            ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
-            ctx.strokeStyle = style.glowColor
-            ctx.lineWidth = 2 / scaleRef.current
-            ctx.stroke()
-          }
+          // รีเซ็ต shadow และ alpha
+          ctx.shadowBlur = 0
+          ctx.globalAlpha = 1
+
+          // วาด outer stroke หลัก (ด้านบนสุด)
+          ctx.beginPath()
+          ctx.arc(circle.x, circle.y, circle.r + pulseSize, 0, Math.PI * 2)
+          ctx.strokeStyle = flashColor
+          ctx.lineWidth = ((style.outerStrokeWidth || 0) + flashIntensity * 3) / scaleRef.current
+          ctx.stroke()
         } else {
           ctx.shadowBlur = 0
           ctx.beginPath()
@@ -843,6 +915,14 @@ export default function CanvasMap({
         }
         
         ctx.restore()
+      }
+
+      // Helper function to convert hex to rgba
+      function hexToRgba(hex: string, alpha: number): string {
+        const r = parseInt(hex.slice(1, 3), 16)
+        const g = parseInt(hex.slice(3, 5), 16)
+        const b = parseInt(hex.slice(5, 7), 16)
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`
       }
 
       ctx.shadowBlur = 0
@@ -900,26 +980,27 @@ export default function CanvasMap({
   }, [backgroundImage, circles, getCircleStyle, flashPhase, currentUsername, businessType, selectedProperty])
 
    useEffect(() => {
-    let animationId: number
+     let animationId: number
 
-    const animate = () => {
-      setFlashPhase((prev) => prev + 0.15)
-      draw()
-      animationId = requestAnimationFrame(animate)
-    }
+     const animate = () => {
+       setFlashPhase((prev) => prev + 0.15)
+       draw()
+       animationId = requestAnimationFrame(animate)
+     }
 
-    if (businessType === "hotel" && selectedRoomType) {
-      animationId = requestAnimationFrame(animate)
-    } else {
-      draw()
-    }
+     // ให้กระพริบตามปกติเมื่อมีการเลือก room type
+     if (businessType === "hotel" && selectedRoomType) {
+       animationId = requestAnimationFrame(animate)
+     } else {
+       draw()
+     }
 
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [businessType, selectedRoomType, draw])
+     return () => {
+       if (animationId) {
+         cancelAnimationFrame(animationId)
+       }
+     }
+   }, [businessType, selectedRoomType, draw])
 
 
   // Initialize canvas
@@ -1124,14 +1205,14 @@ export default function CanvasMap({
   const handleCircleClick = useCallback(
     async (circle: Circle) => {
       // 🏨 Hotel Mode: เช็คว่าห้องตรงกับ room type ที่เลือกหรือไม่
-      if (businessType === "hotel" && selectedRoomType && circle.room_type !== selectedRoomType) {
+      if (businessType === "hotel" && selectedRoomType && circle.status !== "available") {
         toast.error(`ห้องนี้เป็นประเภท ${circle.room_type} ไม่ตรงกับที่ต้องการ (${selectedRoomType})`)
         return
       }
 
-      // For hotel mode, just call onCircleClick with the circle info
-      // Don't modify the status here - let the parent handle it
+      // For hotel mode, update selectedProperty and call onCircleClick
       if (businessType === "hotel") {
+        setSelectedProperty(circle) // Set the selected property to show yellow highlight
         onCircleClick?.(circle)
         return
       }
@@ -1580,7 +1661,7 @@ export default function CanvasMap({
 
       {/* Enhanced Instructions */}
       {showInstructions && (
-        <div className="absolute bottom-4 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
+        <div className="absolute bottom-16 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
           <Button
             variant="ghost"
             size="sm"

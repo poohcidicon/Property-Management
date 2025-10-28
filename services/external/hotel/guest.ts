@@ -1,5 +1,5 @@
 import { IResponse } from "../models/master";
-import { BookingGuest, IGuest } from "../models/customer";
+import { BookingGuest, IGuest, SysHotelGuests } from "../models/customer";
 
 import { db } from "./mock/guest-data"
 import { getConnection } from "@/lib/db";
@@ -15,10 +15,12 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       SELECT DISTINCT g.*
       , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
       , checkin.UnitID as CheckinUnitID, checkin.RoomNumber as CheckinRoomNumber
+      , gbr.Status as BookingRoomStatus
       FROM VW_Hotel_BookingStatus g
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
-      WHERE g.CheckIn = @CheckInDate
+      INNER JOIN Sys_Hotel_BookRoom gbr ON (g.BookRoomID = gbr.BookRoomID)
+      WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P'
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
@@ -35,6 +37,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           status: 'checkin',
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
+          room_number: item.CheckinRoomNumber
         }
       }
       return {
@@ -55,8 +58,10 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           status: 'booked',
           checkin_date: item.CheckIn,
           checkout_date: item.CheckOut,
+          room_number: item.BookRoomNumber
         } : null,
-        checkin: checkin
+        checkin: checkin,
+        book_status: item.BookingRoomStatus
       }
     })
 
@@ -68,6 +73,89 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
     return {
       success: true,
       data: mappingData,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    console.log(err)
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}
+
+export interface IPayloadGetOtherGuestListController {
+  keyword?: string; // ISO date string
+  exclue_book_room_id?: string
+}
+
+export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListController): Promise<IResponse<SysHotelGuests[]>> => {
+  try{
+    const pool = await getConnection();
+    const query = `
+      SELECT DISTINCT g.*
+      ${payload.exclue_book_room_id ? `, (
+        SELECT COUNT(*) FROM Sys_Hotel_BookGuest 
+        WHERE BookRoomID = @ExcludeBookRoomID AND GuestID = g.GuestID
+      ) as IsBooked` : ``}
+      FROM Sys_Hotel_Guests g
+      LEFT JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+      WHERE (g.GuestFirstName LIKE '%'+@Keyword+'%' 
+      or g.GuestLastName LIKE '%'+@Keyword+'%'
+      or g.GuestMobileNumber LIKE '%'+@Keyword+'%'
+      or g.GuestNationalityID = @Keyword)
+    `
+    const result = await pool.request()
+      .input("Keyword", payload.keyword || null)
+      .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
+      .query<SysHotelGuests>(query)
+    if (payload.exclue_book_room_id && result.recordset.length > 0){
+      const availableList = result.recordset.filter((item) => item.IsBooked === 0)
+      return {
+        success: true,
+        data: availableList,
+        message: "Success",
+        error: ""
+      }
+    }
+    return {
+      success: true,
+      data: result.recordset,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}
+
+export interface IPayloadGetOtherBookingGuest {
+  book_room_id: string
+}
+export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest): Promise<IResponse<SysHotelGuests[]>> => {
+  try{
+    const pool = await getConnection();
+    const query = `
+      SELECT g.* FROM Sys_Hotel_Guests g
+      INNER JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+      WHERE bg.BookRoomID = @BookRoomID
+    `
+    const result = await pool.request()
+      .input("BookRoomID", payload.book_room_id || null)
+      .query<SysHotelGuests>(query)
+    return {
+      success: true,
+      data: result.recordset,
       message: "Success",
       error: ""
     }

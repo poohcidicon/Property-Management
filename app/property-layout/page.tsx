@@ -18,7 +18,7 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getUnitMatrixHotelApi } from "@/lib/api/hotel/unit-matrix-hotel"
+import { getFloorMasApi, getUnitMatrixHotelApi, IFloorMas } from "@/lib/api/hotel/unit-matrix-hotel"
 import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
@@ -30,11 +30,14 @@ import { useAuth } from "@/hooks/use-auth"
 import { BookUnitHotelApi, IPayloadBookUnitHotel } from "@/lib/api/hotel/checkin"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { getGuestListApi, Guest } from "@/lib/api/hotel/get-guest"
+import SelectHotelOtherGuest from "@/components/select-hotel-other-guest"
+import { useModalOtherGuestStore } from "../modal-other-guest-store"
+import { useFilterStore } from "../filter-store"
 interface Property {
   id: string
   name: string;
   price: string
-  status: "available" | "booked" | "pending" | "some available" | "checkin"
+  status: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing'
   bookedAt?: number
   bookedBy?: string
   remainingTime?: number
@@ -96,6 +99,8 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
+  const {  } = useFilterStore()
+  const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
   const { isLoading: isLoadingUser } = useAuth()
@@ -123,6 +128,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [pendingBookingHotel, setPendingBookingHotel] = useState<PendingBooking | null>(null);
   const [checkedInBookingHotel, setCheckedInBookingHotel] = useState<CheckedInBooking | null>(null);
   const [guestList, setGuestList] = useState<Guest[]>([])
+  const [floorList, setFloorList] = useState<IFloorMas[]>([])
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -155,8 +161,18 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
 
   const handleGetGuestList = async () => {
+    let checkDate = dayjs().format('YYYY-MM-DD')
+
+    const params = new URLSearchParams(window.location.search);
+    const selectDate = params.get('date');
+    const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
+
+    if (isValidDate && selectDate) {
+      checkDate = selectDate
+    }
+
     const guestList = await getGuestListApi({
-      checkin_date: "2025-10-12",
+      checkin_date: checkDate,
     })
     setGuestList(guestList.data || [])
   }
@@ -277,6 +293,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   useEffect(() => {
     const init = async () => {
       setIsLoadingUnitMatrix(true)
+      await getFloor()
       
       // For all business types, get zones and booking dates
       // The CanvasMap component will handle fetching the appropriate data
@@ -307,10 +324,23 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // set init 
       const lengthZone = zoneData.data.length
       // setSelectedZone(zoneData.data[lengthZone].zone_id)
-      setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
+      // setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
     }
     else{
       setZoneList([])
+    }
+  }
+
+  const getFloor = async () => {
+    const floorData = await getFloorMasApi({ project_id: projectId })
+    if (floorData.data && floorData.data?.length > 0){
+      setFloorList(floorData.data)
+      setSelectedFloor(floorData.data[0].FloorID)
+      setCanvasBackgroundImage(floorData.data[0].ImagePath)
+    }
+    else{
+      setFloorList([])
+      setSelectedFloor(0)
     }
   }
 
@@ -866,7 +896,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       bookedAt: undefined,
       m_price: 0,
       d_price: 0,
-      booking: null
+      booking: null,
+      total_amount: 0
     }
     
     // อัปเดต Canvas Map โดยตรงผ่าน external update handler
@@ -903,7 +934,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         bookedAt: undefined,
         m_price: propertyToRemove.m_price,
         d_price: propertyToRemove.d_price,
-        booking: null
+        booking: null,
+        total_amount: 0
       }
       
       // Find the actual circle data to preserve position
@@ -969,6 +1001,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         setStatusType("booked")
       } else if (property.initStatus === "checkin") {
         setStatusType("checkin")
+      } else if (property.initStatus === "clearing") {
+        setStatusType("clearing")
       } else {
         // Default to available if status is not recognized
         setStatusType("available")
@@ -1034,11 +1068,29 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       
       // Clear selected property when dialog closes
       setSelectedProperty(null)
+      // Reset selected room type to stop blinking animation
+      setSelectedRoomType(null)
       window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
       
       // Close hotel room dialog
       setShowHotelRoomDialog(false)
+      handleBookUnitHotel()
     }
+  }
+
+  const clearRoomSelect = () => {
+    setSelectedProperty(null)
+    setSelectedRoomType(null)
+    window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
+  }
+
+  // Handle hotel room dialog close
+  const handleHotelRoomDialogClose = () => {
+    // Clear selected property when dialog closes
+    setSelectedProperty(null)
+    // Reset selected room type to stop blinking animation
+    setSelectedRoomType(null)
+    window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
   }
 
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -1046,7 +1098,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showClearConfirmDialog, setShowClearConfirmDialog] = useState(false)
   const [showHotelRoomDialog, setShowHotelRoomDialog] = useState(false)
-  const [statusType, setStatusType] = useState<"available" | "booked" | "checkin">("available")
+  const [statusType, setStatusType] = useState<"available" | "booked" | "checkin" | "clearing">("available")
   
   // Sync propertyList กับ circles ที่มีสถานะ pending และถูกเลือกโดย user
   useEffect(() => {
@@ -1327,7 +1379,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       booking_date: dayjs().format('YYYY-MM-DD'),
       start_date: dayjs(pendingBookingHotel.checkInDate).format('YYYY-MM-DD'),
       end_date: dayjs(pendingBookingHotel.checkOutDate).format('YYYY-MM-DD'),
-      unit_id: selectedProperty?.id
+      unit_id: selectedProperty?.id,
+      room_number: selectedProperty.name
     } as IPayloadBookUnitHotel
     const result = await BookUnitHotelApi(payloadBookUnit)
     if (result.data) {
@@ -1806,14 +1859,28 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             {currentBusinessType === "hotel" && (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">ชั้น:</span>
-                <Select value={selectedFloor.toString()} onValueChange={(value) => setSelectedFloor(parseInt(value))}>
+                <Select value={selectedFloor.toString()} onValueChange={(value) => {
+                  const floor = floorList.find((f) => f.FloorID.toString() === value);
+                  if (floor) {
+                    setSelectedFloor(floor.FloorID);
+                    setCanvasBackgroundImage(floor.ImagePath);
+                  }
+                  else {
+                    setSelectedFloor(0);
+                  }
+                }}>
                   <SelectTrigger className="w-24 h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 10 }, (_, i) => (
+                    {/* {Array.from({ length: 10 }, (_, i) => (
                       <SelectItem key={i + 1} value={(i + 1).toString()}>
                         ชั้น {i + 1}
+                      </SelectItem>
+                    ))} */}
+                    {floorList.map((floor) => (
+                      <SelectItem key={floor.FloorID} value={floor.FloorID.toString()}>
+                        {floor.FloorID === 0 ? `ไม่ระบุชั้น` : `ชั้น ${floor.FloorName}` }
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1839,7 +1906,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         {/* Interactive Map Area */}
         <div className="flex-1 relative overflow-hidden bg-gray-50 min-h-[300px] lg:min-h-0">
           <div className="absolute inset-0">
-            <div className="w-full h-full bg-white rounded-lg shadow-inner m-2 lg:m-4 overflow-hidden">
+            <div className="w-full h-[85%] bg-white rounded-lg shadow-inner m-2 lg:m-4 overflow-hidden">
               <Spinner loading={isLoadingUnitMatrix} showSVG={isShowOverlay}>
                 <CanvasMap
                   backgroundImageUrl={canvasBackgroundImage}
@@ -1863,13 +1930,49 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 />
               </Spinner>
             </div>
+            <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center mb-2">
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-green-500"></div>
+                <span>ว่าง</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500"></div>
+                <span>เข้าพัก</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-amber-500"></div>
+                <span>จองแล้ว</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-500"></div>
+                <span>ซ่อมบำรุง</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center">
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#4b5563]"></div>
+                <span>Standard</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-purple-500"></div>
+                <span>Deluxe</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-pink-500"></div>
+                <span>Suite</span>
+              </div>
+              <div className="flex items-center gap-1 md:gap-2">
+                <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#3b82f6]"></div>
+                <span>Superior</span>
+              </div>
+            </div>
           </div>
 
           {/* Floating Legend Panel */}
           {currentBusinessType === "market" ? (
             <MarketLegend showLegend={showLegend} setShowLegend={setShowLegend} />
           ) : (
-            <HotelLegend showLegend={showLegend} setShowLegend={setShowLegend} />
+            <HotelLegend showLegend={false} setShowLegend={setShowLegend} />
           )}
 
           {/* Toggle Button when Legend is hidden */}
@@ -1968,7 +2071,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
           {/* Floating Detail Panel - Booking Interface */}
           <div
-            className={`absolute top-4 right-4 bottom-4 transition-all duration-300 ${showDetailPanel ? "translate-x-0" : "translate-x-full"}`}
+            className={`absolute top-4 right-4 bottom-4 transition-all duration-300 ${showDetailPanel && currentBusinessType === "market" ? "translate-x-0" : "translate-x-full"}`}
           >
             <Card className={`w-80 h-full shadow-lg border-gray-200 backdrop-blur-sm flex flex-col rounded-3xl overflow-hidden ${
               currentBusinessType === "hotel" ? "bg-blue-100" : "bg-teal-100"
@@ -2362,16 +2465,25 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             </Card>
           </div>
 
+          {modalOtherGuests.isOpen && <SelectHotelOtherGuest 
+            setOtherGuest={(c) => {
+              modalOtherGuests.setLastOtherGuest(c)
+              modalOtherGuests.onClose()
+            }}
+            selectedProperty={selectedProperty}
+            setShowModal={(c) => {
+              if (!c) {
+                modalOtherGuests.onClose()
+              }
+            }}
+          />}
+
           {/* Hotel Room Dialog - Only for hotel business type */}
           <HotelRoomDialog
             showHotelRoomDialog={showHotelRoomDialog}
             setShowHotelRoomDialog={setShowHotelRoomDialog}
             selectedProperty={selectedProperty}
             selectedRoomType={selectedRoomType}
-            onConfirmHotelRoom={() => {
-              handleBookUnitHotel()
-              // return "wait api"
-            }}
             onChangeStatus={(status) => {
               if (status) {
                 setSearchUnitMatrix({
@@ -2379,10 +2491,14 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   counter: searchUnitMatrix.counter ? searchUnitMatrix.counter + 1 : 1
                 })
                 setShowHotelRoomDialog(false)
+                clearRoomSelect()
               }
             }}
             guestList={guestList}
+            onConfirmHotelRoom={handleConfirmHotelRoom}
             statusType={statusType}
+            customerData={customerData}
+            onDialogClose={handleHotelRoomDialogClose}
           />
 
           {/* Detail Panel Toggle Button - แสดงเฉพาะเมื่อไม่มีกรอบใดแสดงอยู่ */}

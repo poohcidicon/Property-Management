@@ -45,13 +45,16 @@ export interface IGuest {
     status: string;
     checkin_date: string; // ISO date string
     checkout_date: string; // ISO date string
+    room_number: string
   } | null;
   checkin: {
     unit_id: string;
     status: string;
     checkin_date: string; // ISO date string
     checkout_date: string; // ISO date string
+    room_number: string
   } | null;
+  book_status: string;
 }
 
 // from Database
@@ -71,5 +74,26 @@ export interface BookingGuest {
   BookRoomNumber: string,
   BookUnitID: string,
   CheckinUnitID: string,
-  CheckinRoomNumber: string
+  CheckinRoomNumber: string,
+  BookingRoomStatus: string
+}
+
+export interface SysHotelGuests {
+  GuestID: string;
+  GuestCode: string;
+  GuestTitle: string;
+  GuestFirstName: string;
+  GuestLastName: string;
+  GuestPassport: string;
+  GuestNationalityID: string;
+  GuestMobileNumber: string;
+  GuestAddress: string;
+  GuestEmail: string;
+  GuestPhone: string;
+  CreateDate: string;
+  CreateBy: string;
+  ModifyDate: string;
+  ModifyBy: string;
+  IsDeleted: boolean;
+  IsBooked?: number;
 }

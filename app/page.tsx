@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import PropertyLayout from "../app/property-layout/page"
+import { useProjectStore } from './project-store';
 
 // interface HomePageProps {
 //   params: { id: string }; // Type the `id` parameter as a string
@@ -20,6 +21,7 @@ export default function HomePage() {
   // const projectId = 'M004'
   const [typeBusiness, setTypeBusiness] = useState<string | null>()
   const [projectId, setProjectId] = useState<string | null>()
+  const { setProjectId: setProjectStore } = useProjectStore()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -27,6 +29,7 @@ export default function HomePage() {
     const selectProject = params.get('p')
     setTypeBusiness(selectTypeBusiness || 'market')
     setProjectId(selectProject || 'PANDAAPT')
+    setProjectStore(selectProject || 'PANDAAPT')
   }, [])
 
   if (typeof typeBusiness === 'string' && types.includes(typeBusiness) && projectId) {

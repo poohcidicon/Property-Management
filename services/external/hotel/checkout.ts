@@ -2,11 +2,15 @@ import { getConnection } from "@/lib/db";
 import sql from "mssql";
 import dayjs from "dayjs";
 import { db } from "./mock/units"
+import { getRunNumberHotel } from "./genRunNumberHotel";
 
 export interface IPayloadCheckoutUnitService {
   unit_id: string;
   checkout_date: string; // ISO date string
   total_amount: number;
+  project_id: string
+  payment_method: string
+  book_room_id: string
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -26,6 +30,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
 
     const { recordset: [bookingData] } = await transaction.request()
       .input("UnitID", payload.unit_id)
+      .input("BookRoomID", payload.book_room_id)
       .query(`
         SELECT Top 1 BookRoomID
         ,BookingID
@@ -33,11 +38,123 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         ,CreateDate
         FROM Sys_Hotel_CheckIn
         WHERE UnitID = @UnitID
+        AND BookRoomID = @BookRoomID
+        AND Status = 'A'
       `)
     if (!bookingData) {
       await transaction.rollback();
       return false
     }
+
+    const runningNumber = await getRunNumberHotel({
+      projectID: payload.project_id,
+      runKey: process.env.RUN_KEY || 'Receipt_Hotel',
+      fixWord: "",
+      runningDate: dayjs(payload.checkout_date).toDate(),
+      sbuid: "",
+      userID: "system"
+    }, transaction.request())
+
+    if (!runningNumber) {
+      await transaction.rollback();
+      return false
+    }
+
+    // set payment
+    const VAT = 0.07
+    const baseAmount = Number((payload.total_amount / (1 + VAT)).toFixed(2))
+    const vatAmount = baseAmount * VAT
+    const queryInsReceipt = `
+      INSERT INTO [dbo].[Sys_Hotel_Receipt]
+        ([ReceiptID]
+        ,[ReceiptDate]
+        ,[GuestID]
+        ,[BaseAmount]
+        ,[VATPercent]
+        ,[VATAmount]
+        ,[WHTPercent]
+        ,[WHTAmount]
+        ,[TotalAmount]
+        ,[Status]
+        ,[CreateDate]
+        ,[CreateBy]
+        ,[ModifyDate]
+        ,[ModifyBy])
+      VALUES
+        (@ReceiptID
+        ,GETDATE()
+        ,1
+        ,@BaseAmount
+        ,@Vat
+        ,@VatAmount
+        ,0
+        ,0
+        ,@TotalAmount
+        ,'A'
+        ,GETDATE()
+        ,@CreateBy
+        ,GETDATE()
+        ,@CreateBy)
+    `
+    await transaction.request()
+      .input("ReceiptID", runningNumber)
+      .input("BaseAmount", baseAmount)
+      .input("Vat", VAT*100)
+      .input("VatAmount", vatAmount)
+      .input("TotalAmount", payload.total_amount)
+      .input("CreateBy", process.env.DEFAULT_SALE_ID || "system")
+      .query(queryInsReceipt)
+
+    const queryPayment = `
+      INSERT INTO [dbo].[Sys_Hotel_Payment]
+        ([BookRoomID]
+        ,[PaymentDate]
+        ,[PaymentType]
+        ,[ReceiptID]
+        ,[BaseAmount]
+        ,[VATPercent]
+        ,[VATAmount]
+        ,[FeeAmount]
+        ,[FeeVATAmount]
+        ,[TotalFee]
+        ,[WHTPercent]
+        ,[WHTAmount]
+        ,[TotalAmount]
+        ,[Status]
+        ,[CreateDate]
+        ,[CreateBy]
+        ,[ModifyDate]
+        ,[ModifyBy])
+     VALUES
+        (@BookRoomID
+        ,GETDATE()
+        ,@PaymentType
+        ,@ReceiptID
+        ,@BaseAmount
+        ,@VATPercent
+        ,@VATAmount
+        ,0
+        ,0
+        ,0
+        ,0
+        ,0
+        ,@TotalAmount
+        ,'A'
+        ,GETDATE()
+        ,@CreateBy
+        ,GETDATE()
+        ,@CreateBy)
+    `
+    await transaction.request()
+      .input("BookRoomID", payload.book_room_id)
+      .input("PaymentType", payload.payment_method)
+      .input("ReceiptID", runningNumber)
+      .input("BaseAmount", baseAmount)
+      .input("VATPercent", VAT*100)
+      .input("VATAmount", vatAmount)
+      .input("TotalAmount", payload.total_amount)
+      .input("CreateBy", process.env.DEFAULT_SALE_ID || "system")
+      .query(queryPayment)
 
     const queryUpdateRoom = `
       UPDATE [dbo].[VW_Hotel_RoomStatus]
@@ -77,10 +194,11 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     // set unint
     await transaction.request()
       .input("UnitID", payload.unit_id)
+      .input("ActiveDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
       .query(`
-        UPDATE Sys_Hotel_Room
-        SET Status = 'P'
-        WHERE UnitID = @UnitID
+        UPDATE Sys_Hotel_RoomStatus
+        SET Status = '3'
+        WHERE UnitID = @UnitID AND ActiveDate = @ActiveDate
       `)
     
     // set checkin

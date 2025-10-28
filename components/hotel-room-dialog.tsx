@@ -7,6 +7,9 @@ import HotelBookedCard from "./hotel-booked-card"
 import { CheckedInBooking, PendingBooking } from "@/data/booking-mock-data"
 import { Guest } from "@/lib/api/hotel/get-guest"
 import { useEffect, useState } from "react"
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
+import HotelClearingCard from "./hotel-clearing-card"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -16,7 +19,9 @@ interface HotelRoomDialogProps {
   onConfirmHotelRoom: () => void
   onChangeStatus?: (status: boolean) => void
   guestList: Guest[]
-  statusType?: "available" | "booked" | "checkin"
+  statusType?: "available" | "booked" | "checkin" | "clearing"
+  customerData?: any | null
+  onDialogClose?: () => void // Add callback for dialog close
 }
 
 export default function HotelRoomDialog({
@@ -27,7 +32,9 @@ export default function HotelRoomDialog({
   onConfirmHotelRoom,
   onChangeStatus,
   guestList,
-  statusType = "available"
+  statusType = "available",
+  customerData,
+  onDialogClose
 }: HotelRoomDialogProps) {
 
   const [guest, setGuest] = useState<Guest | null>(null);
@@ -38,6 +45,8 @@ export default function HotelRoomDialog({
       setGuest(guest || null)
     }
   }
+
+  console.log(selectedProperty)
 
   useEffect(() => {
     handleSetGuest()
@@ -52,11 +61,23 @@ export default function HotelRoomDialog({
         <div className="relative">
           <button
             className="absolute top-2 right-2 z-10 p-1 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
-          <HotelCheckinCard booking={selectedProperty?.booking} checkin_customers={selectedProperty?.checkin_customers || []} roomNumber={selectedProperty?.name} roomType={selectedProperty?.room_type} roomId={selectedProperty?.id} onChangeStatus={onChangeStatus} guestList={guestList}/>
+          <HotelCheckinCard 
+            booking={selectedProperty?.booking}
+            total_amount={selectedProperty?.total_amount || 0}
+            checkin_customers={selectedProperty?.checkin_customers || []} 
+            roomNumber={selectedProperty?.name} 
+            roomType={selectedProperty?.room_type} 
+            roomId={selectedProperty?.id} 
+            onChangeStatus={onChangeStatus} 
+            guestList={guestList}
+          />
         </div>
       </div>
     )
@@ -71,7 +92,10 @@ export default function HotelRoomDialog({
         <div className="relative">
           <button
             className="absolute top-2 right-2 z-10 p-1 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -85,6 +109,21 @@ export default function HotelRoomDialog({
           />
         </div>
       </div>
+    )
+  }
+
+  if (statusType === 'clearing') {
+    return (
+      <HotelClearingCard
+        selectedProperty={selectedProperty}
+        selectedRoomType={selectedRoomType}
+        onChangeStatus={(status) => {
+          if (status && onChangeStatus){
+            onChangeStatus(status)
+          }
+          onDialogClose?.()
+        }}
+      />
     )
   }
 
@@ -109,7 +148,10 @@ export default function HotelRoomDialog({
             </span>
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => setShowHotelRoomDialog(false)}
+              onClick={() => {
+                setShowHotelRoomDialog(false)
+                onDialogClose?.()
+              }}
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -147,7 +189,8 @@ export default function HotelRoomDialog({
             <span>
               {selectedProperty?.booking?.start_date && selectedProperty?.booking?.end_date
                 ? `${new Date(selectedProperty.booking.start_date).toLocaleDateString('th-TH')} - ${new Date(selectedProperty.booking.end_date).toLocaleDateString('th-TH')}`
-                : '10 ต.ค. 2025 - 13 ต.ค. 2025'
+                // : `${new Intl.DateTimeFormat('th-TH', { month: 'short', day: 'numeric' }).format(new Date())}  -  ${new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))}`
+                : `${format(new Date(), "dd MMM", { locale: th })} - ${format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "dd MMM yyyy", { locale: th })}`
               }
             </span>
           </div>
@@ -168,23 +211,31 @@ export default function HotelRoomDialog({
 
         {/* Status-specific button */}
         {statusType === "available" ? (
-          <button
-            className="w-full bg-black text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            onClick={onConfirmHotelRoom}
-          >
-            ยืนยันการจอง
-          </button>
+          customerData ? (
+            <button
+              className="w-full bg-black text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
+              onClick={onConfirmHotelRoom}
+            >
+              ยืนยันการจอง
+            </button>
+          ) : null
         ) : statusType === "booked" ? (
           <button
             className="w-full bg-orange-500 text-white rounded-xl py-2.5 hover:bg-orange-600 transition"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             ห้องถูกจองแล้ว
           </button>
         ) : statusType === "checkin" ? (
           <button
             className="w-full bg-red-500 text-white rounded-xl py-2.5 hover:bg-red-600 transition"
-            onClick={() => setShowHotelRoomDialog(false)}
+            onClick={() => {
+              setShowHotelRoomDialog(false)
+              onDialogClose?.()
+            }}
           >
             ห้องถูกเช็คอินแล้ว
           </button>

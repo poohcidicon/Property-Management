@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 import dayjs from "dayjs"
+import { useCustomerStore } from "@/app/customer-store"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -25,18 +26,33 @@ export default function CustomerBookingCard({
     onCheckedInBookingsChange?: (guest: any) => void
 }) {
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
-    const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | null>(null);
+    const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
+    const { customer, setCustomer } = useCustomerStore();
     
     const selectBooking = (booking: PendingBooking) => {
+      if (!customer || (customer.book_room_id !== booking.book_room_id)) {
         setSelectedBooking(booking);
         // When a booking is selected, automatically set the room type filter
         // Use the room type directly from booking
         const bookingRoomType = booking.roomType || null;
         setSelectedRoomType(bookingRoomType);
+        
+        // Store customer data in Zustand store
+        const customerData = {
+            id: booking.id,
+            memberId: booking.guestPhone, // Using phone as memberId since it's unique
+            name: booking.guestName,
+            citizenId: '', // Not available in booking data
+            mobile: booking.guestPhone,
+            type: 'hotel_guest',
+            book_room_id: booking.book_room_id
+        };
+        setCustomer(customerData);
+        
         if (onRoomTypeChange) {
-            onRoomTypeChange(bookingRoomType);
+          onRoomTypeChange(bookingRoomType);
         }
         if (onPendingBookingsChange) {
           onPendingBookingsChange(booking);
@@ -44,6 +60,21 @@ export default function CustomerBookingCard({
         if (onCheckedInBookingsChange) {
           onCheckedInBookingsChange(booking);
         }
+      }
+      else if (booking.book_room_id === customer.book_room_id){
+        // console.log('eeee')
+        setCustomer(null);
+        setSelectedBooking(null)
+        if (onRoomTypeChange) {
+          onRoomTypeChange(null);
+        }
+        if (onPendingBookingsChange) {
+          onPendingBookingsChange(null);
+        }
+        if (onCheckedInBookingsChange) {
+          onCheckedInBookingsChange(null);
+        }
+      }
     };
 
     const handleRoomTypeChange = (roomType: "standard" | "family" | "null") => {
@@ -56,7 +87,16 @@ export default function CustomerBookingCard({
 
     const loadGuest = async () => {
       // test checkin date 2025-10-12
-      const checkinDate = '2025-10-12';
+      // const checkinDate = '2025-10-12';)
+      let checkinDate = dayjs().format('YYYY-MM-DD')
+      
+      const params = new URLSearchParams(window.location.search);
+      const selectDate = params.get('date');
+      const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
+  
+      if (isValidDate && selectDate) {
+        checkinDate = selectDate
+      }
       const guestList = await getGuestListApi({
         checkin_date: checkinDate
       });
@@ -82,6 +122,7 @@ export default function CustomerBookingCard({
           totalAmount,
           status: "pending",
           assignedRoomId: g.booking ? g.booking.unit_id : undefined,
+          assignedRoomName: g.booking ? g.booking.room_number : undefined
         };
       })
       const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
@@ -96,6 +137,7 @@ export default function CustomerBookingCard({
           numberOfDays: 0,
           totalAmount: 0,
           checkInDate: new Date().toISOString(),
+          assignedRoomName: g.checkin && g.checkin.room_number ? g.checkin.room_number : ""
         }
       })
       setPendingBookings(pendingList);
@@ -106,7 +148,6 @@ export default function CustomerBookingCard({
       loadGuest();
     }, [counter])
 
-    console.log(selectedBooking, 'selectedRoomType')
 
     return (
         <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
@@ -173,13 +214,13 @@ export default function CustomerBookingCard({
 
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                       <Phone className="w-3 h-3" />
-                      <span>{booking.guestPhone}</span>
+                      <span>{booking.guestPhone || '-'}</span>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs md:text-sm">
                       <Bed className="w-3 h-3" />
-                      <span className="font-medium" style={{ color: ROOM_TYPES[booking.roomType].color }}>
-                        {ROOM_TYPES[booking.roomType].name}
+                      <span className="font-medium" style={{ color: ROOM_TYPES[booking.roomType]?.color || '#222222' }}>
+                        {ROOM_TYPES[booking.roomType]?.name || booking.roomType}
                       </span>
                     </div>
 
@@ -207,7 +248,7 @@ export default function CustomerBookingCard({
 
                     {booking.assignedRoomId && (
                       <div className="text-xs text-muted-foreground">
-                        ห้อง: {booking.assignedRoomId.replace("room-", "")}
+                        ห้อง: {booking.assignedRoomName?.replace("room-", "")}
                       </div>
                     )}
                   </div>
@@ -239,9 +280,9 @@ export default function CustomerBookingCard({
                         </Badge>
                       </div>
 
-                      {booking.assignedRoomId && (
+                      {booking.assignedRoomName && (
                         <div className="text-xs md:text-sm font-medium">
-                          ห้อง: {booking.assignedRoomId.replace("room-", "")}
+                          ห้อง: {booking.assignedRoomName.replace("room-", "")}
                         </div>
                       )}
 

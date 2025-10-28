@@ -9,6 +9,7 @@ export interface UnitMatrixHotel{
   d_price: number;
   room_type: string;
   status_desc: string;
+  total_amount: number;
   booking: {
     customer_id: string;
     status: string;
@@ -26,6 +27,7 @@ export interface UnitMatrixHotel{
 export interface IPayloadGetUnitHotel {
   project_id: string;
   floor: number;
+  active_date: string
 }
 
 export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Promise<ApiResponse<UnitMatrixHotel[]>> => {
@@ -36,5 +38,54 @@ export const getUnitMatrixHotelApi = async (payload: IPayloadGetUnitHotel): Prom
   catch (error: any) {
     console.error('Error fetching unit matrix hotel:', error);
     throw error;
+  }
+}
+
+export interface IFloorMas {
+  FloorID: number;
+  FloorName: string;
+  FileID: string;
+  ImagePath: string;
+}
+
+export interface IGetFloorMas {
+  project_id: string
+}
+
+export const getFloorMasApi = async (payload: IGetFloorMas): Promise<ApiResponse<IFloorMas[]>> => {
+  try{
+    const response = await axiosPublic.post<ApiResponse<IFloorMas[]>>('/api/hotel/get-floors', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching unit matrix hotel:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}
+
+export interface IUpdateRoomStatus {
+  unit_id: string;
+  status: number;
+  active_date: string
+}
+
+export const updateRoomStatusApi = async (payload: IUpdateRoomStatus): Promise<ApiResponse<boolean>> => {
+  try{
+    const response = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/update-room-status', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching unit matrix hotel:', error);
+    return {
+      success: false,
+      data: false,
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
   }
 }

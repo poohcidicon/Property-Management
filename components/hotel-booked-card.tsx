@@ -1,7 +1,11 @@
 import { CheckinUnitApi, IPayloadCheckin } from '@/lib/api/hotel/checkin';
-import { Guest } from '@/lib/api/hotel/get-guest';
+import { Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import SelectHotelOtherGuest from './select-hotel-other-guest';
+import { useModalOtherGuestStore } from '@/app/modal-other-guest-store';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale/th';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -20,12 +24,21 @@ interface HotelBookedCardProps {
 }
 
 export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
+  const { lastOtherGuest, ...modalOtherGuests } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
+  const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
   const handleCheckIn = async () => {
     const payloadCheckin = {
       unit_id: roomId,
       checkin_date: dayjs().format('YYYY-MM-DD'),
       customers: [{ booking_id: booking?.booking_id, book_room_id: booking?.book_room_id }], // แก้ทีหลัง
+      other_guests: otherGuests.map(g => {
+        return {
+          book_room_id: booking?.book_room_id,
+          guest_id: g.GuestID,
+          gest_name: `${g.GuestFirstName} ${g.GuestLastName}`,
+        }
+      })
     } as IPayloadCheckin
     const result = await CheckinUnitApi(payloadCheckin)
     if (result.data){
@@ -45,14 +58,38 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     }
   }
 
+  const handleAddGuest = () => {
+    modalOtherGuests.onOpen()
+  }
+
+  const handleDelete = (c: SysHotelGuests) => {
+    const found = otherGuests.find(g => g.GuestID === c.GuestID)
+    if (found){
+      setOtherGuests(otherGuests.filter(g => g.GuestID !== c.GuestID))
+    }
+  }
+
+  const handleSetOtherGuest = (c: SysHotelGuests) => {
+    const found = otherGuests.find(g => g.GuestID === c.GuestID)
+    if (!found){
+      setOtherGuests([...otherGuests, c])
+    }
+  }
+
   useEffect(() => {
     if (guestList.length > 0){
       handleSetGuest()
     }
   }, [booking])
 
+  useEffect(() => {
+    if (lastOtherGuest){
+      handleSetOtherGuest(lastOtherGuest)
+    }
+  }, [lastOtherGuest])
+
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
         <h2 className="text-2xl font-bold text-gray-800">ห้อง {roomNumber || '206'}</h2>
@@ -78,14 +115,16 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาห้องพัก</p>
-              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount || '0'}</p>
+              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</p>
             </div>
           </div>
         </div>
 
         {/* Booking Information */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้เช่าห้อพัก</h3>
+          <div className="text-base font-bold text-gray-800 mb-3 flex justify-between align-center">
+            <div>ข้อมูลผู้จอง</div>
+          </div>
           
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -101,21 +140,73 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                {/* {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
+                {selectGuest?.start_booking ? format(new Date(selectGuest?.start_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between">
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
-                {selectGuest?.end_booking ? new Date(selectGuest?.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                {selectGuest?.end_booking ? format(new Date(selectGuest?.end_booking), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
-            
-            <div className="flex justify-between pt-2 border-t border-gray-200">
-              <span className="text-gray-800 font-semibold">ค่าจองทั้งหมด:</span>
-              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount || '0'}</span>
+          </div>
+        </div>
+        <div className="border-t border-gray-200 pt-4">
+          <div className="text-base font-bold text-gray-800 mb-3 flex justify-between align-center">
+            <div>ข้อมูลผู้เข้าพัก</div>
+            <div className="flex justify-end">
+              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+                onClick={handleAddGuest}
+              >
+                +
+              </button>
             </div>
+          </div>
+          
+          {otherGuests.map((otherGuest, index) => {
+            return (
+              <div className='flex justify-between gap-5 mb-4' key={otherGuest.GuestID}>
+                <div className="space-y-2 text-sm w-full">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">ชื่อ:</span>
+                    <span className="font-medium text-gray-800">{otherGuest?.GuestFirstName || ''} {otherGuest?.GuestLastName || ''}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">เบอร์โทร:</span>
+                    <span className="font-medium text-gray-800">{otherGuest?.GuestMobileNumber || ''}</span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">เช็คอินวันที่:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">เช็คเอาท์วันที่:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectGuest?.end_booking ? new Date(selectGuest?.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-end items-start">
+                  <button 
+                    onClick={() => handleDelete(otherGuest)}
+                    className="bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded"
+                  >
+                    ลบ
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+          <div className="flex justify-between pt-2 border-t border-gray-200">
+            <span className="text-gray-800 font-semibold">ค่าจองทั้งหมด:</span>
+            <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</span>
           </div>
         </div>
       </div>

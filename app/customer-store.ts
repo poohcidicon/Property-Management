@@ -7,11 +7,12 @@ type Customer = {
   citizenId: string;
   mobile: string;
   type: string;
+  book_room_id?: string;
 }
 
 type CustomerState = {
   customer: Customer | null;
-  setCustomer: (customer: Customer) => void;
+  setCustomer: (customer: Customer | null) => void;
 };
 
 export const useCustomerStore = create<CustomerState>((set) => ({

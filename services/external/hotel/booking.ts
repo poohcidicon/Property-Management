@@ -11,6 +11,7 @@ export interface IPayloadBookUnitService {
   end_date: string; // ISO date string
   booking_id: string;
   book_room_id: string;
+  room_number: string;
 }
 
 export const bookUnitService = async (payload: IPayloadBookUnitService): Promise<boolean> => {
@@ -32,11 +33,11 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
     delete checkinBooking.parameters['UnitID']
     let insertListOnDate = []
     let count = 0
-    for(let d = dayjs(payload.start_date); d.isBefore(dayjs(payload.end_date)); d = d.add(1, 'day')){
+    for(let d = dayjs(payload.start_date); (d.isBefore(dayjs(payload.end_date)) || d.isSame(dayjs(payload.end_date))); d = d.add(1, 'day')){
       checkinBooking.input(`UnitID_${count}`, payload.unit_id)
       checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
       checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
-      checkinBooking.input(`RoomNumber_${count}`, payload.unit_id)
+      checkinBooking.input(`RoomNumber_${count}`, payload.room_number)
       checkinBooking.input(`TransacDate_${count}`, dayjs().format('YYYY-MM-DD'))
       checkinBooking.input(`CheckIn_${count}`, d.format('YYYY-MM-DD'))
       checkinBooking.input(`Status_${count}`, 'W')
