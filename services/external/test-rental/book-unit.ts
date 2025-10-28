@@ -113,15 +113,17 @@ export const bookUnitsService = async (payload: IPayloadBookUnitsService): Promi
     
     await bookingUnitsRequest.query(bookingUnitsQuery);
 
-    const updateCompensateRequest = transaction.request()
-    const updateCompensateQuery = `
-      UPDATE Sys_Daily_Compensate_Unit SET Status = 'P' 
-      WHERE CompensateID IN (${compensateList.map((id, index) => {
-        updateCompensateRequest.input(`CompensateID${index}`, sql.NVarChar, id);
-        return `@CompensateID${index}`
-      }).join(",")}) AND IsDeleted = 0
-    `
-    await updateCompensateRequest.query(updateCompensateQuery);
+    if (compensateList.length > 0){
+      const updateCompensateRequest = transaction.request()
+      const updateCompensateQuery = `
+        UPDATE Sys_Daily_Compensate_Unit SET Status = 'P' 
+        WHERE CompensateID IN (${compensateList.map((id, index) => {
+          updateCompensateRequest.input(`CompensateID${index}`, sql.NVarChar, id);
+          return `@CompensateID${index}`
+        }).join(",")}) AND IsDeleted = 0
+      `
+      await updateCompensateRequest.query(updateCompensateQuery);
+    }
 
     await transaction.commit();
     return {
