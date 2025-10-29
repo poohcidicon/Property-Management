@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
+import { formatBuddhist } from "@/lib/utils"
 interface Property {
   id: string
   name: string;
@@ -607,21 +608,21 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   }
 
   const getMonthName = (month: number) => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ]
-    return months[month - 1]
+    // const months = [
+    //   "January",
+    //   "February",
+    //   "March",
+    //   "April",
+    //   "May",
+    //   "June",
+    //   "July",
+    //   "August",
+    //   "September",
+    //   "October",
+    //   "November",
+    //   "December",
+    // ]
+    return format(new Date(currentYear, month - 1), 'MMMM', { locale: th })
   }
 
   const handleDateAvaliableClick = (date: number, isAvaliable: boolean) => {
@@ -1514,7 +1515,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     return (
                       <TableRow key={index} className="hover:bg-blue-50 transition-colors">
                         <TableCell className="text-sm font-medium text-blue-800">{property.unit_number}</TableCell>
-                        <TableCell className="text-sm">{format(new Date(property.date), "dd MMM yyyy", { locale: th })}</TableCell>
+                        <TableCell className="text-sm">{formatBuddhist(new Date(property.date), "dd MMM yyyy")}</TableCell>
                         {activeTab === 'monthly' && (
                           <TableCell className="text-sm">
                             {property.compensate_id && (
@@ -2008,7 +2009,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                         <span className="text-blue-500">{"<"}</span>
                       </Button>
                       <span className="text-sm font-medium">
-                        {getMonthName(currentMonth)} {currentYear}
+                        {getMonthName(currentMonth)} {formatBuddhist(new Date(currentYear, currentMonth - 1), 'yyyy')}
                       </span>
                       <Button
                         variant="ghost"
