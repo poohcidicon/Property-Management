@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X, Trash } from 'lucide-react';
-import { CheckoutUnitApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadInsertMaterialOption } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -160,6 +160,19 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     }
   }
 
+  const handleDeleteBookMaterial = async (input: IBookMaterialOption) => {
+    const payload = {
+      id: input.ID,
+      book_room_id: input.BookRoomID,
+      booking_id: input.BookingID
+    } as IPayloadDeleteBookMaterialOption
+
+    const result = await DelBookMaterialOptionApi(payload)
+    if (result.data){
+      loadBookMaterialOption()
+    }
+  }
+
   useEffect(() => {
     if (guestList.length > 0) {
       handleSetGuest()
@@ -305,6 +318,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                       variant="default"
                                       size="sm"
                                       className='text-xs bg-red-500'
+                                      onClick={() => handleDeleteBookMaterial(bm)}
                                     >
                                       ลบ
                                     </Button>

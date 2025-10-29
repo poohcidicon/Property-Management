@@ -1,4 +1,4 @@
-import { getBookMaterialOption, getMaterial, IBookMaterialOption, insBookMaterialOption, IPayloadGetBookMaterialOption } from "@/services/external/hotel/material"
+import { deleteBookMaterialOption, getBookMaterialOption, getMaterial, IBookMaterialOption, insBookMaterialOption, IPayloadDeleteBookMaterialOption, IPayloadGetBookMaterialOption } from "@/services/external/hotel/material"
 import { IResponse } from "@/services/external/models/master"
 
 export interface IMaterial {
@@ -74,6 +74,25 @@ export const getBookMaterialOptionController = async (payload: IPayloadGetBookMa
     return {
       success: false,
       data: [],
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export const deleteBookMaterialOptionController = async (payload: IPayloadDeleteBookMaterialOption): Promise<IResponse<boolean>> => {
+  try{
+    const result = await deleteBookMaterialOption(payload)
+    return {
+      success: true,
+      data: result,
+      error: "",
+      message: ""
+    }
+  }catch(err: any){
+    return {
+      success: false,
+      data: false,
       error: err.message,
       message: err.message
     }

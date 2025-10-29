@@ -160,3 +160,24 @@ export const InsBookMaterialOptionApi = async (payload: IPayloadInsertMaterialOp
     }
   }
 }
+
+export interface IPayloadDeleteBookMaterialOption {
+  id: number;
+  booking_id: string;
+  book_room_id: string;
+}
+
+export const DelBookMaterialOptionApi = async (payload: IPayloadDeleteBookMaterialOption): Promise<ApiResponse<boolean>> => {
+  try{
+    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/delete-book-material', payload);
+    return res.data
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      data: false,
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}

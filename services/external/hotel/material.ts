@@ -106,3 +106,32 @@ export const getBookMaterialOption = async (payload: IPayloadGetBookMaterialOpti
     .query(query)
   return result.recordset
 }
+
+export interface IPayloadDeleteBookMaterialOption {
+  id: string;
+  booking_id: string;
+  book_room_id: string;
+}
+
+export const deleteBookMaterialOption = async (payload: IPayloadDeleteBookMaterialOption): Promise<boolean> => {
+  const pool = await getConnection();
+  let transaction = new sql.Transaction(pool);
+  await transaction.begin();
+  try{
+    const query = `
+      DELETE FROM Sys_Hotel_BookOptions 
+      WHERE ID = @ID AND BookingID = @BookingID AND BookRoomID = @BookRoomID
+    `
+    await transaction.request()
+      .input("ID", payload.id)
+      .input("BookingID", payload.booking_id)
+      .input("BookRoomID", payload.book_room_id)
+      .query(query)
+    await transaction.commit();
+    return true
+  }
+  catch(e){
+    await transaction.rollback();
+    return false
+  }
+}
