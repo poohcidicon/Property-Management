@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Clock, X } from 'lucide-react';
+import { Plus, Clock, X, Trash } from 'lucide-react';
 import { CheckoutUnitApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadInsertMaterialOption } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
@@ -10,8 +10,9 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
-import { DayPicker } from 'react-day-picker';
 import { useProjectStore } from '@/app/project-store';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { TooltipPortal } from '@radix-ui/react-tooltip';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -55,6 +56,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [payInDate, setPayInDate] = useState<any>(null)
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
   const [paymentRemark, setPaymentRemark] = useState<string | null>()
+  const [openDeleteMaterialId, setDeleteMaterialId] = useState<number | null>(null)
   const { projectId } = useProjectStore()
 
   const summaryPrice = (
@@ -280,7 +282,52 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                       <span>{bm.MaterialName}</span>
                       <span className='text-xs'>{format(new Date(bm.CreateDate), "dd MMM yyyy HH:mm", { locale: th })}</span>
                     </div>
-                    <div className="text-sm font-bold text-lg text-green-600">฿ {bm.Price?.toLocaleString() || 0 }</div>
+                    <div className="text-sm font-bold text-lg text-green-600 flex gap-2">
+                      <div>฿ {bm.Price?.toLocaleString() || 0 }</div>
+                      <div>
+                        <TooltipProvider delayDuration={0}>
+                          <Tooltip open={bm.ID === openDeleteMaterialId}>
+                            <TooltipTrigger asChild>
+                              <div className='rounded-full border p-1 cursor-pointer' onClick={() => {
+                                setDeleteMaterialId((prev) => {
+                                  return prev === bm.ID ? null : bm.ID
+                                })
+                              }}>
+                                <Trash className='text-gray-600' size={12}/>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                              <TooltipContent className="TooltipContent" sideOffset={5}>
+                                <div className='flex flex-col gap-2'>
+                                  <span>ยืนยันการลบ</span>
+                                  <div className='flex gap-2'>
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className='text-xs bg-red-500'
+                                    >
+                                      ลบ
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className='text-xs'
+                                      onClick={() => {
+                                        setDeleteMaterialId((prev) => {
+                                          return prev === bm.ID ? null : bm.ID
+                                        })
+                                      }}
+                                    >
+                                      ยกเลิก
+                                    </Button>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </TooltipPortal>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
                   </div>
                 )
               })}
