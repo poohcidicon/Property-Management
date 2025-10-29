@@ -123,6 +123,12 @@ export default function HotelRoomDialog({
           }
           onDialogClose?.()
         }}
+        onClose={(status) => {
+          if (status){
+            setShowHotelRoomDialog(false)
+            onDialogClose?.()
+          }
+        }}
       />
     )
   }

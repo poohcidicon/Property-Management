@@ -7,9 +7,10 @@ interface HotelClearingCardProps {
   selectedProperty: Circle | null
   selectedRoomType: "standard" | "family" | null
   onChangeStatus?: (status: boolean) => void
+  onClose?: (status: boolean) => void
 }
 
-export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus }: HotelClearingCardProps) {
+export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus, onClose }: HotelClearingCardProps) {
 
   const handleChangeStatusRoom = async (status: number) => {
     const payload = {
@@ -45,8 +46,9 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"
               onClick={() => {
-                // setShowHotelRoomDialog(false)
-                // onDialogClose?.()
+                if (onClose){
+                  onClose(true)
+                }
               }}
             >
               <X className="w-5 h-5 text-gray-500" />
