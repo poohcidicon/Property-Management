@@ -199,7 +199,7 @@ export default function CanvasMap({
         const roomColor =
           circle.room_type && ROOM_TYPE_COLORS[circle.room_type as keyof typeof ROOM_TYPE_COLORS]
             ? ROOM_TYPE_COLORS[circle.room_type as keyof typeof ROOM_TYPE_COLORS]
-            : { primary: "#8b5cf6", secondary: "#7c3aed", glow: "rgba(139, 92, 246, 0.6)" }
+            : ROOM_TYPE_COLORS.standard
 
         // ห้องที่ไม่ตรงกับ filter → จาง
         // if (hasRoomTypeFilter && !isMatchingRoomType) {
