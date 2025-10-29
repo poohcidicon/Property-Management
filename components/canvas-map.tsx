@@ -604,7 +604,7 @@ export default function CanvasMap({
       // Also load circles when business type changes
       loadCircles()
     }
-  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, businessType, userLogin, selectedFloor])
+  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, businessType, userLogin, selectedFloor, activeDate])
 
   // Listen for real-time circle updates from other clients
   useEffect(() => {

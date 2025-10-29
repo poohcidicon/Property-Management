@@ -33,6 +33,7 @@ import { getGuestListApi, Guest } from "@/lib/api/hotel/get-guest"
 import SelectHotelOtherGuest from "@/components/select-hotel-other-guest"
 import { useModalOtherGuestStore } from "../modal-other-guest-store"
 import { useFilterStore } from "../filter-store"
+import { Input } from "@/components/ui/input"
 interface Property {
   id: string
   name: string;
@@ -99,7 +100,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
-  const {  } = useFilterStore()
+  const { activeDate, setActiveDate } = useFilterStore()
   const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
@@ -1858,6 +1859,16 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             {/* Floor Filter - Only show for hotel business type */}
             {currentBusinessType === "hotel" && (
               <div className="flex items-center gap-2">
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm font-medium text-gray-700 w-full">วันที่:</span>
+                  <Input 
+                    type="date"
+                    defaultValue={activeDate}
+                    onChange={(e) => {
+                      setActiveDate(e.target.value)
+                    }}
+                  />
+                </div>
                 <span className="text-sm font-medium text-gray-700">ชั้น:</span>
                 <Select value={selectedFloor.toString()} onValueChange={(value) => {
                   const floor = floorList.find((f) => f.FloorID.toString() === value);
