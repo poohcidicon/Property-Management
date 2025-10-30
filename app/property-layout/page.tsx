@@ -27,7 +27,7 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
-import { formatBuddhist } from "@/lib/utils"
+import { formatBuddhist, formatTHCurrency } from "@/lib/utils"
 interface Property {
   id: string
   name: string;
@@ -1512,10 +1512,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   {confirmedProperties.map((property, index) => (
                     <TableRow key={index} className="hover:bg-blue-50 transition-colors">
                       <TableCell className="text-sm font-medium text-blue-800">{property.name}</TableCell>
-                      <TableCell className="text-sm">{Number.parseFloat(property.price).toLocaleString()}.00</TableCell>
+                      <TableCell className="text-sm">{formatTHCurrency(Number.parseFloat(property.price))}</TableCell>
                       <TableCell className="text-sm">{property.quantity || 1}</TableCell>
                       <TableCell className="text-sm font-medium">
-                        {(property.totalAmount).toLocaleString()}
+                        {formatTHCurrency(property.totalAmount)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1562,7 +1562,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                             )}
                           </TableCell>
                         )}
-                        <TableCell className="text-sm">{property.amount.toLocaleString()}</TableCell>
+                        <TableCell className="text-sm">{formatTHCurrency(property.amount)}</TableCell>
                       </TableRow>
                     )
                   })}
@@ -1584,7 +1584,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             {/* Total */}
             <div className="flex justify-between items-center mb-4 p-4 bg-blue-600 rounded-lg shadow-md">
               <span className="text-sm font-medium text-white">รวมทั้งหมด:</span>
-              <span className="text-xl font-bold text-white">{totalBookingAmount.toLocaleString()}.00 บาท</span>
+              <span className="text-xl font-bold text-white">{formatTHCurrency(totalBookingAmount)} บาท</span>
             </div>
 
             {/* Confirm Button */}
