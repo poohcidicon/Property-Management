@@ -11,3 +11,7 @@ export function formatBuddhist(date: Date, pattern: string = 'd MMMM yyyy'): str
   const formatted = format(date, pattern, { locale: th })
   return formatted.replace(/\d{4}$/, (year) => String(parseInt(year) + 543))
 }
+
+export function formatTHCurrency(amount: number): string {
+  return amount.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+}
