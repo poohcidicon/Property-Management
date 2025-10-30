@@ -1440,13 +1440,14 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base text-gray-800">สรุปการเลือกแผง</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-3 px-2">
                     {confirmedProperties.map((property, index) => (
                       <div
                         key={property.cartId}
                         className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200"
                       >
-                        <span className="text-sm font-medium text-gray-800">แผง {property.name}</span>
+                        <span className="text-sm font-medium text-gray-800">แผง <br />
+                          {property.name}</span>
                         <div className="flex gap-2">
                             <span className="text-sm text-gray-600">{property.price} บาท</span>
                             <Button
