@@ -1389,9 +1389,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2024">พ.ศ. 2567</SelectItem>
-                    <SelectItem value="2025">พ.ศ. 2568</SelectItem>
-                    <SelectItem value="2026">พ.ศ. 2569</SelectItem>
+                    <SelectItem value="2024">ค.ศ. 2024</SelectItem>
+                    <SelectItem value="2025">ค.ศ. 2025</SelectItem>
+                    <SelectItem value="2026">ค.ศ. 2026</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

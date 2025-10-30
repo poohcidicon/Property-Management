@@ -9,7 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatBuddhist(date: Date, pattern: string = 'd MMMM yyyy'): string {
   const formatted = format(date, pattern, { locale: th })
-  return formatted.replace(/\d{4}$/, (year) => String(parseInt(year) + 543))
+  // return formatted.replace(/\d{4}$/, (year) => String(parseInt(year) + 543))
+  return formatted
 }
 
 export function formatTHCurrency(amount: number): string {
