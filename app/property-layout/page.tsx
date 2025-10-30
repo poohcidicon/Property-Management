@@ -1866,6 +1866,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     onChangeSerachDay(day)
                   }}
                   focus={focusCanvas}
+                  projectId={projectId}
                 />
               </Spinner>
             </div>

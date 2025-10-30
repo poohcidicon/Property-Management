@@ -46,7 +46,8 @@ interface CanvasMapProps {
   filterUnitMatrix?: SearchUnitMatrix
   onLoading?: (isLoading: boolean) => void
   onChangeFilterDay?: (day: number) => void,
-  focus: {x: number | null, y: number | null}
+  focus: {x: number | null, y: number | null},
+  projectId: string
 }
 
 export default function CanvasMap({ 
@@ -60,7 +61,8 @@ export default function CanvasMap({
   filterUnitMatrix,
   onLoading,
   onChangeFilterDay,
-  focus
+  focus,
+  projectId
 }: CanvasMapProps) {
   const { activeDate, floor } = useFilterStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -108,7 +110,7 @@ export default function CanvasMap({
       if (isSelectedInList) {
         // Selected in Property List - blue highlight
         return {
-          fillColor: "rgba(59, 130, 246, 0.8)",
+          fillColor: "rgba(59, 130, 246)",
           strokeColor: "rgba(37, 99, 235, 1)",
           strokeWidth: 3,
           cursor: 'pointer',
@@ -116,7 +118,7 @@ export default function CanvasMap({
         }
       } else {
         return {
-          fillColor: "rgba(0, 200, 0, 0.7)",
+          fillColor: "rgba(0, 200, 0)",
           strokeColor: "rgba(0, 150, 0, 1)",
           strokeWidth: 2,
           cursor: 'pointer'
@@ -127,7 +129,7 @@ export default function CanvasMap({
       if (isOwnBooking) {
         // Own booking - bright orange with thick border
         return {
-          fillColor: "rgba(255, 165, 0, 0.8)",
+          fillColor: "rgba(255, 165, 0)",
           strokeColor: "rgba(255, 140, 0, 1)",
           strokeWidth: 4,
           cursor: 'pointer'
@@ -135,7 +137,7 @@ export default function CanvasMap({
       } else {
         // Others' booking - darker orange with dashed border
         return {
-          fillColor: "rgba(200, 100, 0, 0.6)",
+          fillColor: "rgba(200, 100, 0)",
           strokeColor: "rgba(150, 80, 0, 1)",
           strokeWidth: 2,
           cursor: 'not-allowed',
@@ -145,7 +147,7 @@ export default function CanvasMap({
     } else if (circle.status === 'some available' || circle.initStatus === 'some available') {
       // partially booked status
       return {
-        fillColor: "rgba(200, 200, 0, 0.7)",
+        fillColor: "rgba(200, 200, 0)",
         strokeColor: "rgba(200, 160, 0, 1)",
         strokeWidth: 2,
         cursor: 'default'
@@ -153,7 +155,7 @@ export default function CanvasMap({
     } else {
       // booked status
       return {
-        fillColor: "rgba(200, 0, 0, 0.7)",
+        fillColor: "rgba(200, 0, 0)",
         strokeColor: "rgba(150, 0, 0, 1)",
         strokeWidth: 2,
         cursor: 'default'
@@ -179,7 +181,7 @@ export default function CanvasMap({
 
         // test connect rental
         const searchUnitMatrixPayload = {
-          project_id: 'M004',
+          project_id: projectId,
           year: filterUnitMatrix?.year || 2025,
           month: filterUnitMatrix?.month || 9,
           day: filterUnitMatrix?.day || filterDay || 0 // 0 means whole month
@@ -573,7 +575,7 @@ export default function CanvasMap({
       ctx.setLineDash([]) // Reset line dash
 
       // Draw circle ID
-      ctx.fillStyle = "white"
+      ctx.fillStyle = "black"
       ctx.font = `${12 / scaleRef.current}px Arial`
       ctx.textAlign = "center"
       ctx.fillText(circle.name, circle.x, circle.y - 8 / scaleRef.current)
