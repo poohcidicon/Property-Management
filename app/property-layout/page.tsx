@@ -29,6 +29,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
 import { formatBuddhist, formatTHCurrency } from "@/lib/utils"
 import { useFilterStore } from "../filter-store"
+import SpinnerSmall from "@/components/ui/spinner-small"
 interface Property {
   id: string
   name: string;
@@ -126,6 +127,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [availableDateList, setAvilableDateList] = useState<{[key: string]: number}>({})
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
   const [compensateUnitist, setCompensateUnitist] = useState<CompensateUnit[]>([])
+  const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -258,6 +260,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     if (data.success) setCustomers(data.data);
     else setCustomers([]);
     setLoading(false);
+    setSearchCustomerCounter(searchCustomerCounter+1)
   }
    function handleSelectCustomer(c: ApiCustomer) {
     setCustomer({
@@ -1767,10 +1770,25 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {customers?.length === 0 ? (
+                    {loading ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-16 text-center text-red-500">
-                          ไม่มีข้อมูล
+                        <td colSpan={6} className="px-4 py-16 text-center">
+                          <SpinnerSmall loading={loading}>
+                            <div className="w-10 h-10"></div>
+                          </SpinnerSmall>
+                        </td>
+                      </tr>
+                    ) : customers?.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-16 text-center">
+                          {searchCustomerCounter > 0 && <p className="text-red-500">ไม่มีข้อมูล</p>}
+                          <Button
+                            variant="outline"
+                            className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap mt-2"
+                            onClick={() => setShowGotoCRM(true)}
+                          >
+                            <PlusIcon /> เพิ่มลูกค้า
+                          </Button>
                         </td>
                       </tr>
                     ) : (
@@ -2347,13 +2365,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                                   onClick={() => setShowCustomerDialog(true)}
                                 >
                                   <SearchIcon /> ค้นหาชื่อลูกค้า
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap"
-                                  onClick={() => setShowGotoCRM(true)}
-                                >
-                                  <PlusIcon /> เพิ่มลูกค้า
                                 </Button>
                               </div>
                             </div>
