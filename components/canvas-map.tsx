@@ -147,7 +147,7 @@ export default function CanvasMap({
     } else if (circle.status === 'some available' || circle.initStatus === 'some available') {
       // partially booked status
       return {
-        fillColor: "rgba(200, 200, 0)",
+        fillColor: "rgb(250 204 21)",
         strokeColor: "rgba(200, 160, 0, 1)",
         strokeWidth: 2,
         cursor: 'default'
