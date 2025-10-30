@@ -43,6 +43,8 @@ interface Property {
 
 interface CartProperty extends Property {
   cartId: string
+  totalAmount: number
+  compensateList: string[]
 }
 
 interface BookingDetail {
@@ -1078,16 +1080,27 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       compensateData = await getCompensateUnits(customerData?.memberId)
     }
     let resultPendingBooking: BookingDetail[] = []
+    let substractCompensateUnit: {[key: string]: number} = {}
     for (const bookDate of selectedDates){
       for (const unit of data){
         const bookUnitDate = dayjs(new Date(currentYear, currentMonth - 1, bookDate)).format('YYYY-MM-DD')
+        const amount = activeTab === 'monthly' ? unit.m_price : unit.d_price
         const foundCompensate = compensateData.find((item) => {
           return item.UnitID === unit.name && dayjs(item.CompenDate).format('YYYY-MM-DD') === bookUnitDate
         })
+        if (foundCompensate){
+          const foundSubstractCompensateUnit = substractCompensateUnit[unit.id]
+          if (foundSubstractCompensateUnit){
+            substractCompensateUnit[unit.id] += amount
+          }
+          else{
+            substractCompensateUnit[unit.id] = amount
+          }
+        }
         resultPendingBooking.push({
           unit_id: unit.id,
           unit_number: unit.name,
-          amount: foundCompensate?.CompensateID ? 0 : activeTab === 'monthly' ? unit.m_price : unit.d_price,
+          amount: foundCompensate?.CompensateID ? 0 : amount,
           date: bookUnitDate,
           type: activeTab === 'monthly' ? 'monthly' : 'daily',
           cartId: unit.cartId!,
@@ -1097,6 +1110,16 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         })
       }
     }
+    setConfirmedProperties([...confirmedProperties, ...data.map((item) => {
+      const foundSubstractCompensateUnit = substractCompensateUnit[item.id]
+      if (foundSubstractCompensateUnit){
+        item.totalAmount = item.totalAmount - foundSubstractCompensateUnit
+        return item
+      }
+      else{
+        return item
+      }
+    })])
     // sort pending booking unit
     const newPendingBookingList = [...pendingBookingList, ...resultPendingBooking].sort((a, b) => a.unit_number.localeCompare(b.unit_number))
     setPendingBookingList(newPendingBookingList)
@@ -1107,7 +1130,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     const result = data.reduce<CartProperty[]>((acc, curr) => {
       const existingPriceIndex = acc.findIndex((item) => item[priceTypeKey] === curr[priceTypeKey] && item.id === curr.id)
       if (existingPriceIndex === -1) {
-        acc.push({...curr, quantity: selectedDates.length, cartId: Number(new Date().getTime()) + Math.random().toString()})
+        acc.push({
+          ...curr, 
+          quantity: selectedDates.length, 
+          cartId: Number(new Date().getTime()) + Math.random().toString(),
+          compensateList: [],
+          totalAmount: Number(selectedDates.length) * curr[priceTypeKey]
+        })
       }
       return acc
     }, [])
@@ -1116,7 +1145,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
   const handleConfirm = () => {
     const newConfirmationProperties = handleSetSummaryConfirmedProperties(bookingData)
-    setConfirmedProperties([...confirmedProperties, ...newConfirmationProperties])
     handleSetBookingUnitData(newConfirmationProperties)
     setShowConfirmation(true)
     setShowDetailPanel(false)
@@ -1141,7 +1169,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   // Calculate total booking amount for confirmation dialog
   const totalBookingAmount = useMemo(() => {
     return confirmedProperties.reduce((sum, property) => {
-      return sum + Number.parseFloat(property.price.replace(",", "")) * property.quantity!
+      return sum + property.totalAmount
     }, 0)
   }, [confirmedProperties])
 
@@ -1487,7 +1515,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                       <TableCell className="text-sm">{Number.parseFloat(property.price).toLocaleString()}.00</TableCell>
                       <TableCell className="text-sm">{property.quantity || 1}</TableCell>
                       <TableCell className="text-sm font-medium">
-                        {(Number.parseFloat(property.price) * (property.quantity || 1)).toLocaleString()}.00
+                        {(property.totalAmount).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}
