@@ -11,6 +11,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
     const unitBookingDate = await getUnitBookingDateController({ 
+      active_date: body.active_date,
       project_id: body.project_id,
       unit_id: body.unit_id || null,
       year: body.year, 

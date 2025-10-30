@@ -4,6 +4,7 @@ import sql from "mssql"
 import { CompensateUnit, ProductGroupMaster } from "../models/unit-matrix"
 
 export interface IPayloadGetUnitBookingDateService {
+  active_date: string
   project_id: string
   year: number
   month: number,

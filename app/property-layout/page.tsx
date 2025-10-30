@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert } from "lucide-react"
+import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert, PlusIcon } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -28,6 +28,7 @@ import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
 import { formatBuddhist, formatTHCurrency } from "@/lib/utils"
+import { useFilterStore } from "../filter-store"
 interface Property {
   id: string
   name: string;
@@ -98,6 +99,7 @@ export interface PropertyLayoutProps {
 
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
+  const { activeDate, floor } = useFilterStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
@@ -269,6 +271,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setShowCustomerDialog(false);
   }
 
+  const gotoCRM = async () => {
+    window.location.href = (process.env.NEXT_PUBLIC_RENTAL_URL !== "" ? process.env.NEXT_PUBLIC_RENTAL_URL : '/') + '/CRM/th/ContactsInfo_Edit.aspx?proc=new'
+  }
+
   useEffect(() => {
     const init = async () => {
       setIsLoadingUnitMatrix(true)
@@ -339,6 +345,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
   const getUnitBookingDate = async (filter: { day?: number; month?: number; year?: number }) => {
     const unitBookingDateData = await getUnitBookingDateApi({ 
+      active_date: activeDate,
       project_id: projectId,
       day: filter.day || searchUnitMatrix.day,
       month: filter.month || Number(selectedMonth),
@@ -986,6 +993,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showClearConfirmDialog, setShowClearConfirmDialog] = useState(false)
   const [showConfirmBookDialog, setShowConfirmBookDialog] = useState(false)
+  const [showGotoCRM, setShowGotoCRM] = useState(false)
   
   // Sync propertyList กับ circles ที่มีสถานะ pending และถูกเลือกโดย user
   useEffect(() => {
@@ -1675,6 +1683,39 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         </DialogContent>
       </Dialog>
 
+      {/* Confirm goto CRM Dialog */}
+      <Dialog open={showGotoCRM} onOpenChange={setShowGotoCRM}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันการเปลี่ยนแปลง
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">คุณต้องการออกจากหน้าจอตลาดรายวันหรือไม่?</p>
+          </div>
+          <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowGotoCRM(false)
+                }}
+              >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowGotoCRM(false)
+                gotoCRM()
+              }}
+            >
+              ยืนยัน
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showCustomerDialog} onOpenChange={setShowCustomerDialog}>
         <DialogContent
         className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col [&>button]:hidden"
@@ -1825,6 +1866,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     onChangeSerachDay(day)
                   }}
                   focus={focusCanvas}
+                  projectId={projectId}
                 />
               </Spinner>
             </div>
@@ -2299,12 +2341,21 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                                   <span className="text-gray-400 italic">ยังไม่ได้เลือกลูกค้า</span>
                                 )}
                               </div>
-                              <Button
-                                className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap"
-                                onClick={() => setShowCustomerDialog(true)}
-                              >
-                                <SearchIcon /> ค้นหาชื่อลูกค้า
-                              </Button>
+                              <div className="flex flex-col gap-3">
+                                <Button
+                                  className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap"
+                                  onClick={() => setShowCustomerDialog(true)}
+                                >
+                                  <SearchIcon /> ค้นหาชื่อลูกค้า
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap"
+                                  onClick={() => setShowGotoCRM(true)}
+                                >
+                                  <PlusIcon /> เพิ่มลูกค้า
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
