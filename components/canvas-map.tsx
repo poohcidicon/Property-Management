@@ -470,7 +470,7 @@ export default function CanvasMap({
               // This is authoritative and should never be overridden
               if (circle.status === 'booked') {
                 console.log(`🔒 Ignoring update for booked circle ${circle.id} (API authoritative)`);
-                toast.info(`${circle.name} ถูกจองแล้ว ไม่สามารถเปลี่ยนแปลงได้`);
+                toast.info(`${circle.name} ถูกจองแล้ว ไม่สามารถเปลี่ยนแผงได้`);
                 return circle;
               }
               
@@ -912,7 +912,7 @@ export default function CanvasMap({
         }
       } else if (circle.status === "booked") {
         // Booked circles from API are permanent and cannot be changed
-        toast.info(`${circle.name} ถูกจองแล้ว ไม่สามารถเปลี่ยนแปลงได้`)
+        toast.info(`${circle.name} ถูกจองแล้ว ไม่สามารถเปลี่ยนแผงได้`)
         return
       } else {
         // Unknown status - shouldn't happen

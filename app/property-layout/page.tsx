@@ -235,7 +235,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // แจ้งเตือนผู้ใช้
       toast({
         title: "การจองหมดเวลา",
-        description: `การจองแปลง ${expiredPropertyIds.join(', ')} หมดเวลาแล้ว`,
+        description: `การจองแผง ${expiredPropertyIds.join(', ')} หมดเวลาแล้ว`,
         variant: "destructive"
       })
     }
@@ -500,7 +500,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       
       toast({
         title: "🎉 รีเฟรชข้อมูลสำเร็จ",
-        description: "ข้อมูลแปลงที่ดินได้รับการอัพเดทแล้ว",
+        description: "ข้อมูลแผงที่ดินได้รับการอัพเดทแล้ว",
         duration: 3000
       })
     } catch (error) {
@@ -733,7 +733,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     try {
       // Show loading toast
       toast({
-        title: "⏳ กำลังยกเลิกการเลือกแปลง...",
+        title: "⏳ กำลังยกเลิกการเลือกแผง...",
         description: "กรุณารอสักครู่",
       })
 
@@ -762,7 +762,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       setIsShowOverlay(false)
       // Show success toast
       toast({
-        title: "✅ ยกเลิกการเลือกแปลงสำเร็จ",
+        title: "✅ ยกเลิกการเลือกแผงสำเร็จ",
         description: "ล้างข้อมูลการเลือกทั้งหมดแล้ว",
       })
 
@@ -770,7 +770,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       console.error("Error clearing selections:", error)
       toast({
         title: "❌ เกิดข้อผิดพลาด",
-        description: "ไม่สามารถยกเลิกการเลือกแปลงได้ กรุณาลองใหม่อีกครั้ง",
+        description: "ไม่สามารถยกเลิกการเลือกแผงได้ กรุณาลองใหม่อีกครั้ง",
         variant: "destructive"
       })
     }
@@ -963,7 +963,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setSelectedProperty(property)
     // เพิ่มรายการเข้าไปใน propertyList ถ้ายังไม่มี
     // แต่ต้องรอให้จุดเปลี่ยนเป็น pending ก่อน (จะเพิ่มใน useEffect)
-    // setPropertyList จะทำใน useEffect ที่ listen การเปลี่ยนแปลงสถานะ
+    // setPropertyList จะทำใน useEffect ที่ listen การเปลี่ยนแผงสถานะ
 
     // เพิ่ม ID เข้าไปใน selectedPropertyIds
     setSelectedPropertyIds(prev => new Set([...prev, property.id]))
@@ -977,7 +977,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
     
     setShowPropertyList(true)
-    // ปิดกรอบการจองเมื่อแสดงรายการแปลง
+    // ปิดกรอบการจองเมื่อแสดงรายการแผง
     // setShowDetailPanel(false)
   }
 
@@ -1039,8 +1039,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     // ส่งข้อมูล propertyList ไปที่ booking และตรวจสอบว่ามีข้อมูลหรือไม่
     if (propertyList.length === 0) {
       toast({
-        title: "ไม่มีแปลงที่เลือก",
-        description: "กรุณาเลือกแปลงที่ต้องการจองก่อน",
+        title: "ไม่มีแผงที่เลือก",
+        description: "กรุณาเลือกแผงที่ต้องการจองก่อน",
         variant: "destructive"
       })
       return
@@ -1218,7 +1218,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // สร้าง array สำหรับเก็บจุดที่อัพเดทสำเร็จ
       const updatedCircles: Circle[] = []
     
-      // // วนลูปทุกแปลงที่จะจอง และเรียก API เพื่อเปลี่ยนสถานะเป็น booked
+      // // วนลูปทุกแผงที่จะจอง และเรียก API เพื่อเปลี่ยนสถานะเป็น booked
       // for (const property of bookingData) {
       //   try {
       //     // เรียก API เพื่ออัพเดทสถานะเป็น booked
@@ -1227,12 +1227,12 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       //     // เก็บจุดที่อัพเดทสำเร็จ
       //     updatedCircles.push(updatedCircle)
         
-      //     // ส่งข้อมูลไปยังผู้ใช้อื่นๆ ผ่าน socket เพื่อให้เห็นการเปลี่ยนแปลงทันที
+      //     // ส่งข้อมูลไปยังผู้ใช้อื่นๆ ผ่าน socket เพื่อให้เห็นการเปลี่ยนแผงทันที
       //     if (externalCircleUpdateRef.current) {
       //       externalCircleUpdateRef.current([updatedCircle])
       //     }
       //   } catch (error) {
-      //     console.error(`ไม่สามารถอัพเดทแปลง ${property.name} ได้:`, error)
+      //     console.error(`ไม่สามารถอัพเดทแผง ${property.name} ได้:`, error)
       //   }
       // }
       
@@ -1313,7 +1313,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         <div className="p-4 lg:p-6 space-y-6">
           {/* Header */}
           <div className="text-center">
-            <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-1">ระบบจัดการโครงการ</h2>
+            <h3 className="text-lg lg:text-lg font-bold text-gray-800 mb-1">ระบบจัดการการเช่าตลาดนัด</h3>
             <p className="text-sm text-gray-500">Property Management System</p>
           </div>
 
@@ -1427,7 +1427,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               {showConfirmation && (
                 <Card className="shadow-sm border-gray-200 bg-blue-50">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-gray-800">สรุปการเลือกแปลง</CardTitle>
+                    <CardTitle className="text-base text-gray-800">สรุปการเลือกแผง</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {confirmedProperties.map((property, index) => (
@@ -1435,7 +1435,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                         key={property.cartId}
                         className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200"
                       >
-                        <span className="text-sm font-medium text-gray-800">แปลงแปลง {property.name}</span>
+                        <span className="text-sm font-medium text-gray-800">แผง {property.name}</span>
                         <div className="flex gap-2">
                             <span className="text-sm text-gray-600">{property.price} บาท</span>
                             <Button
@@ -1484,25 +1484,25 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
           <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-blue-200">
             <DialogTitle className="text-xl font-bold text-blue-700 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-blue-500" />
-              ยืนยันการจองแปลง
+              ยืนยันการจองแผง
             </DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 overflow-auto p-1">
             {/* ข้อความยืนยัน */}
             <div className="bg-blue-100 border-l-4 border-blue-500 p-3 mb-4 rounded-r-md">
-              <p className="text-sm text-blue-800">คุณกำลังจะยืนยันการจองแปลงที่เลือก โปรดตรวจสอบรายละเอียดให้ถูกต้อง</p>
+              <p className="text-sm text-blue-800">คุณกำลังจะยืนยันการจองแผงที่เลือก โปรดตรวจสอบรายละเอียดให้ถูกต้อง</p>
             </div>
             
             {/* Summary Table */}
             <div className="mb-4 bg-white rounded-lg shadow-sm overflow-hidden border border-blue-100">
               <div className="bg-blue-500 text-white py-2 px-3">
-                <h3 className="text-sm font-medium">รายการแปลงที่เลือก</h3>
+                <h3 className="text-sm font-medium">รายการแผงที่เลือก</h3>
               </div>
               <Table>
                 <TableHeader>
                   <TableRow className="bg-blue-50">
-                    <TableHead className="text-xs font-medium text-blue-700">แปลง</TableHead>
+                    <TableHead className="text-xs font-medium text-blue-700">แผง</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">ราคา/วัน</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">จำนวนวัน</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">รวมเงิน</TableHead>
@@ -1532,7 +1532,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               <Table>
                 <TableHeader>
                   <TableRow className="bg-blue-50">
-                    <TableHead className="text-xs font-medium text-blue-700">เลขที่แปลง</TableHead>
+                    <TableHead className="text-xs font-medium text-blue-700">เลขที่แผง</TableHead>
                     <TableHead className="text-xs font-medium text-blue-700">วันที่จอง</TableHead>
                     {activeTab === 'monthly' && <TableHead className="text-xs font-medium text-blue-700">ชดเชย</TableHead>}
                     <TableHead className="text-xs font-medium text-blue-700">ราคาจอง</TableHead>
@@ -1574,7 +1574,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   {confirmedProperties.map((property, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                      <span className="text-xs text-gray-700">แปลงที่ {property.name}</span>
+                      <span className="text-xs text-gray-700">แผงที่ {property.name}</span>
                     </div>
                   ))}
                 </div>
@@ -1905,7 +1905,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             <Card className="w-80 shadow-lg border-gray-200 bg-white backdrop-blur-sm rounded-2xl overflow-hidden">
               <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0 flex-shrink-0">
                 <div>
-                  <CardTitle className="text-base text-gray-800">รายการแปลง</CardTitle>
+                  <CardTitle className="text-base text-gray-800">รายการแผงเช่า</CardTitle>
                   <p className="text-sm text-gray-500">Property List</p>
                 </div>
               </CardHeader>
@@ -1935,7 +1935,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                                     : "bg-red-400"
                               }`}
                             ></div>
-                            <span className="text-sm font-medium text-gray-800">แปลงที่ {property.name}</span>
+                            <span className="text-sm font-medium text-gray-800">แผงที่ {property.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-600">{property.price} บาท</span>
@@ -1985,7 +1985,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               {/* Header */}
               <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0 flex-shrink-0 bg-teal-200 border-b border-teal-300">
                 <div>
-                  <CardTitle className="text-base text-gray-800">การจอง ({bookingData.length} แปลง)</CardTitle>
+                  <CardTitle className="text-base text-gray-800">การจอง ({bookingData.length} แผง)</CardTitle>
                 </div>
                 <Button
                   variant="ghost"
@@ -2003,11 +2003,11 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     {/* Selected Properties Summary */}
                     {bookingData.length > 0 && (
                       <div className="bg-white rounded-lg p-3 border border-teal-300">
-                        <h4 className="text-sm font-medium text-gray-800 mb-2">แปลงที่เลือก</h4>
+                        <h4 className="text-sm font-medium text-gray-800 mb-2">แผงที่เลือก</h4>
                         <div className="space-y-1">
                           {bookingData.map((property) => (
                             <div key={property.id} className="flex justify-between text-xs">
-                              <span>แปลงที่ {property.name}</span>
+                              <span>แผงที่ {property.name}</span>
                               <span>{property.price} บาท/วัน</span>
                             </div>
                           ))}
