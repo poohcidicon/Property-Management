@@ -28,6 +28,7 @@ import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
 import { formatBuddhist, formatTHCurrency } from "@/lib/utils"
+import { useFilterStore } from "../filter-store"
 interface Property {
   id: string
   name: string;
@@ -98,6 +99,7 @@ export interface PropertyLayoutProps {
 
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
+  const { activeDate, floor } = useFilterStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
@@ -339,6 +341,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
   const getUnitBookingDate = async (filter: { day?: number; month?: number; year?: number }) => {
     const unitBookingDateData = await getUnitBookingDateApi({ 
+      active_date: activeDate,
       project_id: projectId,
       day: filter.day || searchUnitMatrix.day,
       month: filter.month || Number(selectedMonth),

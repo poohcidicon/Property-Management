@@ -12,6 +12,7 @@ import { getUnitMatrixApi } from "@/lib/api/unit-matrix"
 import { cn } from "@/lib/utils"
 import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
+import { useFilterStore } from "@/app/filter-store"
 
 export interface Circle {
   x: number
@@ -61,6 +62,7 @@ export default function CanvasMap({
   onChangeFilterDay,
   focus
 }: CanvasMapProps) {
+  const { activeDate, floor } = useFilterStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
