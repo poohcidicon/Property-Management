@@ -278,27 +278,14 @@ export default function CanvasMap({
 
         // Status colors สำหรับ Hotel
         if (circle.status === "available" && circle.initStatus === "available") {
-          if (isSelectedInList) {
-            return {
-              fillColor: "rgba(59, 130, 246, 0.8)",
-              strokeColor: "#ffffff",
-              outerStrokeColor: roomColor.primary,
-              strokeWidth: 3,
-              outerStrokeWidth: 5,
-              cursor: "pointer",
-              isSelected: true,
-              textColor: "white",
-            }
-          } else {
-            return {
-              fillColor: "#10b981", // Green for Available (status: 0)
-              strokeColor: "#ffffff",
-              outerStrokeColor: roomColor.primary,
-              strokeWidth: 2,
-              outerStrokeWidth: 4,
-              cursor: "pointer",
-              textColor: "white",
-            }
+          return {
+            fillColor: "#10b981", // Green for Available (status: 0)
+            strokeColor: "#ffffff",
+            outerStrokeColor: roomColor.primary,
+            strokeWidth: 2,
+            outerStrokeWidth: 4,
+            cursor: "pointer",
+            textColor: "white",
           }
         } else if (circle.status === "booked") {
           return {
@@ -866,6 +853,7 @@ export default function CanvasMap({
 
     circles.forEach((circle) => {
       const style = getCircleStyle(circle)
+      console.log(`🎨 Drawing circle ${circle.id} with style:`, style)
 
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
