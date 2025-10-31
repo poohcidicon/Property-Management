@@ -99,6 +99,7 @@ export interface IPayloadCheckoutUnit {
   project_id: string;
   payment_method: string
   book_room_id: string
+  create_by: string
 }
 
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {
