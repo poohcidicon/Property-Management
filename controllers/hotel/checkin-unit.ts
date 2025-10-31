@@ -50,6 +50,7 @@ export interface IPayloadCheckinUnit {
     book_room_id: string 
   }>;
   checkin_date: string; // ISO date string
+  create_by: string
 }
 
 export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promise<IResponse<boolean>> => {

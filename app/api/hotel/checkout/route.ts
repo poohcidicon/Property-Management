@@ -1,9 +1,18 @@
+import { autherizeUser } from "@/controllers/auth";
 import { checkoutUnitController } from "@/controllers/hotel/checkin-unit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try{
     const body = await request.json()
+    const userSession = await autherizeUser()
+    if (!userSession.data?.user_id){
+      return NextResponse.json({
+        message: "❌ User is not authorized",
+        error: 'User is not authorized',
+        data: null
+      }, { status: 401 })
+    }
     const { unit_id, checkout_date, total_amount } = body
     if(!unit_id || !checkout_date || (!total_amount && total_amount !== 0)){
       return NextResponse.json({
@@ -12,7 +21,10 @@ export async function POST(request: Request) {
         data: null
       }, { status: 400 })
     }
-    const result = await checkoutUnitController(body)
+    const result = await checkoutUnitController({
+      ...body,
+      create_by: userSession.data?.user_id
+    })
     return NextResponse.json(result, { status: 200 })
   }
   catch(err: any){

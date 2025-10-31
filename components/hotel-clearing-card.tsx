@@ -2,6 +2,9 @@ import { X } from "lucide-react"
 import { Circle, ROOM_TYPE_COLORS } from "./canvas-map"
 import { IUpdateRoomStatus, updateRoomStatusApi } from "@/lib/api/hotel/unit-matrix-hotel"
 import dayjs from "dayjs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
+import { useState } from "react"
+import { Button } from "./ui/button"
 
 interface HotelClearingCardProps {
   selectedProperty: Circle | null
@@ -11,6 +14,7 @@ interface HotelClearingCardProps {
 }
 
 export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus, onClose }: HotelClearingCardProps) {
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const handleChangeStatusRoom = async (status: number) => {
     const payload = {
@@ -83,7 +87,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
         <div className="flex gap-2">
           <button
             className="w-full bg-green-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
-            onClick={() => handleChangeStatusRoom(0)}
+            onClick={() => setShowConfirmDialog(true)}
           >
             เปิดห้อง
           </button>
@@ -95,6 +99,36 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
           </button> */}
         </div>
       </div>
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันการเปลี่ยนแปลง
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">คุณต้องเปิดห้องใช่หรือไม่?</p>
+          </div>
+          <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowConfirmDialog(false)
+                }}
+              >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                handleChangeStatusRoom(0)
+              }}
+            >
+              ยืนยัน
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

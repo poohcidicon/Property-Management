@@ -562,7 +562,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   <label>วันที่</label>
                   <div className='flex flex-col gap-2 text-sm'>
                     <input
-                      type='text'
+                      type='date'
                       defaultValue={dayjs().format('YYYY-MM-DD')}
                       className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />

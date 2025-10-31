@@ -11,6 +11,7 @@ export interface IPayloadCheckoutUnitService {
   project_id: string
   payment_method: string
   book_room_id: string
+  create_by: string
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -102,7 +103,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("Vat", VAT*100)
       .input("VatAmount", vatAmount)
       .input("TotalAmount", payload.total_amount)
-      .input("CreateBy", process.env.DEFAULT_SALE_ID || "system")
+      .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
       .query(queryInsReceipt)
 
     const queryPayment = `
@@ -153,7 +154,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("VATPercent", VAT*100)
       .input("VATAmount", vatAmount)
       .input("TotalAmount", payload.total_amount)
-      .input("CreateBy", process.env.DEFAULT_SALE_ID || "system")
+      .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
       .query(queryPayment)
 
     const queryUpdateRoom = `
@@ -174,6 +175,8 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       ,TotalAmount
       ,Status
       ,CreateDate
+      ,CreateBy
+      ,ModifyBy
       )
       SELECT Top 1 BookRoomID
       ,BookingID
@@ -182,6 +185,8 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       ,@TotalAmount
       ,Status
       ,CreateDate
+      ,@CreateBy
+      ,@CreateBy
       FROM Sys_Hotel_CheckIn
       WHERE UnitID = @UnitID
       AND BookRoomID = @BookRoomID
@@ -191,6 +196,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("UnitID", payload.unit_id)
       .input("CheckOutDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
       .input("TotalAmount", payload.total_amount)
+      .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
       .query(queryInsertCheckout)
     
     // set unint

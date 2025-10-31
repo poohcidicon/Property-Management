@@ -1,4 +1,4 @@
-import { ApiResponse, axiosPublic } from "@/lib/axios";
+import { ApiResponse, axiosPrivate, axiosPublic } from "@/lib/axios";
 
 export interface IPayloadBookUnitHotel {
   unit_id: string;
@@ -11,7 +11,7 @@ export interface IPayloadBookUnitHotel {
 }
 export const BookUnitHotelApi = async (payload: IPayloadBookUnitHotel): Promise<ApiResponse<boolean>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/book-unit', payload);
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/book-unit', payload);
     return res.data
   }
   catch (error: any) {
@@ -41,7 +41,7 @@ export interface IPayloadCheckin {
 
 export const CheckinUnitApi = async (payload: IPayloadCheckin): Promise<ApiResponse<boolean>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/checkin', payload);
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/checkin', payload);
     return res.data
   }
   catch (error: any) {
@@ -66,7 +66,7 @@ export interface IPayloadCheckout {
 
 export const CheckoutUnitApi = async (payload: IPayloadCheckout): Promise<ApiResponse<boolean>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/checkout', payload);
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/checkout', payload);
     return res.data
   }
   catch (error: any) {
