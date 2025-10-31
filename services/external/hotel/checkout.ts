@@ -184,8 +184,10 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       ,CreateDate
       FROM Sys_Hotel_CheckIn
       WHERE UnitID = @UnitID
+      AND BookRoomID = @BookRoomID
     `
     await transaction.request()
+      .input("BookRoomID", payload.book_room_id)
       .input("UnitID", payload.unit_id)
       .input("CheckOutDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
       .input("TotalAmount", payload.total_amount)
