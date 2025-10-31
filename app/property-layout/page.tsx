@@ -103,7 +103,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const { activeDate, floor } = useFilterStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
-  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
+  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking, joinRoom, currentRoom } = useRealtimeBooking()
   const { isLoading: isLoadingUser } = useAuth()
   const customerData = useCustomerStore((state) => state.customer); // ใช้ zustand อ่านข้อมูลลูกค้า
   const [activeTab, setActiveTab] = useState("monthly")
@@ -291,6 +291,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     init()
     setIsLoadingUnitMatrix(false)
   }, [])
+
+  // Join initial room when component mounts and socket is connected
+  useEffect(() => {
+    if (isConnected && joinRoom && selectedYear && selectedMonth) {
+      joinRoom(Number(selectedYear), Number(selectedMonth))
+    }
+  }, [isConnected, joinRoom, selectedYear, selectedMonth])
   const getZoneList = async () => {
     const zoneData = await getZonesByProjectApi({ project_id: projectId })
     if (zoneData.data && zoneData.data?.length > 0){
@@ -548,6 +555,11 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       externalCircleUpdateRef.current(resetProperties)
     }
     setCurrentYear(Number(value))
+    
+    // Join room for new year/month
+    if (joinRoom) {
+      joinRoom(Number(value), searchUnitMatrix.month)
+    }
   }
 
   const onChangeSearchMonth = (value: string) => {
@@ -568,6 +580,11 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       externalCircleUpdateRef.current(resetProperties)
     }
     setCurrentMonth(Number(value))
+    
+    // Join room for new year/month
+    if (joinRoom) {
+      joinRoom(searchUnitMatrix.year, Number(value))
+    }
   }
 
   const onChangeSearchZone = (zone_id: string) => {

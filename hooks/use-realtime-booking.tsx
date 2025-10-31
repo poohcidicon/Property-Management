@@ -15,6 +15,7 @@ export function useRealtimeBooking() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [maxRetries] = useState(3);
+  const [currentRoom, setCurrentRoom] = useState<string | null>(null);
 
   useEffect(() => {
     // Function to initialize socket
@@ -222,12 +223,14 @@ export function useRealtimeBooking() {
 
     const data = {
       circle,
-      sourceSocketId: socket.id
+      sourceSocketId: socket.id,
+      room: currentRoom
     };
     
     console.log("📡 About to broadcast with data:", {
       socketId: socket.id,
       connected: socket.connected,
+      room: currentRoom,
       circleData: {
         id: circle.id,
         x: circle.x,
@@ -243,6 +246,26 @@ export function useRealtimeBooking() {
     console.log("✅ Broadcast sent successfully");
   };
 
+  const joinRoom = useCallback((year: number, month: number) => {
+    if (!socket || !isConnected) {
+      console.log("❌ Cannot join room - not connected");
+      return;
+    }
+
+    const roomName = `month-${year}-${month}`;
+    
+    // Leave current room if exists
+    if (currentRoom && currentRoom !== roomName) {
+      console.log(`🚪 Leaving room: ${currentRoom}`);
+      socket.emit('leaveRoom', { room: currentRoom });
+    }
+
+    // Join new room
+    console.log(`🚪 Joining room: ${roomName}`);
+    socket.emit('joinRoom', { room: roomName });
+    setCurrentRoom(roomName);
+  }, [socket, isConnected, currentRoom]);
+
   return {
     socket,
     isConnected,
@@ -250,8 +273,10 @@ export function useRealtimeBooking() {
     connectionError,
     retryCount,
     maxRetries,
+    currentRoom,
 
     onSelectBooking,
     broadcastCircleUpdate,
+    joinRoom,
   };
 }

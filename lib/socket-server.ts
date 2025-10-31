@@ -22,9 +22,13 @@ let currentPort: number | null = (global as any).__socketIOInstance?.port || nul
 let isInitializing = (global as any).__socketInitializing || false;
 
 // In-memory temporary booking state
-let temporaryBookings: Map<string, { bookedBy: string; bookedAt: number; socketId: string }> = new Map();
+let temporaryBookings: Map<string, { bookedBy: string; bookedAt: number; socketId: string; room: string }> = new Map();
 // Track which socket owns which bookings
 let socketBookings: Map<string, Set<string>> = new Map();
+// Track which room each socket is in
+let socketRooms: Map<string, string> = new Map();
+// Track bookings per room
+let roomBookings: Map<string, Map<string, { bookedBy: string; bookedAt: number; socketId: string }>> = new Map();
 // Debounce map to prevent duplicate events
 let eventDebounce: Map<string, number> = new Map();
 // Event deduplication timeout (ms)
@@ -233,6 +237,8 @@ const gracefulShutdown = async () => {
   // Clear temporary data
   temporaryBookings.clear();
   socketBookings.clear();
+  socketRooms.clear();
+  roomBookings.clear();
   eventDebounce.clear();
   
   console.log('✅ Graceful shutdown completed');
@@ -404,7 +410,52 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
         io.on("connection", (socket) => {
           console.log(`🟢 New client connected: ${socket.id} at ${new Date().toISOString()}`);
           
-          // Send current temporary booking state to new client immediately
+          // Handle room joining
+          socket.on("joinRoom", (data: { room: string }) => {
+            const { room } = data;
+            console.log(`🚪 Socket ${socket.id} joining room: ${room}`);
+            
+            // Leave previous room if exists
+            const previousRoom = socketRooms.get(socket.id);
+            if (previousRoom && previousRoom !== room) {
+              socket.leave(previousRoom);
+              console.log(`🚪 Socket ${socket.id} left previous room: ${previousRoom}`);
+            }
+            
+            // Join new room
+            socket.join(room);
+            socketRooms.set(socket.id, room);
+            
+            // Send current booking state for this room
+            const roomBookingState = roomBookings.get(room);
+            if (roomBookingState) {
+              const currentBookings = Array.from(roomBookingState.entries()).map(([circleId, booking]) => ({
+                circleId,
+                bookedBy: booking.bookedBy,
+                bookedAt: booking.bookedAt
+              }));
+              
+              socket.emit("temporaryBookingsState", currentBookings);
+              console.log(`📦 Sent ${currentBookings.length} bookings to ${socket.id} for room ${room}`);
+            } else {
+              socket.emit("temporaryBookingsState", []);
+              console.log(`📦 No bookings to send to ${socket.id} for room ${room}`);
+            }
+          });
+          
+          // Handle room leaving
+          socket.on("leaveRoom", (data: { room: string }) => {
+            const { room } = data;
+            console.log(`🚪 Socket ${socket.id} leaving room: ${room}`);
+            socket.leave(room);
+            
+            // Clear socket's room tracking
+            if (socketRooms.get(socket.id) === room) {
+              socketRooms.delete(socket.id);
+            }
+          });
+          
+          // Send current temporary booking state to new client immediately (for backward compatibility)
           const currentBookings = Array.from(temporaryBookings.entries()).map(([circleId, booking]) => ({
             circleId,
             bookedBy: booking.bookedBy,
@@ -416,7 +467,7 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
           socket.emit("temporaryBookingsState", currentBookings);
           
           if (currentBookings.length > 0) {
-            console.log(`📦 Sending current booking state to new client ${socket.id}:`, 
+            console.log(`📦 Sending current booking state to new client ${socket.id}:`,
               currentBookings.map(b => `${b.circleId}(${b.bookedBy})`).join(', '));
             console.log(`✅ Sent ${currentBookings.length} active bookings to ${socket.id}`);
             
@@ -460,10 +511,12 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
             
             // Update server-side temporary booking state
             if (circle.status === "pending" && circle.bookedBy && circle.bookedAt) {
+              const room = socketRooms.get(socket.id) || 'default';
               temporaryBookings.set(circle.id, {
                 bookedBy: circle.bookedBy,
                 bookedAt: circle.bookedAt,
-                socketId: sourceSocketId || socket.id
+                socketId: sourceSocketId || socket.id,
+                room: room
               });
               
               // Track booking for this socket
@@ -472,8 +525,19 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
               }
               socketBookings.get(socket.id)!.add(circle.id);
               
-              console.log(`💾 Stored temporary booking: ${circle.id} by ${circle.bookedBy} (socket: ${socket.id})`);
+              // Track booking for this room
+              if (!roomBookings.has(room)) {
+                roomBookings.set(room, new Map());
+              }
+              roomBookings.get(room)!.set(circle.id, {
+                bookedBy: circle.bookedBy,
+                bookedAt: circle.bookedAt,
+                socketId: sourceSocketId || socket.id
+              });
+              
+              console.log(`💾 Stored temporary booking: ${circle.id} by ${circle.bookedBy} (socket: ${socket.id}, room: ${room})`);
             } else if (circle.status === "available") {
+              const room = socketRooms.get(socket.id) || 'default';
               // Remove from temporary bookings
               temporaryBookings.delete(circle.id);
               
@@ -482,13 +546,26 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
                 socketBookings.get(socket.id)!.delete(circle.id);
               }
               
-              console.log(`🗑️ Removed temporary booking: ${circle.id}`);
+              // Remove from room tracking
+              if (roomBookings.has(room)) {
+                roomBookings.get(room)!.delete(circle.id);
+              }
+              
+              console.log(`🗑️ Removed temporary booking: ${circle.id} from room: ${room}`);
             }
             
             // Only broadcast if this client is the original source
             if (sourceSocketId === socket.id) {
-              socket.broadcast.emit("circleUpdated", circle);
-              console.log(`📡 Broadcasted circle update to all clients:`, circle);
+              const room = socketRooms.get(socket.id);
+              if (room) {
+                // Broadcast only to clients in the same room
+                socket.to(room).emit("circleUpdated", circle);
+                console.log(`📡 Broadcasted circle update to room ${room}:`, circle);
+              } else {
+                // Fallback to broadcast to all (for backward compatibility)
+                socket.broadcast.emit("circleUpdated", circle);
+                console.log(`📡 Broadcasted circle update to all clients (no room):`, circle);
+              }
             } else {
               console.log(`⏭️ Skipped broadcast - not original source (${sourceSocketId} vs ${socket.id})`);
             }
@@ -518,10 +595,12 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
             
             // Update temporary bookings based on status
             if (circle.status === "pending" && circle.bookedBy) {
+              const room = socketRooms.get(socket.id) || 'default';
               temporaryBookings.set(circle.id, {
                 bookedBy: circle.bookedBy,
                 bookedAt: circle.bookedAt || Date.now(),
-                socketId: socket.id
+                socketId: socket.id,
+                room: room
               });
               
               // Track socket bookings
@@ -530,8 +609,19 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
               }
               socketBookings.get(socket.id)!.add(circle.id);
               
-              console.log(`💾 Stored booking via selectBooking: ${circle.id} by ${circle.bookedBy}`);
+              // Track booking for this room
+              if (!roomBookings.has(room)) {
+                roomBookings.set(room, new Map());
+              }
+              roomBookings.get(room)!.set(circle.id, {
+                bookedBy: circle.bookedBy,
+                bookedAt: circle.bookedAt || Date.now(),
+                socketId: socket.id
+              });
+              
+              console.log(`💾 Stored booking via selectBooking: ${circle.id} by ${circle.bookedBy} (room: ${room})`);
             } else if (circle.status === "available") {
+              const room = socketRooms.get(socket.id) || 'default';
               // Remove from temporary bookings
               temporaryBookings.delete(circle.id);
               
@@ -540,11 +630,24 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
                 socketBookings.get(socket.id)!.delete(circle.id);
               }
               
-              console.log(`🗑️ Removed booking via selectBooking: ${circle.id}`);
+              // Remove from room tracking
+              if (roomBookings.has(room)) {
+                roomBookings.get(room)!.delete(circle.id);
+              }
+              
+              console.log(`🗑️ Removed booking via selectBooking: ${circle.id} from room: ${room}`);
             }
             
-            // Broadcast to all other clients
-            socket.broadcast.emit("circleUpdated", circle);
+            // Broadcast to clients in the same room
+            const room = socketRooms.get(socket.id);
+            if (room) {
+              socket.to(room).emit("circleUpdated", circle);
+              console.log(`📡 Broadcasted circle update to room ${room}:`, circle);
+            } else {
+              // Fallback to broadcast to all (for backward compatibility)
+              socket.broadcast.emit("circleUpdated", circle);
+              console.log(`📡 Broadcasted circle update to all clients (no room):`, circle);
+            }
           });
           
           // Handle request for current booking state
@@ -564,10 +667,13 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
           socket.on("disconnect", (reason) => {
             console.log(`🔴 Client disconnected: ${socket.id}, reason: ${reason}`);
             
+            // Get the room this socket was in
+            const room = socketRooms.get(socket.id);
+            
             // Clean up bookings for this socket
             const userBookings = socketBookings.get(socket.id);
             if (userBookings && userBookings.size > 0) {
-              console.log(`🧹 Cleaning up ${userBookings.size} bookings for disconnected socket ${socket.id}`);
+              console.log(`🧹 Cleaning up ${userBookings.size} bookings for disconnected socket ${socket.id} in room ${room || 'default'}`);
               
               const releasedCircles: any[] = [];
               
@@ -586,18 +692,36 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
                   
                   // Remove from temporary bookings
                   temporaryBookings.delete(circleId);
-                  console.log(`🔓 Released booking: ${circleId} (was booked by ${booking.bookedBy})`);
+                  
+                  // Remove from room tracking
+                  if (room && roomBookings.has(room)) {
+                    roomBookings.get(room)!.delete(circleId);
+                  }
+                  
+                  console.log(`🔓 Released booking: ${circleId} (was booked by ${booking.bookedBy}) from room ${room || 'default'}`);
                 }
               });
               
               // Remove socket tracking
               socketBookings.delete(socket.id);
               
-              // Broadcast released circles to all other clients
+              // Broadcast released circles to clients in the same room
               if (releasedCircles.length > 0) {
-                socket.broadcast.emit("bookingsReleased", releasedCircles);
-                console.log(`📡 Broadcasted ${releasedCircles.length} released bookings to all clients`);
+                if (room) {
+                  socket.to(room).emit("bookingsReleased", releasedCircles);
+                  console.log(`📡 Broadcasted ${releasedCircles.length} released bookings to room ${room}`);
+                } else {
+                  // Fallback to broadcast to all (for backward compatibility)
+                  socket.broadcast.emit("bookingsReleased", releasedCircles);
+                  console.log(`📡 Broadcasted ${releasedCircles.length} released bookings to all clients (no room)`);
+                }
               }
+            }
+            
+            // Clean up room tracking
+            if (room) {
+              socketRooms.delete(socket.id);
+              console.log(`🚪 Removed socket ${socket.id} from room tracking`);
             }
           });
         });
