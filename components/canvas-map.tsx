@@ -235,7 +235,7 @@ export default function CanvasMap({
             strokeColor: "rgba(7, 7, 7, 0.4)",
             outerStrokeColor: roomColor.primary,
             strokeWidth: 3,
-            outerStrokeWidth: 6,
+            outerStrokeWidth: 4,
             cursor: "pointer",
             isHighlighted: false,
             shouldFlash: false, // เปิดการกระพริบตามปกติ
