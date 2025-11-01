@@ -96,19 +96,21 @@ const mockCustomer = {
 export interface PropertyLayoutProps {
   typeBusiness: string;
   projectId: string
+  initMonth?: string | null
+  initYear?: string | null
 }
 
-export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
+export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear }: PropertyLayoutProps) {
   // test project
   const { activeDate, floor } = useFilterStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
-  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking } = useRealtimeBooking()
+  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking, joinRoom, currentRoom } = useRealtimeBooking()
   const { isLoading: isLoadingUser } = useAuth()
   const customerData = useCustomerStore((state) => state.customer); // ใช้ zustand อ่านข้อมูลลูกค้า
   const [activeTab, setActiveTab] = useState("monthly")
-  const [selectedMonth, setSelectedMonth] = useState(() => (new Date().getMonth() + 1).toString()) // เดือนปัจจุบัน
-  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear().toString()) // ปีปัจจุบัน
+  const [selectedMonth, setSelectedMonth] = useState(() => (initMonth || new Date().getMonth() + 1).toString()) // เดือนปัจจุบัน
+  const [selectedYear, setSelectedYear] = useState(() => (initYear || new Date().getFullYear().toString())) // ปีปัจจุบัน
   const [selectedZone, setSelectedZone] = useState("")
   const [showLegend, setShowLegend] = useState(true)
   const [showDetailPanel, setShowDetailPanel] = useState(false)
@@ -144,8 +146,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [circles, setCircles] = useState<Circle[]>([])
   const [searchUnitMatrix, setSearchUnitMatrix] = useState<SearchUnitMatrix>({
     day: 0,
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear(),
+    month: initMonth ? Number(initMonth) : new Date().getMonth() + 1,
+    year: initYear ? Number(initYear) : new Date().getFullYear(),
     counter: 0
   })
   const [focusCanvas, setFocusCanvas] = useState<{ x: number | null; y: number | null }>({
@@ -291,6 +293,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     init()
     setIsLoadingUnitMatrix(false)
   }, [])
+
+  // Join initial room when component mounts and socket is connected
+  useEffect(() => {
+    if (isConnected && joinRoom && selectedYear && selectedMonth) {
+      joinRoom(Number(selectedYear), Number(selectedMonth))
+    }
+  }, [isConnected, joinRoom])
   const getZoneList = async () => {
     const zoneData = await getZonesByProjectApi({ project_id: projectId })
     if (zoneData.data && zoneData.data?.length > 0){
@@ -535,39 +544,59 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
 
   const onChangeSearchYear = (value: string) => {
     setSelectedYear(value)
-    setSearchUnitMatrix({
-      day: searchUnitMatrix.day,
-      month: searchUnitMatrix.month,
-      year: Number(value)
-    })
-    clearAllDates()
-    if (externalCircleUpdateRef.current){
-      const resetProperties = circles.map((property) => {
-        return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
-      })
-      externalCircleUpdateRef.current(resetProperties)
+    if (joinRoom) {
+      joinRoom(searchUnitMatrix.year, Number(value))
     }
-    setCurrentYear(Number(value))
+    const params = new URLSearchParams(window.location.search);
+    params.set('year', value);
+    window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH !== "" ? process.env.NEXT_PUBLIC_BASE_PATH : '/') 
+      + `?${params.toString()}`
+    // setSearchUnitMatrix({
+    //   day: searchUnitMatrix.day,
+    //   month: searchUnitMatrix.month,
+    //   year: Number(value)
+    // })
+    // clearAllDates()
+    // if (externalCircleUpdateRef.current){
+    //   const resetProperties = circles.map((property) => {
+    //     return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
+    //   })
+    //   externalCircleUpdateRef.current(resetProperties)
+    // }
+    // setCurrentYear(Number(value))
+    
+    // Join room for new year/month
+    // if (joinRoom) {
+    //   joinRoom(Number(value), searchUnitMatrix.month)
+    // }
   }
 
   const onChangeSearchMonth = (value: string) => {
     setSelectedMonth(value)
-    setSearchUnitMatrix({
-      day: searchUnitMatrix.day,
-      month: Number(value),
-      year: searchUnitMatrix.year
-    })
-    getUnitBookingDate({
-      month: Number(value)
-    })
-    clearAllDates()
-    if (externalCircleUpdateRef.current){
-      const resetProperties = circles.map((property) => {
-        return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
-      })
-      externalCircleUpdateRef.current(resetProperties)
+    // // Join room for new year/month
+    if (joinRoom) {
+      joinRoom(searchUnitMatrix.year, Number(value))
     }
-    setCurrentMonth(Number(value))
+    const params = new URLSearchParams(window.location.search);
+    params.set('month', value);
+    window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH !== "" ? process.env.NEXT_PUBLIC_BASE_PATH : '/') 
+      + `?${params.toString()}`
+    // setSearchUnitMatrix({
+    //   day: searchUnitMatrix.day,
+    //   month: Number(value),
+    //   year: searchUnitMatrix.year
+    // })
+    // getUnitBookingDate({
+    //   month: Number(value)
+    // })
+    // clearAllDates()
+    // if (externalCircleUpdateRef.current){
+    //   const resetProperties = circles.map((property) => {
+    //     return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
+    //   })
+    //   externalCircleUpdateRef.current(resetProperties)
+    // }
+    // setCurrentMonth(Number(value))
   }
 
   const onChangeSearchZone = (zone_id: string) => {
@@ -1325,7 +1354,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
           {/* Header */}
           <div className="text-center">
             <h3 className="text-lg lg:text-lg font-bold text-gray-800 mb-1">ระบบจัดการการเช่าตลาดนัด</h3>
-            <p className="text-sm text-gray-500">Property Management System</p>
+            <p className="text-sm text-gray-500">Market Rental Management System</p>
           </div>
 
           {/* Tab Buttons */}
