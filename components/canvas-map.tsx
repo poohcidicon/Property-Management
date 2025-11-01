@@ -25,7 +25,8 @@ export interface Circle {
   bookedBy?: string // Username ของคนที่จอง (สำหรับ pending)
   bookedAt?: number // Timestamp ของการจอง
   m_price: number // ราคาเช่ารายเดือน
-  d_price: number // ราคาเช่ารายวัน
+  d_price: number, // ราคาเช่ารายวัน
+  roomId?: string
 }
 
 export interface SearchUnitMatrix {
@@ -77,7 +78,7 @@ export default function CanvasMap({
   const customer = useCustomerStore((state) => state.customer); 
   const { user: userLogin } = useUserStore();
   // Real-time booking hook
-  const { socket, isConnected, isLoading, broadcastCircleUpdate } = useRealtimeBooking()
+  const { socket, isConnected, isLoading, broadcastCircleUpdate, currentRoom } = useRealtimeBooking()
   
   // Track active bookings count
   const [activeBookingsCount, setActiveBookingsCount] = useState(0)

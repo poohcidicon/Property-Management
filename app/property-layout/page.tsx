@@ -883,6 +883,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   
   // Handle removing a property from selection
   const handleRemoveProperty = (propertyId: string) => {
+    console.log(propertyId, 'propertyId')
     // Remove from selectedPropertyIds
     setSelectedPropertyIds(prev => {
       const newSet = new Set(prev)
@@ -948,11 +949,15 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const handleRemoveConfirmedProperty = (cartId: string) => {
     setConfirmedProperties(prev => prev.filter(property => property.cartId !== cartId))
     setPendingBookingList(prev => prev.filter(booking => booking.cartId !== cartId))
+    const cencalProperties = confirmedProperties.filter(booking => booking.cartId === cartId)
+    if (cencalProperties.length === 1) {
+      handleRemoveProperty(cencalProperties[0].id)
+    }
 
     // Show notification
     toast({
       title: "ยกเลิกรายการ",
-      description: `ยกเลิกการจองหมายเลข ${cartId} แล้ว`,
+      description: `ยกเลิกการจองแปลง ${cencalProperties[0].name} แล้ว`,
     })
 
     // If no more confirmed properties, close confirmation dialog
@@ -1173,7 +1178,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         acc.push({
           ...curr, 
           quantity: selectedDates.length, 
-          cartId: Number(new Date().getTime()) + Math.random().toString(),
+          cartId: `${new Date().getTime().toString(36).slice(-5)}-${Math.floor(Math.random() * (10 ** 5)).toString(36)}`,
           compensateList: [],
           totalAmount: Number(selectedDates.length) * curr[priceTypeKey]
         })
@@ -1194,12 +1199,12 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     setSelectedDates([])
     setShopType('Food')
     setProductType(null)
-    if (externalCircleUpdateRef.current){
-      const resetProperties = circles.map((property) => {
-        return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
-      })
-      externalCircleUpdateRef.current(resetProperties)
-    }
+    // if (externalCircleUpdateRef.current){
+    //   const resetProperties = circles.map((property) => {
+    //     return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
+    //   })
+    //   externalCircleUpdateRef.current(resetProperties)
+    // }
     if (activeTab === 'monthly'){
       // ให้เด้งหน้าจองทันที
       setShowConfirmDialog(true)
@@ -1259,22 +1264,19 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       const updatedCircles: Circle[] = []
     
       // // วนลูปทุกแผงที่จะจอง และเรียก API เพื่อเปลี่ยนสถานะเป็น booked
-      // for (const property of bookingData) {
-      //   try {
-      //     // เรียก API เพื่ออัพเดทสถานะเป็น booked
-      //     const updatedCircle = await updateCircleStatus(property.id, 'booked')
-        
-      //     // เก็บจุดที่อัพเดทสำเร็จ
-      //     updatedCircles.push(updatedCircle)
-        
-      //     // ส่งข้อมูลไปยังผู้ใช้อื่นๆ ผ่าน socket เพื่อให้เห็นการเปลี่ยนแผงทันที
-      //     if (externalCircleUpdateRef.current) {
-      //       externalCircleUpdateRef.current([updatedCircle])
-      //     }
-      //   } catch (error) {
-      //     console.error(`ไม่สามารถอัพเดทแผง ${property.name} ได้:`, error)
-      //   }
-      // }
+      for (const property of bookingData) {
+        try {
+          // เรียก API เพื่ออัพเดทสถานะเป็น booked
+          if (externalCircleUpdateRef.current){
+            const resetProperties = circles.map((property) => {
+              return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
+            })
+            externalCircleUpdateRef.current(resetProperties)
+          }
+        } catch (error) {
+          console.error(`ไม่สามารถอัพเดทแผง ${property.name} ได้:`, error)
+        }
+      }
       
       // แสดง toast สำเร็จ ถ้ามีการอัพเดทอย่างน้อย 1 จุด
       if (result.data) {

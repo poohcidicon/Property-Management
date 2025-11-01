@@ -560,11 +560,9 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
               if (room) {
                 // Broadcast only to clients in the same room
                 socket.to(room).emit("circleUpdated", circle);
-                console.log(`📡 Broadcasted circle update to room ${room}:`, circle);
               } else {
                 // Fallback to broadcast to all (for backward compatibility)
                 socket.broadcast.emit("circleUpdated", circle);
-                console.log(`📡 Broadcasted circle update to all clients (no room):`, circle);
               }
             } else {
               console.log(`⏭️ Skipped broadcast - not original source (${sourceSocketId} vs ${socket.id})`);
@@ -653,14 +651,17 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
           // Handle request for current booking state
           socket.on("requestCurrentState", () => {
             // console.log(`📡 Client ${socket.id} requested current booking state`);
-            
+            const room = socketRooms.get(socket.id);
             const currentBookings = Array.from(temporaryBookings.entries()).map(([circleId, booking]) => ({
               circleId,
               bookedBy: booking.bookedBy,
-              bookedAt: booking.bookedAt
+              bookedAt: booking.bookedAt,
+              room: booking.room
             }));
+
+            const filterByRoom = room ? currentBookings.filter(booking => booking.room === room) : currentBookings;
             
-            socket.emit("temporaryBookingsState", currentBookings);
+            socket.emit("temporaryBookingsState", filterByRoom);
             // console.log(`📦 Sent current state to ${socket.id}: ${currentBookings.length} bookings`);
           });
 
