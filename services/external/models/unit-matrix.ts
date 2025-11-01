@@ -6,6 +6,7 @@ export interface UnitMatrix {
   Y: number;
   M_Price: number;
   D_Price: number;
+  floor: string;
 }
 
 export interface FloorPlan {
