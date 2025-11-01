@@ -96,7 +96,7 @@ export default function CanvasMap({
   // Property circles data
   const [circles, setCircles] = useState<Circle[]>([])
   const [isLoadingCircles, setIsLoadingCircles] = useState(true)
-  const [hasReceivedSocketData, setHasReceivedSocketData] = useState(false)
+  const [hasReceivedSocketData, setHasReceivedSocketData] = useState(0)
   
   // User info
   const [currentUsername, setCurrentUsername] = useState<string>('')
@@ -174,9 +174,11 @@ export default function CanvasMap({
     setCurrentUsername(username)
     const loadCircles = async () => {
       try {
-        setIsLoadingCircles(true)
-        if (onLoading) {
-          onLoading(true)
+        if (hasReceivedSocketData === 0){
+          setIsLoadingCircles(true)
+          if (onLoading) {
+            onLoading(true)
+          }
         }
         // const circlesData = await getCircles()
 
@@ -268,6 +270,7 @@ export default function CanvasMap({
     }
 
     if (hasReceivedSocketData) {
+      console.log(hasReceivedSocketData, 'hasReceivedSocketData')
       loadCircles()
     }
   }, [hasReceivedSocketData, filterUnitMatrix, filterDay, userLogin])
@@ -278,6 +281,7 @@ export default function CanvasMap({
 
     const handleCircleUpdate = (updatedCircle: Circle) => {
       console.log('📡 Received real-time circle update:', updatedCircle)
+      setHasReceivedSocketData((prev) => prev+1)
       
       // Update local state only - DO NOT broadcast again
       setCircles(prevCircles => {
@@ -314,7 +318,7 @@ export default function CanvasMap({
       console.log('📦 Processing current booking state from server:', bookings)
       
       // Mark that we've received socket data
-      setHasReceivedSocketData(true)
+      setHasReceivedSocketData(1)
       
       if (bookings.length > 0) {
         let updatedCount = 0;

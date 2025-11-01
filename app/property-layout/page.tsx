@@ -356,6 +356,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   }
 
   const getUnitBookingDate = async (filter: { day?: number; month?: number; year?: number }) => {
+    setIsLoadingUnitMatrix(true)
     const unitBookingDateData = await getUnitBookingDateApi({ 
       active_date: activeDate,
       project_id: projectId,
@@ -388,6 +389,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     else{
       setUnitBookingDateList([])
     }
+    setIsLoadingUnitMatrix(false)
     return unitBookingDateData.data
   }
 
@@ -1224,6 +1226,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
 
   const handleConfirmBooking = async () => {
     setShowConfirmDialog(false)
+    setIsLoadingUnitMatrix(true)
   
     try {
       // แสดง toast กำลังดำเนินการ
@@ -1263,19 +1266,12 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       // สร้าง array สำหรับเก็บจุดที่อัพเดทสำเร็จ
       const updatedCircles: Circle[] = []
     
-      // // วนลูปทุกแผงที่จะจอง และเรียก API เพื่อเปลี่ยนสถานะเป็น booked
-      for (const property of bookingData) {
-        try {
-          // เรียก API เพื่ออัพเดทสถานะเป็น booked
-          if (externalCircleUpdateRef.current){
-            const resetProperties = circles.map((property) => {
-              return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
-            })
-            externalCircleUpdateRef.current(resetProperties)
-          }
-        } catch (error) {
-          console.error(`ไม่สามารถอัพเดทแผง ${property.name} ได้:`, error)
-        }
+      if (externalCircleUpdateRef.current){
+        const resetProperties = circles.map((property) => {
+          return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
+        })
+        console.log('resetProperties', resetProperties)
+        externalCircleUpdateRef.current(resetProperties)
       }
       
       // แสดง toast สำเร็จ ถ้ามีการอัพเดทอย่างน้อย 1 จุด
@@ -1316,6 +1312,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       setShowConfirmation(false)
       setConfirmedProperties([])
       setPendingBookingList([])
+      setIsLoadingUnitMatrix(false)
     }
   }
 
