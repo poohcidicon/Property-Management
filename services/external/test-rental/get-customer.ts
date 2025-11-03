@@ -17,7 +17,7 @@ export const getCustomerRental = async (keyword: string): Promise<IResponse<ICus
         "saleId": "429ca1b6-874e-4071-be63-8753ea7473f3",
         "buId": "001",
         "page": "1",
-        "pageSize": "10",
+        "pageSize": "50",
         "search": {
           "id": "",
           "keyword": keyword,
