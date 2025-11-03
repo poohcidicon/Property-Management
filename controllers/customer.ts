@@ -25,7 +25,9 @@ export const genGenMemberIDController = async (payload: { item_id: string }): Pr
     const response = await genMemberIdRental(payload);
     return {
       success: true,
-      data: response.data,
+      data: response.data ? {
+        member_id: response.data 
+      } : null,
       message: "Success"
     }
   } catch (err: any) {

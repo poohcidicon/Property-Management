@@ -44,7 +44,7 @@ interface IPayloadGenMemberId {
   item_id: string
 }
 
-export const genMemberIdRental = async (payload: IPayloadGenMemberId): Promise<IResponse<{ member_id: string }>> => {
+export const genMemberIdRental = async (payload: IPayloadGenMemberId): Promise<IResponse<string>> => {
   try{
     const response = await axios({
       method: 'POST',
