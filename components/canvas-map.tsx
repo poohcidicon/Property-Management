@@ -15,6 +15,8 @@ import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
 import { useProjectStore } from "@/app/project-store"
 import { useFilterStore } from "@/app/filter-store"
+import Spinner from "./ui/Spinner"
+import SpinnerSmall from "./ui/spinner-small"
 
 export interface Circle {
   x: number
@@ -1446,6 +1448,7 @@ export default function CanvasMap({
   return (
     <div className="relative w-full h-full">
       {/* Canvas */}
+      <SpinnerSmall loading={isLoadingCircles}>
       <canvas
         ref={canvasRef}
         className={`w-full h-full border-2 border-gray-300 ${
@@ -1464,6 +1467,7 @@ export default function CanvasMap({
         onDrop={handleDrop}
         style={{ touchAction: "none" }}
       />
+      </SpinnerSmall>
 
       {/* Enhanced Upload Area */}
       {showUploadArea && (

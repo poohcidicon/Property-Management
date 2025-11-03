@@ -14,6 +14,7 @@ import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 import dayjs from "dayjs"
 import { useCustomerStore } from "@/app/customer-store"
 import { useFilterStore } from "@/app/filter-store"
+import SpinnerSmall from "./ui/spinner-small"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -31,6 +32,7 @@ export default function CustomerBookingCard({
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const { customer, setCustomer } = useCustomerStore();
     
     const selectBooking = (booking: PendingBooking) => {
@@ -106,9 +108,11 @@ export default function CustomerBookingCard({
       if (isValidDate && selectDate) {
         checkinDate = selectDate
       }
+      setIsLoading(true)
       const guestList = await getGuestListApi({
         checkin_date: checkinDate
       });
+      setIsLoading(false)
       if(!guestList.success || !guestList.data){
         setPendingBookings([]);
         setCheckedInBookings([]);
@@ -159,7 +163,7 @@ export default function CustomerBookingCard({
 
 
     return (
-        <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
+    <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
       <div className="p-3 md:p-4 border-b">
         <h2 className="text-lg md:text-xl font-bold">รายการจอง</h2>
       </div>
@@ -196,6 +200,7 @@ export default function CustomerBookingCard({
       </div> */}
 
       <ScrollArea className="flex-1">
+        <SpinnerSmall loading={isLoading}>
         <div className="p-3 md:p-4 space-y-4">
           {/* Pending Bookings */}
           <div>
@@ -306,6 +311,7 @@ export default function CustomerBookingCard({
             </div>
           )}
         </div>
+        </SpinnerSmall>
       </ScrollArea>
     </div>
     )

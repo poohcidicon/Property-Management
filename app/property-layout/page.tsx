@@ -34,6 +34,7 @@ import SelectHotelOtherGuest from "@/components/select-hotel-other-guest"
 import { useModalOtherGuestStore } from "../modal-other-guest-store"
 import { useFilterStore } from "../filter-store"
 import { Input } from "@/components/ui/input"
+import SpinnerSmall from "@/components/ui/spinner-small"
 interface Property {
   id: string
   name: string;
@@ -128,6 +129,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
   const [pendingBookingHotel, setPendingBookingHotel] = useState<PendingBooking | null>(null);
   const [checkedInBookingHotel, setCheckedInBookingHotel] = useState<CheckedInBooking | null>(null);
+  const [mainLoading, setMainLoading] = useState(false)
   const [guestList, setGuestList] = useState<Guest[]>([])
   const [floorList, setFloorList] = useState<IFloorMas[]>([])
   const { toast } = useToast()
@@ -175,9 +177,11 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       checkDate = selectDate
     }
 
+    setMainLoading(true)
     const guestList = await getGuestListApi({
       checkin_date: checkDate,
     })
+    setMainLoading(false)
     setGuestList(guestList.data || [])
   }
   
@@ -1869,6 +1873,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     defaultValue={activeDate}
                     onChange={(e) => {
                       setActiveDate(e.target.value)
+                      setShowHotelRoomDialog(false)
+                      clearRoomSelect()
                     }}
                   />
                 </div>
