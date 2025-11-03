@@ -137,7 +137,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const [propertyList, setPropertyList] = useState<Property[]>([])
   const [bookingData, setBookingData] = useState<Property[]>([])
   const [productGroupMas, setProductGroupMas] = useState<ProductGroupMaster[]>([])
-  const [shopType, setShopType] = useState<string | undefined>()
+  const [shopType, setShopType] = useState<string | null>()
   const [productType, setProductType] = useState<string | null>(null)
   
   // Ref for external circle update handler
@@ -1163,7 +1163,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         })
       }
     }
-    setConfirmedProperties([...confirmedProperties, ...data.map((item) => {
+    const newConfirmationProperties = [...confirmedProperties, ...data.map((item) => {
       const foundSubstractCompensateUnit = substractCompensateUnit[item.id]
       if (foundSubstractCompensateUnit){
         item.totalAmount = item.totalAmount - foundSubstractCompensateUnit
@@ -1172,9 +1172,13 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       else{
         return item
       }
-    })])
+    })]
+    setConfirmedProperties(newConfirmationProperties)
     // sort pending booking unit
     const newPendingBookingList = [...pendingBookingList, ...resultPendingBooking].sort((a, b) => a.unit_number.localeCompare(b.unit_number))
+      .filter((book) => {
+        return newConfirmationProperties.find((c) => c.id === book.unit_id)
+      })
     setPendingBookingList(newPendingBookingList)
   }
 
@@ -1205,7 +1209,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     setIsLoadingUnitMatrix(false)
     setSelectedPropertyIds(new Set())
     setSelectedDates([])
-    setShopType('Food')
+    // setShopType(null)
     setProductType(null)
     // if (externalCircleUpdateRef.current){
     //   const resetProperties = circles.map((property) => {
@@ -2367,7 +2371,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                     <div className="space-y-3">
                       {/* Customer Type Group */}
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทร้านค้า</label>
+                        <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทร้านค้า<label className="text-red-500">*</label></label>
                         <Select value={shopType || undefined} onValueChange={(val) => setShopType(val)}>
                           <SelectTrigger className="w-full bg-white border-teal-300">
                             <SelectValue placeholder="เลือกประเภทร้านค้า"/>

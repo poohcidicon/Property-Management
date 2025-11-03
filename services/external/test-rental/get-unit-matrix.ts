@@ -19,7 +19,7 @@ export const getUnitMatrixService = async ({ project_id, year, month, day, phase
       .input("Year", sql.Int, year)
       .input("Month", sql.Int, month)
       .input("Day", sql.Int, day)
-      // .input("Phase", sql.Int, phase)
+      .input("FloorPlanID", sql.Int, phase)
       .execute(`SP_DAILY_MATRIX`);
 
     // mock price
