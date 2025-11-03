@@ -22,7 +22,7 @@ export const getUnitMatrixService = async ({ project_id, year, month, day }: IPa
 
     // mock price
 
-    const newResult = result.recordset.map(item => {
+    let newResult = result.recordset.map(item => {
       if (!item.M_Price || item.M_Price === 0) {
         item.M_Price = 0;
       }
@@ -31,6 +31,16 @@ export const getUnitMatrixService = async ({ project_id, year, month, day }: IPa
       }
       return item;
     })
+
+    const { recordset: unitData } = await pool.request()
+      .input("ProjectID", sql.NVarChar, project_id)
+      .query(`select * from Sys_Master_Units
+        where ProjectID = @ProjectID and isDelete = 0
+      `);
+
+    if (unitData.length > 0) {
+      newResult = newResult.filter(item => item.UnitID === unitData.find(unit => unit.UnitID === item.UnitID)?.UnitID);
+    }
 
     return {
       success: true,
