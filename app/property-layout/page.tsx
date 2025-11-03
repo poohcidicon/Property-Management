@@ -636,8 +636,8 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
 
   // เพิ่ม state สำหรับปฏิทิน - เริ่มต้นด้วยเดือนปัจจุบันและไม่เลือกวันใด
   const [selectedDates, setSelectedDates] = useState<number[]>([])
-  const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth() + 1) // เดือนปัจจุบัน
-  const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear()) // ปีปัจจุบัน
+  const [currentMonth, setCurrentMonth] = useState(() => (initMonth ? Number(initMonth) : null) || new Date().getMonth() + 1) // เดือนปัจจุบัน
+  const [currentYear, setCurrentYear] = useState(() => (initYear ? Number(initYear) : null) || new Date().getFullYear()) // ปีปัจจุบัน
   const [isSelectingRange, setIsSelectingRange] = useState(false)
   const [rangeStart, setRangeStart] = useState<number | null>(null)
 
