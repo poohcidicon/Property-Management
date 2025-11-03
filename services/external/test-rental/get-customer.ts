@@ -39,3 +39,36 @@ export const getCustomerRental = async (keyword: string): Promise<IResponse<ICus
     }
   }
 }
+
+interface IPayloadGenMemberId {
+  item_id: string
+}
+
+export const genMemberIdRental = async (payload: IPayloadGenMemberId): Promise<IResponse<{ member_id: string }>> => {
+  try{
+    const response = await axios({
+      method: 'POST',
+      url: `${process.env.RENTAL_API_ENDPOINT}/customer/GenerateMemberID`,
+      headers: {
+        'Content-Type': 'application/json',
+        'rem-api-usermane': process.env.REM_USERNAME || '',
+        'rem-api-password': process.env.REM_PASSWORD || '',
+        'rem-api-secretkey': process.env.REM_SECRET || ''
+      },
+      data: {
+        itemid: payload.item_id
+      }
+    })
+    return {
+      success: true,
+      data: response.data.data,
+      message: "Success"
+    }
+  }
+  catch (err: any) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+}

@@ -18,7 +18,7 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit, compensateUnitsApi, CompensateUnit, getProductGroupApi, ProductGroupMaster } from "@/lib/api/unit-booking"
+import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit, compensateUnitsApi, CompensateUnit, getProductGroupApi, ProductGroupMaster, genMemberIdApi } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
 import CustomerBookingCard from "@/components/customer-booking-card"
@@ -130,6 +130,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
   const [compensateUnitist, setCompensateUnitist] = useState<CompensateUnit[]>([])
   const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
+  const [selectPhase, setSelectPhase] = useState<number | null>(null)
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -305,7 +306,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     if (zoneData.data && zoneData.data?.length > 0){
       setZoneList(zoneData.data.map((item) => {
         return {
-          id: item.zone_id,
+          id: item.zone_id+"",
           name: item.zone_name,
           imagePath: item.zone_path_image,
           x: item.x,
@@ -317,6 +318,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       const lengthZone = zoneData.data.length
       // setSelectedZone(zoneData.data[lengthZone].zone_id)
       setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
+      setSelectPhase(zoneData.data[lengthZone-1].zone_id)
     }
     else{
       setZoneList([])
@@ -606,10 +608,14 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     const zoneData = zoneList.find((item) => {
       return item.id === zone_id
     })
-    setFocusCanvas({
-      x: zoneData?.x || null,
-      y: zoneData?.y || null
-    })
+    setSelectPhase(Number(zone_id))
+    if (zoneData?.id){
+      setCanvasBackgroundImage(zoneData.imagePath)
+      setFocusCanvas({
+        x: zoneData?.x || null,
+        y: zoneData?.y || null
+      })
+    }
   }
 
   const onChangeSelectBookType = (value: string) => {
@@ -1235,10 +1241,28 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         description: "กรุณารอสักครู่",
         duration: 3000,
       })
+      let memberId = customerData?.memberId || ""
+      if (!memberId){
+        // gen member id
+        const res = await genMemberIdApi({
+          item_id: customerData?.id || ""
+        })
+        if (res.data){
+          memberId = res.data.member_id || ""
+        }
+      }
+      if (!memberId){
+        toast({
+          title: "ไม่สามารถจองได้",
+          description: "ไม่มีรหัสลูกค้า",
+          duration: 3000,
+        })
+        return
+      }
 
       // ทำการบันทึกการจองผ่าน API
       const payloadBooking = {
-        customer_id: customerData?.memberId || "",
+        customer_id: memberId,
         booking_date: dayjs().format('YYYY-MM-DD'),
         booking_type: activeTab === 'monthly' ? 'monthly' : 'daily',
         amount: totalBookingAmount,
@@ -1914,6 +1938,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                   }}
                   focus={focusCanvas}
                   projectId={projectId}
+                  phase={selectPhase}
                 />
               </Spinner>
             </div>

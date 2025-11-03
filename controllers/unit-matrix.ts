@@ -8,6 +8,7 @@ export interface IPayloadGetUnitMatrixController {
   year: number;
   month: number;
   day: number;
+  phase: number;
 }
 
 export interface IResponseGetUnitMatrixController {
@@ -27,7 +28,8 @@ export const getUnitMatrixController = async (payload: IPayloadGetUnitMatrixCont
       project_id: payload.project_id,
       year: payload.year,
       month: payload.month,
-      day: payload.day
+      day: payload.day,
+      phase: payload.phase
     });
 
     const responseData = unitMatrix.data?.map((item: UnitMatrix) => {

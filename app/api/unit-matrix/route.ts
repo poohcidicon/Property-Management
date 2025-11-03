@@ -15,7 +15,8 @@ export async function POST(request: Request) {
       unit_id: body.unit_id || null,
       year: body.year, 
       month: body.month,
-      day: body.day || 0
+      day: body.day || 0,
+      phase: body.phase
     });
     return NextResponse.json(unitMatrix, { status: 200 });
   }

@@ -11,6 +11,7 @@ export interface UnitMatrix {
 
 export interface FloorPlan {
   ProjectID: string;
+  FloorPlanID: string;
   FloorPlanName: string;
   X: number;
   Y: number;

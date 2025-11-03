@@ -27,7 +27,7 @@ export const getZonesByProjectController = async (payload: IPayloadGetZonesByPro
     const zoneData = await getFloorPlanService(payload);
     const mappingData = zoneData.data?.map((item, index) => {
       return {
-        zone_id: index+"",
+        zone_id: item.FloorPlanID,
         zone_name: item.FloorPlanName,
         x: item.X,
         y: item.Y,

@@ -16,7 +16,8 @@ export async function getUnitMatrixApi (payload: {
   project_id: string,
   year: number,
   month: number,
-  day: number
+  day: number,
+  phase: number,
 }) {
   try{
     const response = await axiosPublic.post<ApiResponse<UnitMatrix[]>>('/api/unit-matrix', payload);
@@ -29,7 +30,7 @@ export async function getUnitMatrixApi (payload: {
 }
 
 export interface Zone {
-  zone_id: string,
+  zone_id: number,
   zone_name: string,
   zone_path_image: string
   x: number,

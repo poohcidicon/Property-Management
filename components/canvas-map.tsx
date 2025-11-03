@@ -48,7 +48,8 @@ interface CanvasMapProps {
   onLoading?: (isLoading: boolean) => void
   onChangeFilterDay?: (day: number) => void,
   focus: {x: number | null, y: number | null},
-  projectId: string
+  projectId: string;
+  phase: number | null;
 }
 
 export default function CanvasMap({ 
@@ -63,7 +64,8 @@ export default function CanvasMap({
   onLoading,
   onChangeFilterDay,
   focus,
-  projectId
+  projectId,
+  phase
 }: CanvasMapProps) {
   const { activeDate, floor } = useFilterStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -183,11 +185,15 @@ export default function CanvasMap({
         // const circlesData = await getCircles()
 
         // test connect rental
+        if (!phase){
+          return
+        }
         const searchUnitMatrixPayload = {
           project_id: projectId,
           year: filterUnitMatrix?.year || 2025,
           month: filterUnitMatrix?.month || 9,
-          day: filterUnitMatrix?.day || filterDay || 0 // 0 means whole month
+          day: filterUnitMatrix?.day || filterDay || 0, // 0 means whole month
+          phase: phase
         }
         const unitMatrixData = await getUnitMatrixApi(searchUnitMatrixPayload)
 
@@ -273,7 +279,7 @@ export default function CanvasMap({
       console.log(hasReceivedSocketData, 'hasReceivedSocketData')
       loadCircles()
     }
-  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, userLogin])
+  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, userLogin, phase])
 
   // Listen for real-time circle updates from other clients
   useEffect(() => {
