@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Search, X } from "lucide-react";
+import { PlusIcon, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { axiosPublic } from "@/lib/axios";
 import { SysHotelGuests } from "@/services/external/models/customer";
 import { getOtherGuestListApi } from "@/lib/api/hotel/get-guest";
 import { Circle } from "./canvas-map";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import SpinnerSmall from "./ui/spinner-small";
 
 export interface SelectHotelOtherGuestProps {
   setShowModal: (show: boolean) => void;
@@ -21,6 +24,8 @@ export default function SelectHotelOtherGuest({
   const [customers, setCustomers] = useState<SysHotelGuests[]>([]);
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
+  const [showGotoCRM, setShowGotoCRM] = useState(false)
 
   // Search API
   async function handleSearch() {
@@ -32,6 +37,7 @@ export default function SelectHotelOtherGuest({
     if (data.success) setCustomers(data.data || []);
     else setCustomers([]);
     setLoading(false);
+    setSearchCustomerCounter(searchCustomerCounter + 1)
   }
 
   function handleSelect(c: SysHotelGuests) {
@@ -51,6 +57,10 @@ export default function SelectHotelOtherGuest({
 
   const closeModal = () => {
     setShowModal(false);  
+  }
+
+  const gotoCRM = async () => {
+    window.location.href = (process.env.NEXT_PUBLIC_RENTAL_URL !== "" ? process.env.NEXT_PUBLIC_RENTAL_URL : '/') + '/CRM/th/ContactsInfo_Edit.aspx?proc=new'
   }
 
   return (
@@ -99,10 +109,27 @@ export default function SelectHotelOtherGuest({
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {customers?.length === 0 ? (
+                {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-16 text-center text-red-500">
-                      ไม่มีข้อมูล
+                    <td colSpan={6} className="px-4 py-16 text-center">
+                      <SpinnerSmall loading={loading}>
+                        <div className="w-10 h-10"></div>
+                      </SpinnerSmall>
+                    </td>
+                  </tr>
+                ) : customers?.length === 0 ? (
+                  <tr className="justify-center">
+                    <td colSpan={6} className="px-4 py-16 text-center">
+                      {searchCustomerCounter > 0 && <p className="text-red-500">ไม่มีข้อมูล</p>}
+                      <div className="flex justify-center">
+                        <Button
+                          variant="outline"
+                          className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap mt-4"
+                          onClick={() => setShowGotoCRM(true)}
+                        >
+                          <PlusIcon /> เพิ่มลูกค้า
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -111,7 +138,7 @@ export default function SelectHotelOtherGuest({
                       key={c.GuestID}
                       className={`border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-700">{c.GuestID}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{c.GuestCode}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{c.GuestFirstName} {c.GuestLastName}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{c.GuestNationalityID}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{c.GuestMobileNumber}</td>
@@ -143,6 +170,37 @@ export default function SelectHotelOtherGuest({
           </button>
         </div>
       </div>
+      <Dialog open={showGotoCRM} onOpenChange={setShowGotoCRM}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันการเปลี่ยนแปลง
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">คุณต้องการออกจากหน้าจอห้องพักรายวันหรือไม่?</p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowGotoCRM(false)
+              }}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowGotoCRM(false)
+                gotoCRM()
+              }}
+            >
+              ยืนยัน
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

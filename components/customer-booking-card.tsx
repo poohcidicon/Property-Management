@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { getGuestListApi } from "@/lib/api/hotel/get-guest"
 import dayjs from "dayjs"
 import { useCustomerStore } from "@/app/customer-store"
+import { useFilterStore } from "@/app/filter-store"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -25,6 +26,7 @@ export default function CustomerBookingCard({
     onPendingBookingsChange?: (guest: any) => void
     onCheckedInBookingsChange?: (guest: any) => void
 }) {
+    const { activeDate } = useFilterStore()
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
     const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
@@ -93,6 +95,13 @@ export default function CustomerBookingCard({
       const params = new URLSearchParams(window.location.search);
       const selectDate = params.get('date');
       const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
+
+      if (activeDate){
+        checkinDate = activeDate
+      }
+      else if (isValidDate && selectDate) {
+        checkinDate = selectDate
+      }
   
       if (isValidDate && selectDate) {
         checkinDate = selectDate
@@ -146,7 +155,7 @@ export default function CustomerBookingCard({
 
     useEffect(() => {
       loadGuest();
-    }, [counter])
+    }, [counter, activeDate])
 
 
     return (

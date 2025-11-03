@@ -17,7 +17,7 @@ export const getCustomerRental = async (keyword: string): Promise<IResponse<ICus
         "saleId": "429ca1b6-874e-4071-be63-8753ea7473f3",
         "buId": "001",
         "page": "1",
-        "pageSize": "10",
+        "pageSize": "50",
         "search": {
           "id": "",
           "keyword": keyword,
@@ -29,6 +29,39 @@ export const getCustomerRental = async (keyword: string): Promise<IResponse<ICus
     return {
       success: true,
       data: response.data.data?.contacts as ICustomer[],
+      message: "Success"
+    }
+  }
+  catch (err: any) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+}
+
+interface IPayloadGenMemberId {
+  item_id: string
+}
+
+export const genMemberIdRental = async (payload: IPayloadGenMemberId): Promise<IResponse<string>> => {
+  try{
+    const response = await axios({
+      method: 'POST',
+      url: `${process.env.RENTAL_API_ENDPOINT}/customer/GenerateMemberID`,
+      headers: {
+        'Content-Type': 'application/json',
+        'rem-api-usermane': process.env.REM_USERNAME || '',
+        'rem-api-password': process.env.REM_PASSWORD || '',
+        'rem-api-secretkey': process.env.REM_SECRET || ''
+      },
+      data: {
+        itemid: payload.item_id
+      }
+    })
+    return {
+      success: true,
+      data: response.data.data,
       message: "Success"
     }
   }

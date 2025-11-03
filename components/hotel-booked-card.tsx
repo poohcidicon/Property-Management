@@ -6,6 +6,10 @@ import SelectHotelOtherGuest from './select-hotel-other-guest';
 import { useModalOtherGuestStore } from '@/app/modal-other-guest-store';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { genMemberIdApi } from '@/lib/api/unit-booking';
+import { useFilterStore } from '@/app/filter-store';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -27,7 +31,12 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
   const { lastOtherGuest, ...modalOtherGuests } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const handleCheckIn = async () => {
+    const payloadGenMemberIdList = otherGuests.filter(g => !g.GuestCode).map(g => {
+      return genMemberIdApi({ item_id: g.GuestID })
+    })
+    await Promise.all(payloadGenMemberIdList)
     const payloadCheckin = {
       unit_id: roomId,
       checkin_date: dayjs().format('YYYY-MM-DD'),
@@ -214,12 +223,42 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       {/* Action Button */}
       <div className="px-6 pb-6">
         <button 
-          onClick={handleCheckIn}
+          onClick={() => {
+            setShowConfirmDialog(true)
+          }}
           className="w-full bg-gray-900 text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
         >
           เช็คอิน
         </button>
       </div>
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันเช็คอิน
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmDialog(false)
+              }}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                handleCheckIn()
+                setShowConfirmDialog(false)
+              }}
+            >
+              ยืนยัน
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

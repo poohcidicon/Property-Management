@@ -48,3 +48,18 @@ export async function bookUnitApi (payload: IPayloadBookUnit): Promise<ApiRespon
     throw error;
   }
 }
+
+export interface IPayloadGenMemberId {
+  item_id: string;
+}
+
+export async function genMemberIdApi (payload: IPayloadGenMemberId): Promise<ApiResponse<{ member_id: string }>> {
+  try{
+    const response = await axiosPublic.post<ApiResponse<{ member_id: string }>>('/api/gen-member-id', payload);
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching circles:', error);
+    throw error;
+  }
+}

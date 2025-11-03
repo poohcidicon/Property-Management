@@ -168,7 +168,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     const selectDate = params.get('date');
     const isValidDate = dayjs(selectDate, 'YYYY-MM-DD', true).isValid();
 
-    if (isValidDate && selectDate) {
+    if (activeDate){
+      checkDate = activeDate
+    }
+    else if (isValidDate && selectDate) {
       checkDate = selectDate
     }
 
@@ -308,7 +311,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
     init()
     setIsLoadingUnitMatrix(false)
-  }, [currentBusinessType])
+  }, [currentBusinessType, activeDate])
   const getZoneList = async () => {
     const zoneData = await getZonesByProjectApi({ project_id: projectId })
     if (zoneData.data && zoneData.data?.length > 0){

@@ -3,6 +3,7 @@ import { BookingGuest, IGuest, SysHotelGuests } from "../models/customer";
 
 import { db } from "./mock/guest-data"
 import { getConnection } from "@/lib/db";
+import { getCustomerRental } from "../test-rental/get-customer";
 
 export interface IPayloadGetGuestListService {
   checkin_date?: string; // ISO date string
@@ -95,6 +96,36 @@ export interface IPayloadGetOtherGuestListController {
 
 export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListController): Promise<IResponse<SysHotelGuests[]>> => {
   try{
+    const customerList = await getCustomerRental(payload.keyword!)
+    if (!customerList.data || customerList.data.length === 0){
+      return {
+        success: false,
+        error: "Customer not found",
+        data: [],
+        message: "Customer not found"
+      }
+    }
+    const mappingGuest = customerList.data.map<SysHotelGuests>((item) => {
+      return {
+        GuestID: item.id,
+        GuestFirstName: item.firstName,
+        GuestLastName: item.lastName,
+        GuestCode: item.memberId,
+        IsBooked: 0,
+        GuestEmail: item.email,
+        GuestPhone: item.mobile,
+        GuestAddress: "",
+        GuestPassport: item.citizenId,
+        GuestMobileNumber: item.mobile,
+        GuestNationalityID: item.citizenId,
+        CreateDate: new Date().toISOString(),
+        CreateBy: "system",
+        ModifyDate: new Date().toISOString(),
+        ModifyBy: "system",
+        IsDeleted: false,
+        GuestTitle: ""
+      }
+    })
     const pool = await getConnection();
     const query = `
       SELECT DISTINCT g.*
@@ -114,17 +145,17 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
       .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
       .query<SysHotelGuests>(query)
     if (payload.exclue_book_room_id && result.recordset.length > 0){
-      const availableList = result.recordset.filter((item) => item.IsBooked === 0)
+      // const availableList = mappingGuest.filter((item) => item.IsBooked === 0)
       return {
         success: true,
-        data: availableList,
+        data: mappingGuest,
         message: "Success",
         error: ""
       }
     }
     return {
       success: true,
-      data: result.recordset,
+      data: mappingGuest,
       message: "Success",
       error: ""
     }
@@ -146,8 +177,21 @@ export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest
   try{
     const pool = await getConnection();
     const query = `
-      SELECT g.* FROM Sys_Hotel_Guests g
-      INNER JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+      SELECT g.ItemID as GuestID
+      , g.FirstName as GuestFirstName
+      , g.LastName as GuestLastName
+      , g.Email as GuestEmail
+      , g.Tel1 as GuestMobileNumber
+      , g.MemberID as GuestCode
+      , g.PassportID as GuestPassport
+      , g.CitizenID as GuestNationalityID
+      , g.Tel1 as GuestPhone
+      , g.CreateDate as CreateDate
+      , g.CreateBy as CreateBy
+      , g.ModifyDate as ModifyDate
+      , g.IsDelete as IsDelete
+      FROM Sys_CRM_Contacts g
+      INNER JOIN Sys_Hotel_BookGuest bg ON g.ItemID = bg.GuestID
       WHERE bg.BookRoomID = @BookRoomID
     `
     const result = await pool.request()
