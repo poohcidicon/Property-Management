@@ -62,6 +62,9 @@ const checkExpiredBookings = () => {
   // Check each booking for expiration
   temporaryBookings.forEach((booking, circleId) => {
     const bookingAge = now - booking.bookedAt;
+    console.log(BOOKING_TIMEOUT, 'BOOKING_TIMEOUT')
+    console.log(now, 'now')
+    console.log(`⏰ Booking: ${circleId} at ${booking.bookedAt} (age: ${Math.floor(bookingAge/1000)}s)`);
     
     // If booking is older than 10 minutes, mark it as expired
     if (bookingAge > BOOKING_TIMEOUT) {
@@ -492,6 +495,7 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
               circle = data as Circle;
               sourceSocketId = socket.id; // Assume current socket is the source
             }
+            circle.bookedAt = Date.now();
             
             // Create unique event key for deduplication
             const eventKey = `${circle.id}-${circle.status}-${circle.bookedBy || 'none'}-${circle.bookedAt || 0}`;
