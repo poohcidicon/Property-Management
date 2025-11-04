@@ -1,6 +1,6 @@
 import { bookUnitService } from "@/services/external/hotel/booking";
 import { checkinService } from "@/services/external/hotel/checkin";
-import { checkoutUnitService } from "@/services/external/hotel/checkout";
+import { checkoutUnitService, preCheckout } from "@/services/external/hotel/checkout";
 import { IResponse } from "@/services/external/models/master";
 
 export interface IPayloadBookUnit {
@@ -122,6 +122,42 @@ export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Pro
     }
   }
   catch (err: any){
+    return {
+      success: false,
+      data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export interface IPayloadPreCheckout {
+  unit_id: string;
+  booking_id: string;
+  book_room_id: string;
+  room_number: string;
+  update_by?: string;
+  total_amount: number
+}
+export const preCheckoutController = async (payload: IPayloadPreCheckout): Promise<IResponse<boolean>> => {
+  try{
+    const res = await preCheckout(payload)
+    if(!res){
+      return {
+        success: false,
+        data: false,
+        error: "Pre-checkout failed",
+        message: "Pre-checkout failed"
+      }
+    }
+    return {
+      success: true,
+      data: true,
+      error: "",
+      message: "Pre-checkout successful"
+    }
+  }
+  catch(err: any){
     return {
       success: false,
       data: false,

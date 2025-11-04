@@ -147,7 +147,7 @@ export interface IPayloadInsertMaterialOption {
 
 export const InsBookMaterialOptionApi = async (payload: IPayloadInsertMaterialOption): Promise<ApiResponse<boolean>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/ins-book-material', payload);
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/ins-book-material', payload);
     return res.data
   }
   catch (error: any) {
@@ -170,6 +170,28 @@ export interface IPayloadDeleteBookMaterialOption {
 export const DelBookMaterialOptionApi = async (payload: IPayloadDeleteBookMaterialOption): Promise<ApiResponse<boolean>> => {
   try{
     const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/delete-book-material', payload);
+    return res.data
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      data: false,
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}
+
+export interface IPayloadPreCheckout {
+  unit_id: string;
+  booking_id: string;
+  book_room_id: string;
+  total_amount: number;
+}
+
+export const PreCheckoutApi = async (payload: IPayloadPreCheckout) => {
+  try{
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/pre-checkout', payload);
     return res.data
   }
   catch (error: any) {

@@ -108,8 +108,8 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
     const mappingGuest = customerList.data.map<SysHotelGuests>((item) => {
       return {
         GuestID: item.id,
-        GuestFirstName: item.firstName,
-        GuestLastName: item.lastName,
+        GuestFirstName: item.firstName ? item.firstName : item.firstNameEng,
+        GuestLastName: item.lastName ? item.lastName : item.lastNameEng,
         GuestCode: item.memberId,
         IsBooked: 0,
         GuestEmail: item.email,
@@ -117,7 +117,7 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
         GuestAddress: "",
         GuestPassport: item.citizenId,
         GuestMobileNumber: item.mobile,
-        GuestNationalityID: item.citizenId,
+        GuestNationalityID: item.citizenId ? item.citizenId : "",
         CreateDate: new Date().toISOString(),
         CreateBy: "system",
         ModifyDate: new Date().toISOString(),
@@ -178,8 +178,8 @@ export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest
     const pool = await getConnection();
     const query = `
       SELECT g.ItemID as GuestID
-      , g.FirstName as GuestFirstName
-      , g.LastName as GuestLastName
+      , CASE WHEN g.FirstName = '' THEN g.FirstNameEng ELSE isnull(g.FirstName, g.FirstNameEng) END as GuestFirstName
+      , CASE WHEN g.LastName = '' THEN g.LastNameEng ELSE isnull(g.LastName, g.LastNameEng) END as GuestLastName
       , g.Email as GuestEmail
       , g.Tel1 as GuestMobileNumber
       , g.MemberID as GuestCode

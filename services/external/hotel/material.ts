@@ -33,6 +33,7 @@ export interface IPayloadInsertMaterialOption {
   material_id: string;
   price: number;
   qty: number;
+  create_by?: string;
 }
 
 export const insBookMaterialOption = async (payload: IPayloadInsertMaterialOption): Promise<boolean> => {
@@ -65,6 +66,87 @@ export const insBookMaterialOption = async (payload: IPayloadInsertMaterialOptio
       .input("Price", payload.price)
       .input("Qty", payload.qty)
       .query(query)
+
+    const VAT = 0.07
+    const amount = payload.price * payload.qty
+    const baseAmount = Number((amount / (1 + VAT)).toFixed(2))
+    const vatAmount = baseAmount * VAT
+
+    const { recordset: [material] } = await transaction.request()
+      .input("MaterialID", payload.material_id)
+      .query(`SELECT * FROM Sys_Hotel_Material WHERE MaterialID = @MaterialID`)
+    if (!material) {
+      await transaction.rollback();
+      return false
+    }
+    const insertPayTransQuery = `
+      INSERT INTO [dbo].[Sys_Hotel_PayTrans]
+        ([PayTransID]
+        ,[BookRoomID]
+        ,[TransacDate]
+        ,[EffectDate]
+        ,[Description]
+        ,[RefType]
+        ,[RefID]
+        ,[Quantity]
+        ,[Price]
+        ,[Discount]
+        ,[FeeQuantity]
+        ,[BaseAmount]
+        ,[VATPercent]
+        ,[VATAmount]
+        ,[TotalAmount]
+        ,[PaidAmount]
+        ,[PayID]
+        ,[Status]
+        ,[CreateDate]
+        ,[CreateBy]
+        ,[ModifyDate]
+        ,[ModifyBy])
+     VALUES
+        (@PayTransID
+        ,@BookRoomID
+        ,GETDATE()
+        ,@EffectDate
+        ,@Description
+        ,@RefType
+        ,@RefID
+        ,@Quantity
+        ,@Price
+        ,@Discount
+        ,@FeeQuantity
+        ,@BaseAmount
+        ,@VATPercent
+        ,@VATAmount
+        ,@TotalAmount
+        ,0
+        ,null
+        ,'A'
+        ,GETDATE()
+        ,@UpdateBy
+        ,GETDATE()
+        ,@UpdateBy)
+    `
+    const { recordset: [payTransID] } = await transaction.request().query(`
+        SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
+      `)
+    await transaction.request()
+      .input("PayTransID", payTransID.PayTransID)
+      .input("BookRoomID", payload.book_room_id)
+      .input("EffectDate", new Date())
+      .input("Description", material.MaterialName ? material.MaterialName : material.MaterialNameEN)
+      .input("RefType", "Service")
+      .input("RefID", material.MaterialID)
+      .input("Quantity", payload.qty)
+      .input("Price", payload.price)
+      .input("Discount", 0)
+      .input("FeeQuantity", 0)
+      .input("BaseAmount", baseAmount)
+      .input("VATPercent", VAT * 100)
+      .input("VATAmount", vatAmount)
+      .input("TotalAmount", amount)
+      .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+      .query(insertPayTransQuery)
 
     await transaction.commit();
     return true
@@ -118,6 +200,14 @@ export const deleteBookMaterialOption = async (payload: IPayloadDeleteBookMateri
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
   try{
+    const {recordset: [foundBookOption]} = await transaction.request()
+      .input("ID", payload.id)
+      .query(`select * from Sys_Hotel_BookOptions where ID = @ID`)
+    if (!foundBookOption) {
+      await transaction.rollback();
+      return false
+    }
+
     const query = `
       DELETE FROM Sys_Hotel_BookOptions 
       WHERE ID = @ID AND BookingID = @BookingID AND BookRoomID = @BookRoomID
@@ -127,6 +217,17 @@ export const deleteBookMaterialOption = async (payload: IPayloadDeleteBookMateri
       .input("BookingID", payload.booking_id)
       .input("BookRoomID", payload.book_room_id)
       .query(query)
+    
+    const {recordset: [foundPayTrans]} = await transaction.request()
+      .input("RefID", foundBookOption.MaterialID)
+      .input("RefType", "Service")
+      .input("BookRoomID", payload.book_room_id)
+      .query(`select * from Sys_Hotel_PayTrans where RefID = @RefID AND RefType = @RefType AND BookRoomID = @BookRoomID`)
+    if (foundPayTrans){
+      await transaction.request()
+        .input("PayTransID", foundPayTrans.PayTransID)
+        .query(`delete from Sys_Hotel_PayTrans where PayTransID = @PayTransID`)
+    }
     await transaction.commit();
     return true
   }

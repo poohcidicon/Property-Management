@@ -44,6 +44,113 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       delete updateRequest.parameters['CreateBy']
     }
 
+    const insertPayTransQuery = `
+      INSERT INTO [dbo].[Sys_Hotel_PayTrans]
+        ([PayTransID]
+        ,[BookRoomID]
+        ,[TransacDate]
+        ,[EffectDate]
+        ,[Description]
+        ,[RefType]
+        ,[RefID]
+        ,[Quantity]
+        ,[Price]
+        ,[Discount]
+        ,[FeeQuantity]
+        ,[BaseAmount]
+        ,[VATPercent]
+        ,[VATAmount]
+        ,[TotalAmount]
+        ,[PaidAmount]
+        ,[PayID]
+        ,[Status]
+        ,[CreateDate]
+        ,[CreateBy]
+        ,[ModifyDate]
+        ,[ModifyBy])
+     VALUES
+        (@PayTransID
+        ,@BookRoomID
+        ,GETDATE()
+        ,@EffectDate
+        ,@Description
+        ,@RefType
+        ,@RefID
+        ,@Quantity
+        ,@Price
+        ,@Discount
+        ,@FeeQuantity
+        ,@BaseAmount
+        ,@VATPercent
+        ,@VATAmount
+        ,@TotalAmount
+        ,0
+        ,null
+        ,'A'
+        ,GETDATE()
+        ,@UpdateBy
+        ,GETDATE()
+        ,@UpdateBy)
+    `
+    const checkinQuery = `
+      SELECT * FROM Sys_Hotel_Booking
+      WHERE BookingID = @BookingID
+    `
+    const {recordset: bookingResult=[]} = await transaction.request()
+      .input("BookingID", payload.customers[0].booking_id)
+      .query(checkinQuery)
+    if(bookingResult.length === 0){
+      await transaction.rollback();
+      return false
+    }
+    const { recordset: checkinResult=[]} = await transaction.request()
+      .input("BookingID", payload.customers[0].booking_id)
+      .input("BookRoomID", payload.customers[0].book_room_id)
+      .query(`
+        select * from Sys_Hotel_CheckIn
+        WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
+      `)
+    const VAT = 0.07
+    const baseAmount = Number((bookingResult[0].Amount / (1 + VAT)).toFixed(2))
+    const vatAmount = baseAmount * VAT
+
+    for (const checkin of checkinResult){
+      const { recordset: [payTransID] } = await transaction.request().query(`
+        SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
+      `)
+      const insertPayTrans = transaction.request()
+      insertPayTrans.input("PayTransID", payTransID.PayTransID)
+      insertPayTrans.input("BookRoomID", checkin.BookRoomID)
+      insertPayTrans.input("EffectDate", checkin.CheckIn)
+      insertPayTrans.input("Description", "เช่ารายวัน")
+      insertPayTrans.input("RefType", "Book")
+      insertPayTrans.input("RefID", checkin.BookingID)
+      insertPayTrans.input("Quantity", 1)
+      insertPayTrans.input("Price", bookingResult[0].Amount)
+      insertPayTrans.input("Discount", 0)
+      insertPayTrans.input("FeeQuantity", 0)
+      insertPayTrans.input("BaseAmount", baseAmount)
+      insertPayTrans.input("VATPercent", VAT*100)
+      insertPayTrans.input("VATAmount", vatAmount)
+      insertPayTrans.input("TotalAmount", bookingResult[0].Amount)
+      insertPayTrans.input("UpdateBy", payload.create_by)
+      await insertPayTrans.query(insertPayTransQuery)
+      delete insertPayTrans.parameters['BookRoomID']
+      delete insertPayTrans.parameters['EffectDate']
+      delete insertPayTrans.parameters['Description']
+      delete insertPayTrans.parameters['RefType']
+      delete insertPayTrans.parameters['RefID']
+      delete insertPayTrans.parameters['Quantity']
+      delete insertPayTrans.parameters['Price']
+      delete insertPayTrans.parameters['Discount']
+      delete insertPayTrans.parameters['FeeQuantity']
+      delete insertPayTrans.parameters['BaseAmount']
+      delete insertPayTrans.parameters['VATPercent']
+      delete insertPayTrans.parameters['VATAmount']
+      delete insertPayTrans.parameters['TotalAmount']
+      delete insertPayTrans.parameters['UpdateBy']
+    }
+
     if (payload.other_guests && payload.other_guests.length > 0) {
       const insertGuests = transaction.request()
       insertGuests.input("CreateBy", payload.create_by)

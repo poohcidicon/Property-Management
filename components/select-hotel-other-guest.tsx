@@ -97,7 +97,7 @@ export default function SelectHotelOtherGuest({
           </div>
 
           {/* Table */}
-          <div className="border border-gray-300 rounded overflow-hidden">
+          <div className="border border-gray-300 rounded overflow-auto max-h-96">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-300">
