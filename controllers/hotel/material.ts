@@ -40,6 +40,7 @@ export interface IPayloadInsertMaterialOption {
   material_id: string;
   price: number;
   qty: number;
+  create_by?: string;
 }
 
 export const insBookMaterialOptionController = async (payload: IPayloadInsertMaterialOption): Promise<IResponse<boolean>> => {

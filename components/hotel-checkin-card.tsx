@@ -185,9 +185,6 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     const res = await PreCheckoutApi(payload)
     if (res.data){
       setShowPaymentDialog(true)
-      if (onChangeStatus) {
-        onChangeStatus(true);
-      }
     }
     // console.log(payload, 'payload')
   }

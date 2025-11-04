@@ -13,8 +13,8 @@ export async function POST(request: Request) {
         data: null
       }, { status: 401 })
     }
-    const { unit_id, booking_date } = body
-    if(!unit_id || !body.booking_id || !body.book_room_id || !body.total_amount || !booking_date){
+    const { unit_id } = body
+    if(!unit_id || !body.booking_id || !body.book_room_id){
       return new Response(JSON.stringify({
         message: "❌ Missing required parameters unit_id, customer_id, booking_date or booking_id, book_room_id",
         error: 'failed',

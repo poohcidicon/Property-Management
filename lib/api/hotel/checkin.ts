@@ -147,7 +147,7 @@ export interface IPayloadInsertMaterialOption {
 
 export const InsBookMaterialOptionApi = async (payload: IPayloadInsertMaterialOption): Promise<ApiResponse<boolean>> => {
   try{
-    const res = await axiosPublic.post<ApiResponse<boolean>>('/api/hotel/ins-book-material', payload);
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/ins-book-material', payload);
     return res.data
   }
   catch (error: any) {
