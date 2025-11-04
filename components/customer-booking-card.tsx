@@ -81,6 +81,18 @@ export default function CustomerBookingCard({
       }
     };
 
+    const selectCheckin = (checkin: CheckedInBooking) => {
+      if (onRoomTypeChange) {
+        onRoomTypeChange(null);
+      }
+      if (onPendingBookingsChange) {
+        onPendingBookingsChange(null);
+      }
+      if (onCheckedInBookingsChange) {
+        onCheckedInBookingsChange(checkin);
+      }
+    };
+
     const handleRoomTypeChange = (roomType: "standard" | "family" | "null") => {
         const roomTypeValue = roomType === "null" ? null : roomType;
         setSelectedRoomType(roomTypeValue);
@@ -281,7 +293,8 @@ export default function CustomerBookingCard({
                 {checkedInBookings.map((booking) => (
                   <Card
                     key={booking.id}
-                    className="p-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 flex-shrink-0 w-72 lg:w-auto"
+                    className="p-3 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 flex-shrink-0 w-72 lg:w-auto cursor-pointer"
+                    onClick={() => selectCheckin(booking)}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">

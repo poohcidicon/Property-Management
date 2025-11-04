@@ -1591,7 +1591,18 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
           counter={searchUnitMatrix.counter}
           onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "standard" | "family" | null)}
           onPendingBookingsChange={(guest: PendingBooking) => setPendingBookingHotel(guest)}
-          onCheckedInBookingsChange={(guest: CheckedInBooking) => setCheckedInBookingHotel(guest)}
+          onCheckedInBookingsChange={(guest: CheckedInBooking) => {
+            if (guest?.assignedRoomId){
+              handlePropertyClick(circles.find(circle => circle.id === guest.assignedRoomId) as Circle)
+              setSelectedRoomType(null)
+            }
+            else{
+              setSelectedProperty(null)
+              setShowHotelRoomDialog(false)
+              window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
+            }
+            setCheckedInBookingHotel(guest)
+          }}
         />
       )}
 
