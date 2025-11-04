@@ -136,7 +136,7 @@ export const insBookMaterialOption = async (payload: IPayloadInsertMaterialOptio
       .input("EffectDate", new Date())
       .input("Description", material.MaterialName ? material.MaterialName : material.MaterialNameEN)
       .input("RefType", "Service")
-      .input("RefID", material.TermID)
+      .input("RefID", material.MaterialID)
       .input("Quantity", payload.qty)
       .input("Price", payload.price)
       .input("Discount", 0)
@@ -200,6 +200,14 @@ export const deleteBookMaterialOption = async (payload: IPayloadDeleteBookMateri
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
   try{
+    const {recordset: [foundBookOption]} = await transaction.request()
+      .input("ID", payload.id)
+      .query(`select * from Sys_Hotel_BookOptions where ID = @ID`)
+    if (!foundBookOption) {
+      await transaction.rollback();
+      return false
+    }
+
     const query = `
       DELETE FROM Sys_Hotel_BookOptions 
       WHERE ID = @ID AND BookingID = @BookingID AND BookRoomID = @BookRoomID
@@ -209,6 +217,17 @@ export const deleteBookMaterialOption = async (payload: IPayloadDeleteBookMateri
       .input("BookingID", payload.booking_id)
       .input("BookRoomID", payload.book_room_id)
       .query(query)
+    
+    const {recordset: [foundPayTrans]} = await transaction.request()
+      .input("RefID", foundBookOption.MaterialID)
+      .input("RefType", "Service")
+      .input("BookRoomID", payload.book_room_id)
+      .query(`select * from Sys_Hotel_PayTrans where RefID = @RefID AND RefType = @RefType AND BookRoomID = @BookRoomID`)
+    if (foundPayTrans){
+      await transaction.request()
+        .input("PayTransID", foundPayTrans.PayTransID)
+        .query(`delete from Sys_Hotel_PayTrans where PayTransID = @PayTransID`)
+    }
     await transaction.commit();
     return true
   }
