@@ -8,11 +8,12 @@ import SpinnerSmall from './ui/spinner-small';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { useProjectStore } from '@/app/project-store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { TooltipPortal } from '@radix-ui/react-tooltip';
+import FormattedInput from './ui/formatted-input';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -186,6 +187,15 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   useEffect(() => {
     loadMaterial()
   }, [])
+
+  const handleDialogAddService = (open : any) => {
+    let trigger = open
+    setShowDialogMaterial(trigger)
+    if (trigger === false){
+      setMaterialPrice(0)
+      setSelectMaterialId(null)
+    }
+  }
 
   return (
     <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
@@ -394,24 +404,18 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           </DialogHeader>
           <div className="flex-1 overflow-auto p-1">
             <div className='flex flex-col gap-1'>
-              <div className='flex flex-col gap-2 text-sm'>
-                <label>ค่าความเสียหาย (บาท)</label>
-                <input
-                  type="number"
-                  value={damagesPrice}
-                  onChange={e => setDamagesPrice(Number(e.target.value))}
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className='flex flex-col gap-2 text-sm'>
-                <label>ค่า Minibar (บาท)</label>
-                <input
-                  type="number"
-                  value={minibarPrice}
-                  onChange={e => setMinibarPrice(Number(e.target.value))}
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <FormattedInput
+                label="ค่าความเสียหาย (บาท)"
+                type="number"
+                value={damagesPrice}
+                onChange={setDamagesPrice}
+              />
+              <FormattedInput
+                label="ค่า Minibar (บาท)"
+                type="number"
+                value={minibarPrice}
+                onChange={setMinibarPrice}
+              />
               <div className='flex flex-col gap-2 text-sm'>
                 <label>หมายเหตุ</label>
                 <textarea
@@ -478,7 +482,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         </DialogContent>
       </Dialog>
       <Dialog open={showDialogMaterial} onOpenChange={(open) => {
-        setShowDialogMaterial(open);
+        handleDialogAddService(open)
       }}>
         <DialogContent 
           className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
@@ -497,7 +501,12 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div style={{ width: "100%" }}>
                   <Select
                     value={selectMaterialId || undefined} 
-                    onValueChange={(value) => setSelectMaterialId(value)}
+                    onValueChange={(value) => {
+                      if(value !== selectMaterialId){
+                        setMaterialPrice(0)
+                      }
+                      setSelectMaterialId(value)
+                    }}
                   >
                     <SelectTrigger className="w-full h-8 text-sm">
                       <SelectValue placeholder="ยังไม่ได้เลือกบริการเสริม..."/>
@@ -514,22 +523,19 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   </Select>
                 </div>
               </div>
-              <div className='flex flex-col gap-2 text-sm'>
-                <label>ราคา (บาท)</label>
-                <input
-                  type="number"
-                  value={materialPrice}
-                  onChange={e => setMaterialPrice(Number(e.target.value))}
-                  className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <FormattedInput
+                label="ราคา (บาท)"
+                type="number"
+                value={materialPrice}
+                onChange={setMaterialPrice}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                onClick={() => setShowDialogMaterial(false)}
+                onClick={() => handleDialogAddService(false)}
               >
                 ยกเลิก
               </Button>
