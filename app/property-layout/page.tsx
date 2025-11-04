@@ -318,7 +318,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       const lengthZone = zoneData.data.length
       // setSelectedZone(zoneData.data[lengthZone].zone_id)
       setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
-      setSelectPhase(zoneData.data[lengthZone-1].zone_id)
+      // setSelectPhase(zoneData.data[lengthZone-1].zone_id)
     }
     else{
       setZoneList([])
