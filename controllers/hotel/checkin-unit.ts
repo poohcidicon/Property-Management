@@ -1,5 +1,5 @@
 import { bookUnitService } from "@/services/external/hotel/booking";
-import { checkinService } from "@/services/external/hotel/checkin";
+import { CheckinDetail, checkinService, getCheckinDetail, IPayloadCheckinDetail } from "@/services/external/hotel/checkin";
 import { checkoutUnitService, preCheckout } from "@/services/external/hotel/checkout";
 import { IResponse } from "@/services/external/models/master";
 
@@ -161,6 +161,26 @@ export const preCheckoutController = async (payload: IPayloadPreCheckout): Promi
     return {
       success: false,
       data: false,
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export const getCheckinDetailController = async (payload: IPayloadCheckinDetail): Promise<IResponse<CheckinDetail[]>> => {
+  try{
+    const result = await getCheckinDetail(payload)
+    return {
+      success: true,
+      data: result,
+      error: "",
+      message: ""
+    }
+  }
+  catch(err: any){
+    return {
+      success: false,
+      data: [],
       error: err.message,
       message: err.message
     }

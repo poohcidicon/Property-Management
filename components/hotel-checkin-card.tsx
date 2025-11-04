@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X, Trash } from 'lucide-react';
-import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -38,6 +38,16 @@ interface HotelCheckinCardProps {
   onChangeStatus?: (status: boolean) => void;
 }
 
+interface CheckinData {
+  booking_id: string;
+  book_room_id: string;
+  check_in: string;
+  check_out: string;
+  room_number: string;
+  status: string;
+  amount: number;
+}
+
 export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -58,6 +68,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
   const [paymentRemark, setPaymentRemark] = useState<string | null>()
   const [openDeleteMaterialId, setDeleteMaterialId] = useState<number | null>(null)
+  const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
   const { projectId } = useProjectStore()
 
   const summaryPrice = (
@@ -88,14 +99,36 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     }
   };
 
-  const handleSetGuest = () => {
-    if (guestList.length > 0) {
-      const guest = guestList.find((g) => {
-        const foundCheckin = checkin_customers.find((c) => c.book_room_id === g.book_room_id);
-        return foundCheckin
-      })
-      setSelectGuest(guest || null)
-    }
+  const handleSetCheckin = async () => {
+    const checkin = checkin_customers[0]
+    if (!checkin || !checkin?.book_room_id) return
+    const checkinDetail = await GetCheckinDetailApi({
+      book_room_id: checkin?.book_room_id
+    })
+    if (!checkinDetail.data) return
+    const sortedCheckinDetail = checkinDetail.data.sort((a, b) => {
+      const dateA = new Date(a.CheckIn);
+      const dateB = new Date(b.CheckIn);
+      return dateA.getTime() - dateB.getTime();
+    })
+    const checkinDate = sortedCheckinDetail[0].CheckIn
+    const checkoutDate = sortedCheckinDetail[sortedCheckinDetail.length - 1].CheckIn
+    setCheckinDetail({
+      booking_id: sortedCheckinDetail[0].BookingID,
+      book_room_id: sortedCheckinDetail[0].BookRoomID,
+      check_in: checkinDate,
+      check_out: checkoutDate,
+      room_number: sortedCheckinDetail[0].RoomNumber,
+      status: sortedCheckinDetail[0].Status,
+      amount: sortedCheckinDetail[0].Amount
+    })
+    // if (guestList.length > 0) {
+    //   const guest = guestList.find((g) => {
+    //     const foundCheckin = checkin_customers.find((c) => c.book_room_id === g.book_room_id);
+    //     return foundCheckin
+    //   })
+    //   setSelectGuest(guest || null)
+    // }
   }
 
   const handleSetOtherGuest = async () => {
@@ -190,9 +223,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   }
 
   useEffect(() => {
-    if (guestList.length > 0) {
-      handleSetGuest()
-    }
+    handleSetCheckin()
     if (checkin_customers.length > 0){
       handleSetOtherGuest()
       loadBookMaterialOption()
@@ -239,7 +270,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคา</p>
-              <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p>
+              {/* <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p> */}
+              <p className="text-sm font-semibold text-green-600">฿ {checkinDetail?.amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p> 
             </div>
           </div>
         </div>
@@ -281,7 +313,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <span className="text-gray-600">เช็คอินวันที่:</span>
               <span className="font-medium text-gray-800">
                 {/* {selectGuest?.start_booking ? new Date(selectGuest.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
-                {selectGuest?.start_booking ? format(new Date(selectGuest.start_booking), "dd MMM yyyy", { locale: th }) : '-'}
+                {checkinDetail?.check_in ? format(new Date(checkinDetail?.check_in ), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
@@ -289,13 +321,13 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <span className="text-gray-600">เช็คเอาท์วันที่:</span>
               <span className="font-medium text-gray-800">
                 {/* {selectGuest?.end_booking ? new Date(selectGuest.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'} */}
-                {selectGuest?.end_booking ? format(new Date(selectGuest.end_booking), "dd MMM yyyy", { locale: th }) : '-'}
+                {checkinDetail?.check_out ? format(new Date(checkinDetail.check_out), "dd MMM yyyy", { locale: th }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
-              <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</span>
+              <span className="font-bold text-lg text-green-600">฿ {checkinDetail?.amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</span>
             </div>
           </div>
         </div>

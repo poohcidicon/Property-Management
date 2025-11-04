@@ -61,6 +61,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
   };
 
   const handleSetGuest = () => {
+    console.log(booking, 'bookingg')
     if (guestList.length > 0) {
       const guest = guestList.find(g => g.id === booking?.booking_id)
       setSelectGuest(guest || null)

@@ -190,3 +190,31 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
     return false
   }
 }
+
+export interface IPayloadCheckinDetail {
+  book_room_id: string;
+}
+
+export interface CheckinDetail {
+  BookRoomID: string;
+  BookingID: string;
+  CheckIn: string;
+  RoomNumber: string;
+  Status: string;
+  Amount: number
+}
+
+export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<CheckinDetail[]> => {
+  const pool = await getConnection()
+  const result = await pool.request()
+    .input("BookRoomID", payload.book_room_id)
+    .query(`
+      SELECT c.BookRoomID, c.BookingID, c.CheckIn, c.RoomNumber, b.Status
+      , b.Amount
+      FROM Sys_Hotel_CheckIn c
+      inner join Sys_Hotel_Booking b on (c.BookingID = b.BookingID)
+      WHERE BookRoomID = @BookRoomID
+      ORDER BY CheckIn
+    `)
+  return result.recordset
+}

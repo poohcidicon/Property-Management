@@ -203,3 +203,27 @@ export const PreCheckoutApi = async (payload: IPayloadPreCheckout) => {
     }
   }
 }
+
+export interface CheckinDetail {
+  BookRoomID: string;
+  BookingID: string;
+  CheckIn: string;
+  RoomNumber: string;
+  Status: string;
+  Amount: number;
+}
+
+export const GetCheckinDetailApi = async (payload: { book_room_id: string }): Promise<ApiResponse<CheckinDetail[]>> => {
+  try{
+    const res = await axiosPublic.post<ApiResponse<CheckinDetail[]>>('/api/hotel/get-checkin-detail', payload);
+    return res.data
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}
