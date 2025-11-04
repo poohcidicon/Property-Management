@@ -1535,23 +1535,23 @@ export default function CanvasMap({
                 }`}></div>
                 <span className="text-xs text-gray-600">
                   {isLoading ? 'กำลังเชื่อมต่อ' : 
-                   isConnected ? 'ออนไลน์' : 'ออฟไลน์'}
+                  isConnected ? 'ออนไลน์' : 'ออฟไลน์'}
                 </span>
               </div>
             </div>
             
             <div className="flex justify-between items-center">
               {/* System Info */}
-              <div className="text-xs text-gray-500">
+              {businessType === 'market' && <div className="text-xs text-gray-500">
                 ระบบจองชั่วคราว
-              </div>
+              </div>}
               
               {/* Active Bookings Count */}
-              <div className="flex items-center gap-1 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-100">
+              {businessType === 'market' && <div className="flex items-center gap-1 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-100">
                 <span className="text-xs text-blue-700">
                   จองแล้ว <span className="font-medium">{activeBookingsCount}</span> จุด
                 </span>
-              </div>
+              </div>}
             </div>
           </CardContent>
         </Card>
