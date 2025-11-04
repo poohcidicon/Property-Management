@@ -1,4 +1,4 @@
-import { signAccesstoken, verifyToken } from "@/lib/auth";
+import { signAccesstoken, verifyToken, decodeToken } from "@/lib/auth";
 import { IUserSession } from "@/model/auth.model";
 import { IResponse } from "@/services/external/models/master";
 import { randomUUID } from "crypto";
@@ -41,7 +41,7 @@ export const autherizeUser = async (): Promise<IResponse<IUserSession | null>> =
   try{
     // Verify token here if needed
     const access_token = (await cookies()).get('access_token')?.value
-    const decoded = verifyToken(access_token || '');
+    const decoded = decodeToken(access_token || '');
     if (!decoded) {
       return {
         success: false,
