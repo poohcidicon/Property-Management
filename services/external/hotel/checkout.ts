@@ -247,3 +247,103 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     return false
   }
 }
+
+export interface IPayloadPreCheckout {
+  unit_id: string
+  booking_id: string
+  book_room_id: string
+  room_number: string
+  update_by?: string
+}
+
+export const preCheckout = async (payload: IPayloadPreCheckout): Promise<boolean> => {
+  const pool = await getConnection();
+  let transaction = new sql.Transaction(pool);
+  await transaction.begin();
+  try{
+    const updateRequest = transaction.request()
+    updateRequest.input("BookingID", payload.booking_id)
+    updateRequest.input("UpdateBy", payload.update_by || process.env.DEFAULT_SALE_ID || "system")
+    updateRequest.input("BookRoomID", payload.book_room_id)
+
+    const updatePreCheckoutRoom = `
+      UPDATE Sys_Hotel_BookRoom
+      SET Status = 'O', ModifyDate = GETDATE(), ModifyBy = @UpdateBy
+      WHERE BookRoomID = @BookRoomID and BookingID = @BookingID
+    `
+    await updateRequest.query(updatePreCheckoutRoom)
+
+    // set payment
+    // const VAT = 0.07
+    // const baseAmount = Number((payload.total_amount / (1 + VAT)).toFixed(2))
+    // const vatAmount = baseAmount * VAT
+
+    // const insertPayTransQuery = `
+    //   INSERT INTO [dbo].[Sys_Hotel_PayTrans]
+    //     ([BookRoomID]
+    //     ,[TransacDate]
+    //     ,[EffectDate]
+    //     ,[Description]
+    //     ,[RefType]
+    //     ,[RefID]
+    //     ,[Quantity]
+    //     ,[Price]
+    //     ,[Discount]
+    //     ,[FeeQuantity]
+    //     ,[BaseAmount]
+    //     ,[VATPercent]
+    //     ,[VATAmount]
+    //     ,[TotalAmount]
+    //     ,[PaidAmount]
+    //     ,[PayID]
+    //     ,[Status]
+    //     ,[CreateDate]
+    //     ,[CreateBy]
+    //     ,[ModifyDate]
+    //     ,[ModifyBy])
+    //  VALUES
+    //     (@BookRoomID
+    //     ,GETDATE()
+    //     ,@EffectDate
+    //     ,@Description
+    //     ,@RefType
+    //     ,@RefID
+    //     ,@Quantity
+    //     ,@Price
+    //     ,@Discount
+    //     ,@FeeQuantity
+    //     ,@BaseAmount
+    //     ,@VATPercent
+    //     ,@VATAmount
+    //     ,@TotalAmount
+    //     ,0
+    //     ,null
+    //     ,'A'
+    //     ,GETDATE()
+    //     ,@UpdateBy
+    //     ,GETDATE
+    //     ,@UpdateBy)
+    // `
+
+    // updateRequest.input("EffectDate", payload.booking_date)
+    // updateRequest.input("Description", "เช่ารายวัน")
+    // updateRequest.input("RefType", "Book")
+    // updateRequest.input("RefID", payload.booking_id)
+    // updateRequest.input("Quantity", 1)
+    // updateRequest.input("Price", payload.total_amount)
+    // updateRequest.input("Discount", 0)
+    // updateRequest.input("FeeQuantity", 0)
+    // updateRequest.input("BaseAmount", baseAmount)
+    // updateRequest.input("VATPercent", VAT)
+    // updateRequest.input("VATAmount", vatAmount)
+    // updateRequest.input("TotalAmount", payload.total_amount)
+    // updateRequest.query(insertPayTransQuery)
+    transaction.commit();
+    return true
+  }
+  catch(err: any){
+    await transaction.rollback();
+    console.error('Error in preCheckout:', err);
+    return false
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X, Trash } from 'lucide-react';
-import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -172,6 +172,24 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     if (result.data){
       loadBookMaterialOption()
     }
+  }
+
+  const handlePreCheckout = async () => {
+    const checkin_customer = checkin_customers[0]
+    const payload = {
+      unit_id: roomId,
+      book_room_id: checkin_customer.book_room_id,
+      booking_id: checkin_customer.booking_id,
+      total_amount: summaryPrice
+    } as IPayloadPreCheckout
+    const res = await PreCheckoutApi(payload)
+    if (res.data){
+      setShowPaymentDialog(true)
+      if (onChangeStatus) {
+        onChangeStatus(true);
+      }
+    }
+    // console.log(payload, 'payload')
   }
 
   useEffect(() => {
@@ -471,7 +489,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   className="mt-2"
                   onClick={() => {
                     setShowDialogCheckout(false)
-                    setShowPaymentDialog(true)
+                    handlePreCheckout()
+                    // setShowPaymentDialog(true)
                   }}
                 >
                   ยืนยันเช็คเอาท์

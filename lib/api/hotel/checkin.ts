@@ -181,3 +181,25 @@ export const DelBookMaterialOptionApi = async (payload: IPayloadDeleteBookMateri
     }
   }
 }
+
+export interface IPayloadPreCheckout {
+  unit_id: string;
+  booking_id: string;
+  book_room_id: string;
+  total_amount: number;
+}
+
+export const PreCheckoutApi = async (payload: IPayloadPreCheckout) => {
+  try{
+    const res = await axiosPrivate.post<ApiResponse<boolean>>('/api/hotel/pre-checkout', payload);
+    return res.data
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      data: false,
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}
