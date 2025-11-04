@@ -127,20 +127,31 @@ export interface IFloorMas {
 export const getFloorMas = async (payload: { project_id: string }): Promise<IResponse<IFloorMas[]>> => {
   try{
     const pool = await getConnection();
+    // const result = await pool.request()
+    //   .input("ProjectID", payload.project_id)
+    //   .input("CreateBy", process.env.DEFAULT_SALE_ID || '429ca1b6-874e-4071-be63-8753ea7473f3')
+    //   .query<IFloorMas>(`
+    //     select vr.FloorID, vr.FloorName 
+    //     , F.Id FileID
+    //     from VW_Hotel_RoomStatus vr
+    //     inner join Sys_Daily_Floor_Plan dp on vr.FloorID = dp.FloorID
+    //     LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), dp.FloorPlanID) = F.RefID
+    //     AND ISNULL(F.Isdelete,0) = 0
+    //     AND F.Process = 'floorplan'
+    //     AND F.CreateBy = @CreateBy
+    //     where vr.ProjectID = @ProjectID
+    //     group by vr.FloorID, vr.FloorName, F.Id
+    //   `)
     const result = await pool.request()
       .input("ProjectID", payload.project_id)
-      .input("CreateBy", process.env.DEFAULT_SALE_ID || '429ca1b6-874e-4071-be63-8753ea7473f3')
       .query<IFloorMas>(`
-        select vr.FloorID, vr.FloorName 
-        , F.Id FileID
-        from VW_Hotel_RoomStatus vr
-        inner join Sys_Daily_Floor_Plan dp on vr.FloorID = dp.FloorID
-        LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), dp.FloorPlanID) = F.RefID
+        SELECT vr.FloorID, vr.FloorName , F.Id FileID
+        FROM VW_Hotel_RoomStatus vr
+        INNER JOIN Sys_Daily_Floor_Plan dp on vr.FloorID = dp.FloorID AND dp.IsDeleted = 0
+        LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), dp.FloorPlanID) = F.RefID AND F.Process = 'floorplan' AND F.ProjectID = dp.ProjectID
         AND ISNULL(F.Isdelete,0) = 0
-        AND F.Process = 'floorplan'
-        AND F.CreateBy = @CreateBy
-        where vr.ProjectID = @ProjectID
-        group by vr.FloorID, vr.FloorName, F.Id
+        WHERE vr.ProjectID = @ProjectID
+        GROUP BY vr.FloorID, vr.FloorName, F.Id
       `)
     return {
       success: true,
