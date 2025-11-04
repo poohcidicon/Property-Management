@@ -12,7 +12,9 @@ export const getUnitsHotelService = async (payload: {
   try{
     const pool = await getConnection();
     const query = `
-      SELECT DISTINCT u.*
+      SELECT DISTINCT u.UnitID, u.ProjectID, u.RoomNumber
+      , u.Area, u.X, u.Y, u.TowerID, u.TowerName, u.FloorID, u.FloorName, u.RoomType
+      , u.ActiveDate, u.DateType, u.StatusText, u.Status
       , booking.BookingID, Booking.BookRoomID, booking.Status as BookingStatus
       FROM VW_Hotel_RoomStatus u
       LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W')

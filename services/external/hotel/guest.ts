@@ -108,8 +108,8 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
     const mappingGuest = customerList.data.map<SysHotelGuests>((item) => {
       return {
         GuestID: item.id,
-        GuestFirstName: item.firstName,
-        GuestLastName: item.lastName,
+        GuestFirstName: item.firstName ? item.firstName : item.firstNameEng,
+        GuestLastName: item.lastName ? item.lastName : item.lastNameEng,
         GuestCode: item.memberId,
         IsBooked: 0,
         GuestEmail: item.email,
@@ -117,7 +117,7 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
         GuestAddress: "",
         GuestPassport: item.citizenId,
         GuestMobileNumber: item.mobile,
-        GuestNationalityID: item.citizenId,
+        GuestNationalityID: item.citizenId ? item.citizenId : "",
         CreateDate: new Date().toISOString(),
         CreateBy: "system",
         ModifyDate: new Date().toISOString(),
