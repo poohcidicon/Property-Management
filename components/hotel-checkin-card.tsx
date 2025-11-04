@@ -430,7 +430,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div>
                   ค่าห้องพัก
                 </div>
-                <div>฿ {selectGuest?.total_amount || total_amount?.toLocaleString() || 0 }</div>
+                <div>฿ {selectGuest?.total_amount.toLocaleString()  || total_amount?.toLocaleString() || 0 }</div>
               </div>
               <div className='flex justify-between'>
                 <div>
