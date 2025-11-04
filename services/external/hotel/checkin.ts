@@ -123,7 +123,7 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       insertPayTrans.input("BookRoomID", checkin.BookRoomID)
       insertPayTrans.input("EffectDate", checkin.CheckIn)
       insertPayTrans.input("Description", "เช่ารายวัน")
-      insertPayTrans.input("RefType", "Booking")
+      insertPayTrans.input("RefType", "Book")
       insertPayTrans.input("RefID", checkin.BookingID)
       insertPayTrans.input("Quantity", 1)
       insertPayTrans.input("Price", bookingResult[0].Amount)
