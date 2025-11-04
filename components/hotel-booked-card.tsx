@@ -98,7 +98,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
   }, [lastOtherGuest])
 
   return (
-    <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg">
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
         <h2 className="text-2xl font-bold text-gray-800">ห้อง {roomNumber || '206'}</h2>
@@ -106,7 +106,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       </div>
 
       {/* Room Details */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 overflow-y-scroll max-h-[70vh]">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-start">
             <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +173,6 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
               </button>
             </div>
           </div>
-          
           {otherGuests.map((otherGuest, index) => {
             return (
               <div className='flex justify-between gap-5 mb-4' key={otherGuest.GuestID}>
