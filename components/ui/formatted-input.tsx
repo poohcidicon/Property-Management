@@ -51,8 +51,8 @@ export default function FormattedInput({
 
   const handleBlur = () => {
     // Format with 2 decimal places on blur
-    if (inputValue !== '') {
-      const numValue = parseFloat(inputValue);
+    if (inputValue !== '' && inputValue !== "0") {
+      const numValue = parseFloat(inputValue.toLocaleString());
       if (!isNaN(numValue)) {
         const formattedValue = numValue.toFixed(2);
         setInputValue(formattedValue);
