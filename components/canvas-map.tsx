@@ -855,7 +855,7 @@ export default function CanvasMap({
 
     circles.forEach((circle) => {
       const style = getCircleStyle(circle)
-      console.log(`🎨 Drawing circle ${circle.id} with style:`, style)
+      // console.log(`🎨 Drawing circle ${circle.id} with style:`, style)
 
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
       // วาด outer stroke (สำหรับ Hotel mode เท่านั้น)
