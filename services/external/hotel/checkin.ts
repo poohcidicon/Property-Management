@@ -202,6 +202,8 @@ export interface CheckinDetail {
   RoomNumber: string;
   Status: string;
   Amount: number
+  GuestFullName: string;
+  GuestPhone: string
 }
 
 export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<CheckinDetail[]> => {
@@ -210,7 +212,7 @@ export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<
     .input("BookRoomID", payload.book_room_id)
     .query(`
       SELECT c.BookRoomID, c.BookingID, c.CheckIn, c.RoomNumber, b.Status
-      , b.Amount
+      , b.Amount, b.LeadGuest as GuestFullName, b.LeadPhone as GuestPhone
       FROM Sys_Hotel_CheckIn c
       inner join Sys_Hotel_Booking b on (c.BookingID = b.BookingID)
       WHERE BookRoomID = @BookRoomID

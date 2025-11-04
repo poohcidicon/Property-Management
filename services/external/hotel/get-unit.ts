@@ -17,7 +17,7 @@ export const getUnitsHotelService = async (payload: {
       , u.ActiveDate, u.DateType, u.StatusText, u.Status
       , booking.BookingID, Booking.BookRoomID, booking.Status as BookingStatus
       FROM VW_Hotel_RoomStatus u
-      LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W')
+      LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W' AND booking.CheckIn = convert(date, @ActiveDate))
       LEFT JOIN Sys_Hotel_Room room ON (u.UnitID = room.UnitID)
       WHERE u.ActiveDate = @ActiveDate and isNull(u.FloorID, 0) = @Floor
       AND u.ProjectID = @ProjectID

@@ -1,4 +1,4 @@
-import { CheckinUnitApi, IPayloadCheckin } from '@/lib/api/hotel/checkin';
+import { CheckinUnitApi, GetCheckinDetailApi, IPayloadCheckin } from '@/lib/api/hotel/checkin';
 import { Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import { genMemberIdApi } from '@/lib/api/unit-booking';
 import { useFilterStore } from '@/app/filter-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
+import SpinnerSmall from './ui/spinner-small';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -27,11 +28,25 @@ interface HotelBookedCardProps {
   onChangeStatus?: (status: boolean) => void;
 }
 
+interface CheckinData {
+  booking_id: string;
+  book_room_id: string;
+  check_in: string;
+  check_out: string;
+  room_number: string;
+  status: string;
+  amount: number;
+  guest_name: string;
+  guest_phone: string
+}
+
 export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
   const { lastOtherGuest, ...modalOtherGuests } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
+  const [loading, setLoading] = useState(false)
   const handleCheckIn = async () => {
     const payloadGenMemberIdList = otherGuests.filter(g => !g.GuestCode).map(g => {
       return genMemberIdApi({ item_id: g.GuestID })
@@ -68,6 +83,34 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     }
   }
 
+  const handleSetBookRoom = async () => {
+    if (!booking || !booking?.book_room_id) return
+    setLoading(true)
+    const checkinDetail = await GetCheckinDetailApi({
+      book_room_id: booking?.book_room_id
+    })
+    setLoading(false)
+    if (!checkinDetail.data) return
+    const sortedCheckinDetail = checkinDetail.data.sort((a, b) => {
+      const dateA = new Date(a.CheckIn);
+      const dateB = new Date(b.CheckIn);
+      return dateA.getTime() - dateB.getTime();
+    })
+    const checkinDate = sortedCheckinDetail[0].CheckIn
+    const checkoutDate = sortedCheckinDetail[sortedCheckinDetail.length - 1].CheckIn
+    setCheckinDetail({
+      booking_id: sortedCheckinDetail[0].BookingID,
+      book_room_id: sortedCheckinDetail[0].BookRoomID,
+      check_in: checkinDate,
+      check_out: checkoutDate,
+      room_number: sortedCheckinDetail[0].RoomNumber,
+      status: sortedCheckinDetail[0].Status,
+      amount: sortedCheckinDetail[0].Amount,
+      guest_name: sortedCheckinDetail[0].GuestFullName,
+      guest_phone: sortedCheckinDetail[0].GuestPhone
+    })
+  }
+
   const handleAddGuest = () => {
     modalOtherGuests.onOpen()
   }
@@ -87,8 +130,8 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
   }
 
   useEffect(() => {
-    if (guestList.length > 0){
-      handleSetGuest()
+    if (booking){
+      handleSetBookRoom()
     }
   }, [booking])
 
@@ -125,43 +168,45 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">ราคาห้องพัก</p>
-              <p className="text-sm font-semibold text-blue-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</p>
+              <p className="text-sm font-semibold text-blue-600">฿ {checkinDetail?.amount?.toLocaleString() || '0'}</p>
             </div>
           </div>
         </div>
 
         {/* Booking Information */}
         <div className="border-t border-gray-200 pt-4">
-          <div className="text-base font-bold text-gray-800 mb-3 flex justify-between align-center">
-            <div>ข้อมูลผู้จอง</div>
-          </div>
-          
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">ชื่อ:</span>
-              <span className="font-medium text-gray-800">{selectGuest?.full_name || ''}</span>
+          <SpinnerSmall loading={loading}>
+            <div className="text-base font-bold text-gray-800 mb-3 flex justify-between align-center">
+              <div>ข้อมูลผู้จอง</div>
             </div>
             
-            <div className="flex justify-between">
-              <span className="text-gray-600">เบอร์โทร:</span>
-              <span className="font-medium text-gray-800">{selectGuest?.mobile || ''}</span>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">ชื่อ:</span>
+                <span className="font-medium text-gray-800">{checkinDetail?.guest_name || ''}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-gray-600">เบอร์โทร:</span>
+                <span className="font-medium text-gray-800">{checkinDetail?.guest_phone || ''}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-gray-600">เช็คอินวันที่:</span>
+                <span className="font-medium text-gray-800">
+                  {/* {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
+                  {checkinDetail?.check_in ? format(new Date(checkinDetail?.check_in), "dd MMM yyyy", { locale: th }) : '-'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-gray-600">เช็คเอาท์วันที่:</span>
+                <span className="font-medium text-gray-800">
+                  {checkinDetail?.check_out ? format(new Date(checkinDetail?.check_out), "dd MMM yyyy", { locale: th }) : '-'}
+                </span>
+              </div>
             </div>
-            
-            <div className="flex justify-between">
-              <span className="text-gray-600">เช็คอินวันที่:</span>
-              <span className="font-medium text-gray-800">
-                {/* {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
-                {selectGuest?.start_booking ? format(new Date(selectGuest?.start_booking), "dd MMM yyyy", { locale: th }) : '-'}
-              </span>
-            </div>
-            
-            <div className="flex justify-between">
-              <span className="text-gray-600">เช็คเอาท์วันที่:</span>
-              <span className="font-medium text-gray-800">
-                {selectGuest?.end_booking ? format(new Date(selectGuest?.end_booking), "dd MMM yyyy", { locale: th }) : '-'}
-              </span>
-            </div>
-          </div>
+          </SpinnerSmall>
         </div>
         <div className="border-t border-gray-200 pt-4">
           <div className="text-base font-bold text-gray-800 mb-3 flex justify-between align-center">

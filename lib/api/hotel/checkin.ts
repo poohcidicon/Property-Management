@@ -211,6 +211,8 @@ export interface CheckinDetail {
   RoomNumber: string;
   Status: string;
   Amount: number;
+  GuestFullName: string;
+  GuestPhone: string
 }
 
 export const GetCheckinDetailApi = async (payload: { book_room_id: string }): Promise<ApiResponse<CheckinDetail[]>> => {
