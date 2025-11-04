@@ -178,8 +178,8 @@ export const getOtherBookingGuest = async (payload: IPayloadGetOtherBookingGuest
     const pool = await getConnection();
     const query = `
       SELECT g.ItemID as GuestID
-      , g.FirstName as GuestFirstName
-      , g.LastName as GuestLastName
+      , CASE WHEN g.FirstName = '' THEN g.FirstNameEng ELSE isnull(g.FirstName, g.FirstNameEng) END as GuestFirstName
+      , CASE WHEN g.LastName = '' THEN g.LastNameEng ELSE isnull(g.LastName, g.LastNameEng) END as GuestLastName
       , g.Email as GuestEmail
       , g.Tel1 as GuestMobileNumber
       , g.MemberID as GuestCode
