@@ -51,7 +51,6 @@ interface CheckinData {
 export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
   const [isLoadingOtherGuests, setIsLoadingOtherGuests] = useState(false)
   const [showDialogCheckout, setShowDialogCheckout] = useState(false)
@@ -73,7 +72,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const { projectId } = useProjectStore()
 
   const summaryPrice = (
-    selectGuest?.total_amount || total_amount || 0
+    checkinDetail?.amount || total_amount || 0
   ) + (
     damagesPrice
   ) + (
@@ -484,7 +483,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div>
                   ค่าห้องพัก
                 </div>
-                <div>฿ {selectGuest?.total_amount.toLocaleString()  || total_amount?.toLocaleString() || 0 }</div>
+                <div>฿ {checkinDetail?.amount.toLocaleString()  || total_amount?.toLocaleString() || 0 }</div>
               </div>
               <div className='flex justify-between'>
                 <div>
