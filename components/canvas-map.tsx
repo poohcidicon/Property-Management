@@ -76,6 +76,7 @@ export default function CanvasMap({
   const [showInstructions, setShowInstructions] = useState(true)
   const [filterMode, setFilterMode] = useState<"day" | "month">("month")
   const [filterDay, setFilterDay] = useState<number | null>(null) // วันที่เลือก (สำหรับโหมด day)
+  const [changeBackgroundCount, setChangeBackgroundCount] = useState(1)
   
   const customer = useCustomerStore((state) => state.customer); 
   const { user: userLogin } = useUserStore();
@@ -532,8 +533,12 @@ export default function CanvasMap({
       setBackgroundImage(img)
       setIsImageLoaded(true)
     }
-    if (backgroundImageUrl){
+    if (backgroundImageUrl && img.src !== backgroundImageUrl){
       img.src = backgroundImageUrl
+      setCircles([])
+      if (onLoading){
+        onLoading(true)
+      }
     }
     else{
       img.src = "./Image-not-found.png";
