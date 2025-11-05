@@ -985,13 +985,13 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       // if (isSelectProperty === -1 && bookingData.length > 0) {
       //   return true
       // }
-      const resultForBook = newPropertyList.find((property) => {
+      const resultForBook = newPropertyList.filter((property) => {
         const propertyHasBookDate = unitBookingDateList.find((item) => item.unit_number === property.name)
         const isBooked = propertyHasBookDate ? propertyHasBookDate.booking_date_list[dateKey] === 1 : false
         const isAvaliable = propertyHasBookDate ? propertyHasBookDate.booking_date_list[dateKey] === 0 : false
         return !isBooked && isAvaliable
       })
-      return resultForBook
+      return resultForBook.length === newPropertyList.length
     })
     setSelectedDates(dates.map(date => date.getDate()))
   }
