@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert, PlusIcon } from "lucide-react"
+import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert, PlusIcon, ChevronDown } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -27,9 +27,12 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
-import { formatBuddhist, formatTHCurrency } from "@/lib/utils"
+import { cn, formatBuddhist, formatTHCurrency } from "@/lib/utils"
 import { useFilterStore } from "../filter-store"
 import SpinnerSmall from "@/components/ui/spinner-small"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { useDebounce } from "@/hooks/use-debounce"
 interface Property {
   id: string
   name: string;
@@ -139,6 +142,9 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const [productGroupMas, setProductGroupMas] = useState<ProductGroupMaster[]>([])
   const [shopType, setShopType] = useState<string | null>()
   const [productType, setProductType] = useState<string | null>(null)
+  const [openSelectShopType, setOpenSelectShopType] = useState(false)
+  const [searchProductGroup, setSearchProductGroup] = useState("")
+  const searchProductGroupQuery = useDebounce(searchProductGroup, 500)
   
   // Ref for external circle update handler
   const externalCircleUpdateRef = useRef<((circles: Circle[]) => void) | null>(null)
@@ -340,10 +346,16 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     }
   }
 
-  const getProductGroup = async () => {
-    const result = await getProductGroupApi()
+  const getProductGroup = async (keyword?: string) => {
+    let result = await getProductGroupApi()
     if (result.data){
-      setProductGroupMas(result.data)
+      let resultFilter = result.data as ProductGroupMaster[]
+      if (keyword){
+        resultFilter = result.data.filter((item) => {
+          return item.Name.includes(keyword)
+        })
+      }
+      setProductGroupMas(resultFilter)
     }
     else{
       setProductGroupMas([])
@@ -410,7 +422,6 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       // found
       if (isSelectUnit > -1) {
         // remove disable date
-        console.log(unitBookDateList, 'dateeee')
         const DisableDateKeyList = Object.keys(disableDateList)
         setDisableDateList((prev) => {
           DisableDateKeyList.forEach((date) => {
@@ -1362,13 +1373,9 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     }
   }
 
-  // const handleChangeDialogCustomer = (open: boolean) => {
-  //   const isProd = process.env.NODE_ENV === 'production'
-  //   if (!isProd && !open){
-  //     setCustomer(mockCustomer)
-  //   }
-  //   setShowCustomerDialog(false)
-  // }
+  useEffect(() => {
+    getProductGroup(searchProductGroupQuery)
+  }, [searchProductGroupQuery])
 
   return (
     <ConnectionGuard
@@ -2377,21 +2384,68 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                       {/* Customer Type Group */}
                       <div>
                         <label className="text-sm font-medium text-gray-700 block mb-1">กลุ่มประเภทร้านค้า<label className="text-red-500">*</label></label>
-                        <Select value={shopType || undefined} onValueChange={(val) => setShopType(val)}>
+                        {/* <Select 
+                          value={shopType || undefined} 
+                          onValueChange={(val) => setShopType(val)}
+                        >
                           <SelectTrigger className="w-full bg-white border-teal-300">
                             <SelectValue placeholder="เลือกประเภทร้านค้า"/>
                           </SelectTrigger>
                           <SelectContent>
-                            {/* <SelectItem value="Food">ร้านอาหาร</SelectItem>
-                            <SelectItem value="Toy">ร้านของเล่น</SelectItem>
-                            <SelectItem value="Other">ร้านขายของ</SelectItem> */}
                             {productGroupMas.map((item) => {
                               return (
                                 <SelectItem key={item.ID} value={item.Value}>{item.Name}</SelectItem>
                               )
                             })}
                           </SelectContent>
-                        </Select>
+                        </Select> */}
+                        <Popover open={openSelectShopType} onOpenChange={setOpenSelectShopType}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openSelectShopType}
+                              className="w-full justify-between"
+                            >
+                              {shopType
+                                ? productGroupMas.find((produntGroup) => produntGroup.Value === shopType)?.Name
+                                : "เลือกประเภทร้านค้า"}
+                              <ChevronDown className="h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0">
+                            <Command shouldFilter={false}>
+                              <CommandInput 
+                                placeholder="ค้นหา..." 
+                                className="h-9"
+                                value={searchProductGroup}
+                                onValueChange={(value) => {
+                                  setSearchProductGroup(value)
+                                }}
+                              />
+                              <CommandList>
+                                <CommandEmpty>ไม่พบข้อมูล</CommandEmpty>
+                                <CommandGroup>
+                                  {productGroupMas.map((product) => {
+                                    return (
+                                      <CommandItem
+                                        key={product.ID}
+                                        value={product.Value}
+                                        onSelect={(curr) => {
+                                          setShopType(curr)
+                                          setOpenSelectShopType(false)
+                                        }}
+                                        data-selected={!(shopType === product.Value)}
+                                      >
+                                        {product.Name}
+                                      </CommandItem>
+                                    )
+                                  })}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                       </div>
 
                       {/* Product Type */}
