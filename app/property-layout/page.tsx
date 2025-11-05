@@ -406,14 +406,18 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         return
       }
       const isSelectUnit = bookingData.findIndex((item) => item.name === unit.name)
+      const unitBookDateList = unitBookingDateList.filter((item1) => bookingData.find((item2) => item1.unit_number === item2.name && item1.unit_number !== unit.name))
       // found
       if (isSelectUnit > -1) {
         // remove disable date
+        console.log(unitBookDateList, 'dateeee')
         const DisableDateKeyList = Object.keys(disableDateList)
         setDisableDateList((prev) => {
           DisableDateKeyList.forEach((date) => {
-            const foundDate = unitBookingDate.booking_date_list[date] === 1
-            if (foundDate){
+            const isAvaliable = unitBookDateList.filter((unitBooking) => {
+              return unitBooking.booking_date_list[date] === 1
+            })
+            if (isAvaliable.length === 0){
               prev[date] = 0
             }
           })
