@@ -534,6 +534,7 @@ export default function CanvasMap({
       setIsImageLoaded(true)
     }
     if (backgroundImageUrl && img.src !== backgroundImageUrl){
+      setIsImageLoaded(false)
       img.src = backgroundImageUrl
       setCircles([])
       if (onLoading){

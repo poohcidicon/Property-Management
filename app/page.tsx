@@ -22,6 +22,7 @@ export default function HomePage() {
   const [projectId, setProjectId] = useState<string | null>()
   const [initMonth, setInitMonth] = useState<string | null>()
   const [initYear, setInitYear] = useState<string | null>()
+  const [initZone, setInitZone] = useState<string | null>()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -29,14 +30,16 @@ export default function HomePage() {
     const selectProject = params.get('p')
     const selectInitMonth = params.get('month')
     const selectInitYear = params.get('year')
+    const selectInitZone = params.get('zone')
     setTypeBusiness(selectTypeBusiness || 'market')
     setProjectId(selectProject || 'M004')
     setInitYear(selectInitYear)
     setInitMonth(selectInitMonth)
+    setInitZone(selectInitZone)
   }, [])
 
   if (typeof typeBusiness === 'string' && types.includes(typeBusiness) && projectId) {
-    return <PropertyLayout typeBusiness={typeBusiness} projectId={projectId} initMonth={initMonth} initYear={initYear}/>
+    return <PropertyLayout typeBusiness={typeBusiness} projectId={projectId} initMonth={initMonth} initYear={initYear} initZone={initZone}/>
   }
 
   

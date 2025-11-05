@@ -101,9 +101,10 @@ export interface PropertyLayoutProps {
   projectId: string
   initMonth?: string | null
   initYear?: string | null
+  initZone?: string | null
 }
 
-export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear }: PropertyLayoutProps) {
+export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear, initZone }: PropertyLayoutProps) {
   // test project
   const { activeDate, floor } = useFilterStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
@@ -133,7 +134,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const [pendingBookingList, setPendingBookingList] = useState<BookingDetail[]>([])
   const [compensateUnitist, setCompensateUnitist] = useState<CompensateUnit[]>([])
   const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
-  const [selectPhase, setSelectPhase] = useState<number | null>(null)
+  const [selectPhase, setSelectPhase] = useState<number | null>(!isNaN(Number(initZone)) ? Number(initZone) : null)
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -323,9 +324,15 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
 
       // set init 
       const lengthZone = zoneData.data.length
-      // setSelectedZone(zoneData.data[lengthZone].zone_id)
-      // setCanvasBackgroundImage(zoneData.data[lengthZone-1].zone_path_image)
-      // setSelectPhase(zoneData.data[lengthZone-1].zone_id)
+      if (initZone){
+        const foundZone = zoneData.data.find((item) => item.zone_id === Number(initZone))
+        if (!foundZone){
+          return
+        }
+        setSelectedZone(foundZone.zone_id+"")
+        setCanvasBackgroundImage(foundZone.zone_path_image)
+        setSelectPhase(foundZone.zone_id)
+      }
     }
     else{
       setZoneList([])
@@ -632,6 +639,9 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         y: zoneData?.y || null
       })
     }
+    const params = new URLSearchParams(window.location.search);
+    params.set('zone', zone_id);
+    window.history.pushState({}, '', `?${params.toString()}`)
   }
 
   const onChangeSelectBookType = (value: string) => {
