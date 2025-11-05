@@ -47,124 +47,124 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       return false
     }
 
-    const runningNumber = await getRunNumberHotel({
-      projectID: payload.project_id,
-      runKey: process.env.RUN_KEY || 'Receipt_Hotel',
-      fixWord: "",
-      runningDate: dayjs(payload.checkout_date).toDate(),
-      sbuid: "",
-      userID: "system"
-    }, transaction.request())
+    // const runningNumber = await getRunNumberHotel({
+    //   projectID: payload.project_id,
+    //   runKey: process.env.RUN_KEY || 'Receipt_Hotel',
+    //   fixWord: "",
+    //   runningDate: dayjs(payload.checkout_date).toDate(),
+    //   sbuid: "",
+    //   userID: "system"
+    // }, transaction.request())
 
-    if (!runningNumber) {
-      await transaction.rollback();
-      return false
-    }
+    // if (!runningNumber) {
+    //   await transaction.rollback();
+    //   return false
+    // }
 
     // set payment
-    const VAT = 0.07
-    const baseAmount = Number((payload.total_amount / (1 + VAT)).toFixed(2))
-    const vatAmount = baseAmount * VAT
-    const queryInsReceipt = `
-      INSERT INTO [dbo].[Sys_Hotel_Receipt]
-        ([ReceiptID]
-        ,[ReceiptDate]
-        ,[GuestID]
-        ,[BaseAmount]
-        ,[VATPercent]
-        ,[VATAmount]
-        ,[WHTPercent]
-        ,[WHTAmount]
-        ,[TotalAmount]
-        ,[Status]
-        ,[CreateDate]
-        ,[CreateBy]
-        ,[ModifyDate]
-        ,[ModifyBy])
-      VALUES
-        (@ReceiptID
-        ,GETDATE()
-        ,1
-        ,@BaseAmount
-        ,@Vat
-        ,@VatAmount
-        ,0
-        ,0
-        ,@TotalAmount
-        ,'A'
-        ,GETDATE()
-        ,@CreateBy
-        ,GETDATE()
-        ,@CreateBy)
-    `
-    await transaction.request()
-      .input("ReceiptID", runningNumber)
-      .input("BaseAmount", baseAmount)
-      .input("Vat", VAT*100)
-      .input("VatAmount", vatAmount)
-      .input("TotalAmount", payload.total_amount)
-      .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
-      .query(queryInsReceipt)
+    // const VAT = 0.07
+    // const baseAmount = Number((payload.total_amount / (1 + VAT)).toFixed(2))
+    // const vatAmount = baseAmount * VAT
+    // const queryInsReceipt = `
+    //   INSERT INTO [dbo].[Sys_Hotel_Receipt]
+    //     ([ReceiptID]
+    //     ,[ReceiptDate]
+    //     ,[GuestID]
+    //     ,[BaseAmount]
+    //     ,[VATPercent]
+    //     ,[VATAmount]
+    //     ,[WHTPercent]
+    //     ,[WHTAmount]
+    //     ,[TotalAmount]
+    //     ,[Status]
+    //     ,[CreateDate]
+    //     ,[CreateBy]
+    //     ,[ModifyDate]
+    //     ,[ModifyBy])
+    //   VALUES
+    //     (@ReceiptID
+    //     ,GETDATE()
+    //     ,1
+    //     ,@BaseAmount
+    //     ,@Vat
+    //     ,@VatAmount
+    //     ,0
+    //     ,0
+    //     ,@TotalAmount
+    //     ,'A'
+    //     ,GETDATE()
+    //     ,@CreateBy
+    //     ,GETDATE()
+    //     ,@CreateBy)
+    // `
+    // await transaction.request()
+    //   .input("ReceiptID", runningNumber)
+    //   .input("BaseAmount", baseAmount)
+    //   .input("Vat", VAT*100)
+    //   .input("VatAmount", vatAmount)
+    //   .input("TotalAmount", payload.total_amount)
+    //   .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+    //   .query(queryInsReceipt)
 
-    const queryPayment = `
-      INSERT INTO [dbo].[Sys_Hotel_Payment]
-        ([BookRoomID]
-        ,[PaymentDate]
-        ,[PaymentType]
-        ,[ReceiptID]
-        ,[BaseAmount]
-        ,[VATPercent]
-        ,[VATAmount]
-        ,[FeeAmount]
-        ,[FeeVATAmount]
-        ,[TotalFee]
-        ,[WHTPercent]
-        ,[WHTAmount]
-        ,[TotalAmount]
-        ,[Status]
-        ,[CreateDate]
-        ,[CreateBy]
-        ,[ModifyDate]
-        ,[ModifyBy])
-     VALUES
-        (@BookRoomID
-        ,GETDATE()
-        ,@PaymentType
-        ,@ReceiptID
-        ,@BaseAmount
-        ,@VATPercent
-        ,@VATAmount
-        ,0
-        ,0
-        ,0
-        ,0
-        ,0
-        ,@TotalAmount
-        ,'A'
-        ,GETDATE()
-        ,@CreateBy
-        ,GETDATE()
-        ,@CreateBy)
-    `
-    await transaction.request()
-      .input("BookRoomID", payload.book_room_id)
-      .input("PaymentType", payload.payment_method)
-      .input("ReceiptID", runningNumber)
-      .input("BaseAmount", baseAmount)
-      .input("VATPercent", VAT*100)
-      .input("VATAmount", vatAmount)
-      .input("TotalAmount", payload.total_amount)
-      .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
-      .query(queryPayment)
+    // const queryPayment = `
+    //   INSERT INTO [dbo].[Sys_Hotel_Payment]
+    //     ([BookRoomID]
+    //     ,[PaymentDate]
+    //     ,[PaymentType]
+    //     ,[ReceiptID]
+    //     ,[BaseAmount]
+    //     ,[VATPercent]
+    //     ,[VATAmount]
+    //     ,[FeeAmount]
+    //     ,[FeeVATAmount]
+    //     ,[TotalFee]
+    //     ,[WHTPercent]
+    //     ,[WHTAmount]
+    //     ,[TotalAmount]
+    //     ,[Status]
+    //     ,[CreateDate]
+    //     ,[CreateBy]
+    //     ,[ModifyDate]
+    //     ,[ModifyBy])
+    //  VALUES
+    //     (@BookRoomID
+    //     ,GETDATE()
+    //     ,@PaymentType
+    //     ,@ReceiptID
+    //     ,@BaseAmount
+    //     ,@VATPercent
+    //     ,@VATAmount
+    //     ,0
+    //     ,0
+    //     ,0
+    //     ,0
+    //     ,0
+    //     ,@TotalAmount
+    //     ,'A'
+    //     ,GETDATE()
+    //     ,@CreateBy
+    //     ,GETDATE()
+    //     ,@CreateBy)
+    // `
+    // await transaction.request()
+    //   .input("BookRoomID", payload.book_room_id)
+    //   .input("PaymentType", payload.payment_method)
+    //   .input("ReceiptID", runningNumber)
+    //   .input("BaseAmount", baseAmount)
+    //   .input("VATPercent", VAT*100)
+    //   .input("VATAmount", vatAmount)
+    //   .input("TotalAmount", payload.total_amount)
+    //   .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+    //   .query(queryPayment)
 
-    const queryUpdateRoom = `
-      UPDATE [dbo].[VW_Hotel_RoomStatus]
-      SET Status = '0'
-      WHERE UnitID = @UnitID
-    `
-    await transaction.request()
-      .input("UnitID", payload.unit_id)
-      .query(queryUpdateRoom)
+    // const queryUpdateRoom = `
+    //   UPDATE [dbo].[VW_Hotel_RoomStatus]
+    //   SET Status = '0'
+    //   WHERE UnitID = @UnitID
+    // `
+    // await transaction.request()
+    //   .input("UnitID", payload.unit_id)
+    //   .query(queryUpdateRoom)
     
     const queryInsertCheckout = `
       INSERT INTO [dbo].[Sys_Hotel_CheckOut]

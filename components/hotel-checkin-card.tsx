@@ -69,6 +69,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [paymentRemark, setPaymentRemark] = useState<string | null>()
   const [openDeleteMaterialId, setDeleteMaterialId] = useState<number | null>(null)
   const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
+  const [showConfirmCheckoutDialog, setShowConfirmCheckoutDialog] = useState(false)
   const { projectId } = useProjectStore()
 
   const summaryPrice = (
@@ -80,6 +81,11 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   ) + (
     summaryMaterialPrice
   )
+
+  const gotoReservationsRental = (book_room_id: string) => {
+    const url = (process.env.NEXT_PUBLIC_RENTAL_URL !== "" ? process.env.NEXT_PUBLIC_RENTAL_URL : '/') + `/Hotel/Reservations/Reservations.aspx?p=${projectId}&brid=${book_room_id}&s=O`
+    window.open(url, '_blank')
+  }
 
   const handleCheckout = async () => {
     const checkin_customer = checkin_customers[0]
@@ -93,6 +99,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
+      gotoReservationsRental(checkin_customer.book_room_id)
       if (onChangeStatus) {
         onChangeStatus(true);
       }
@@ -517,9 +524,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   size="sm"
                   className="mt-2"
                   onClick={() => {
-                    setShowDialogCheckout(false)
-                    handlePreCheckout()
-                    // setShowPaymentDialog(true)
+                    // setShowDialogCheckout(false)
+                    // handlePreCheckout()
+                    setShowConfirmCheckoutDialog(true)
                   }}
                 >
                   ยืนยันเช็คเอาท์
@@ -690,6 +697,35 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 </Button>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showConfirmCheckoutDialog} onOpenChange={setShowConfirmCheckoutDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ยืนยันเช็คเอาท์
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmCheckoutDialog(false)
+              }}
+            >
+              ยกเลิก
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                handleCheckout()
+                setShowDialogCheckout(false)
+                setShowConfirmCheckoutDialog(false)
+              }}
+            >
+              ยืนยัน
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
