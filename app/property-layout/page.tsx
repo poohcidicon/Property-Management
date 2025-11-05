@@ -278,7 +278,8 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   }
 
   const gotoCRM = async () => {
-    window.location.href = (process.env.NEXT_PUBLIC_RENTAL_URL !== "" ? process.env.NEXT_PUBLIC_RENTAL_URL : '/') + '/CRM/th/ContactsInfo_Edit.aspx?proc=new'
+    const url = (process.env.NEXT_PUBLIC_RENTAL_URL !== "" ? process.env.NEXT_PUBLIC_RENTAL_URL : '/') + '/CRM/th/ContactsInfo_Edit.aspx?proc=new'
+    window.open(url, '_blank')
   }
 
   useEffect(() => {
@@ -1842,7 +1843,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                           <Button
                             variant="outline"
                             className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap mt-2"
-                            onClick={() => setShowGotoCRM(true)}
+                            onClick={() => gotoCRM()}
                           >
                             <PlusIcon /> เพิ่มลูกค้า
                           </Button>
