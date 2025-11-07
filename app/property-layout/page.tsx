@@ -326,12 +326,27 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       const lengthZone = zoneData.data.length
       if (initZone){
         const foundZone = zoneData.data.find((item) => item.zone_id === Number(initZone))
-        if (!foundZone){
+        if (foundZone){
+          setSelectedZone(foundZone.zone_id+"")
+          setCanvasBackgroundImage(foundZone.zone_path_image)
+          setSelectPhase(foundZone.zone_id)
           return
         }
-        setSelectedZone(foundZone.zone_id+"")
-        setCanvasBackgroundImage(foundZone.zone_path_image)
-        setSelectPhase(foundZone.zone_id)
+      }
+      let floorPlanFileCount = 0
+      let currentFloorPlan = zoneData.data[0]
+      zoneData.data.forEach((item) => {
+        if (item.zone_path_image !== currentFloorPlan.zone_path_image){
+          floorPlanFileCount = 1
+          currentFloorPlan = item
+        }
+        else{
+          floorPlanFileCount++
+        }
+      })
+      if (floorPlanFileCount === zoneData.data.length){
+        setCanvasBackgroundImage(currentFloorPlan.zone_path_image)
+        setSelectPhase(currentFloorPlan.zone_id)
       }
     }
     else{
