@@ -105,7 +105,7 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
         message: "Customer not found"
       }
     }
-    const mappingGuest = customerList.data.map<SysHotelGuests>((item) => {
+    let mappingGuest = customerList.data.map<SysHotelGuests>((item) => {
       return {
         GuestID: item.id,
         GuestFirstName: item.firstName ? item.firstName : item.firstNameEng,
@@ -126,33 +126,49 @@ export const getOtherGuestList = async (payload: IPayloadGetOtherGuestListContro
         GuestTitle: ""
       }
     })
-    const pool = await getConnection();
-    const query = `
-      SELECT DISTINCT g.*
-      ${payload.exclue_book_room_id ? `, (
-        SELECT COUNT(*) FROM Sys_Hotel_BookGuest 
-        WHERE BookRoomID = @ExcludeBookRoomID AND GuestID = g.GuestID
-      ) as IsBooked` : ``}
-      FROM Sys_Hotel_Guests g
-      LEFT JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
-      WHERE (g.GuestFirstName LIKE '%'+@Keyword+'%' 
-      or g.GuestLastName LIKE '%'+@Keyword+'%'
-      or g.GuestMobileNumber LIKE '%'+@Keyword+'%'
-      or g.GuestNationalityID = @Keyword)
-    `
-    const result = await pool.request()
-      .input("Keyword", payload.keyword || null)
-      .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
-      .query<SysHotelGuests>(query)
-    if (payload.exclue_book_room_id && result.recordset.length > 0){
-      // const availableList = mappingGuest.filter((item) => item.IsBooked === 0)
-      return {
-        success: true,
-        data: mappingGuest,
-        message: "Success",
-        error: ""
+    if (payload.exclue_book_room_id) {
+      const pool = await getConnection();
+      const { recordset: bookGuests } = await pool.request()
+        .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
+        .query<{
+          BookRoomID: string;
+          GuestID: string;
+        }>(`
+          SELECT bg.*
+          FROM Sys_Hotel_BookGuest bg
+          WHERE bg.BookRoomID = @ExcludeBookRoomID
+        `)
+      if (bookGuests.length > 0) {
+        const guestIds = bookGuests.map(item => item.GuestID)
+        mappingGuest = mappingGuest.filter(item => !guestIds.includes(item.GuestID))
       }
     }
+    // const pool = await getConnection();
+    // const query = `
+    //   SELECT DISTINCT g.*
+    //   ${payload.exclue_book_room_id ? `, (
+    //     SELECT COUNT(*) FROM Sys_Hotel_BookGuest 
+    //     WHERE BookRoomID = @ExcludeBookRoomID AND GuestID = g.GuestID
+    //   ) as IsBooked` : ``}
+    //   FROM Sys_Hotel_Guests g
+    //   LEFT JOIN Sys_Hotel_BookGuest bg ON g.GuestID = bg.GuestID
+    //   WHERE (g.GuestFirstName LIKE '%'+@Keyword+'%' 
+    //   or g.GuestLastName LIKE '%'+@Keyword+'%'
+    //   or g.GuestMobileNumber LIKE '%'+@Keyword+'%'
+    //   or g.GuestNationalityID = @Keyword)
+    // `
+    // const result = await pool.request()
+    //   .input("ExcludeBookRoomID", payload.exclue_book_room_id || null)
+    //   .query<SysHotelGuests>(query)
+    // if (payload.exclue_book_room_id && result.recordset.length > 0){
+    //   // const availableList = mappingGuest.filter((item) => item.IsBooked === 0)
+    //   return {
+    //     success: true,
+    //     data: mappingGuest,
+    //     message: "Success",
+    //     error: ""
+    //   }
+    // }
     return {
       success: true,
       data: mappingGuest,

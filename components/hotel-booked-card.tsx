@@ -40,10 +40,15 @@ interface CheckinData {
   guest_phone: string
 }
 
+interface SysHotelBookGuests extends SysHotelGuests {
+  book_room_id: string;
+}
+
 export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
   const { lastOtherGuest, ...modalOtherGuests } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
-  const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
+  const [otherGuests, setOtherGuests] = useState<SysHotelBookGuests[]>([]);
+  const [otherGuestsAll, setOtherGuestsAll] = useState<SysHotelBookGuests[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -109,6 +114,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       guest_name: sortedCheckinDetail[0].GuestFullName,
       guest_phone: sortedCheckinDetail[0].GuestPhone
     })
+    setOtherGuests(otherGuestsAll.filter(g => g.book_room_id === roomId))
   }
 
   const handleAddGuest = () => {
@@ -119,13 +125,21 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     const found = otherGuests.find(g => g.GuestID === c.GuestID)
     if (found){
       setOtherGuests(otherGuests.filter(g => g.GuestID !== c.GuestID))
+      setOtherGuestsAll(otherGuestsAll.filter(g => g.GuestID !== c.GuestID && g.book_room_id === roomId))
     }
   }
 
   const handleSetOtherGuest = (c: SysHotelGuests) => {
     const found = otherGuests.find(g => g.GuestID === c.GuestID)
     if (!found){
-      setOtherGuests([...otherGuests, c])
+      setOtherGuests([...otherGuests, {
+        ...c,
+        book_room_id: roomId!
+      }])
+      setOtherGuestsAll([...otherGuests, {
+        ...c,
+        book_room_id: roomId!
+      }])
     }
   }
 
