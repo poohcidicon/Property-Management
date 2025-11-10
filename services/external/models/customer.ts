@@ -97,3 +97,7 @@ export interface SysHotelGuests {
   IsDeleted: boolean;
   IsBooked?: number;
 }
+
+export interface SysHotelBookGuests extends SysHotelGuests {
+  book_room_id: string;
+}

@@ -1,4 +1,4 @@
-import { SysHotelGuests } from "@/services/external/models/customer";
+import { SysHotelBookGuests, SysHotelGuests } from "@/services/external/models/customer";
 import { create } from "zustand";
 
 interface ModalOtherGuestState {
@@ -6,7 +6,9 @@ interface ModalOtherGuestState {
   onOpen: () => void;
   onClose: () => void;
   lastOtherGuest: SysHotelGuests | null;
+  bookOtherGuests: SysHotelBookGuests[]
   setLastOtherGuest: (guest: SysHotelGuests) => void;
+  setBookOtherGuests: (guest: SysHotelBookGuests[]) => void
 }
 
 export const useModalOtherGuestStore = create<ModalOtherGuestState>((set) => ({
@@ -14,5 +16,7 @@ export const useModalOtherGuestStore = create<ModalOtherGuestState>((set) => ({
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),
   lastOtherGuest: null,
+  bookOtherGuests: [],
   setLastOtherGuest: (guest: SysHotelGuests) => set({ lastOtherGuest: guest }),
+  setBookOtherGuests: (guest: SysHotelBookGuests[]) => set({ bookOtherGuests: guest }),
 }));

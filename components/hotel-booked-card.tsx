@@ -11,6 +11,7 @@ import { useFilterStore } from '@/app/filter-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import SpinnerSmall from './ui/spinner-small';
+import { SysHotelBookGuests } from '@/services/external/models/customer';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -40,18 +41,19 @@ interface CheckinData {
   guest_phone: string
 }
 
-interface SysHotelBookGuests extends SysHotelGuests {
-  book_room_id: string;
-}
-
 export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
-  const { lastOtherGuest, ...modalOtherGuests } = useModalOtherGuestStore()
+  const { 
+    lastOtherGuest,
+    bookOtherGuests,
+    setBookOtherGuests,
+    ...modalOtherGuests 
+  } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelBookGuests[]>([]);
-  const [otherGuestsAll, setOtherGuestsAll] = useState<SysHotelBookGuests[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [counterSearch, setCountSearch] = useState(0)
   const handleCheckIn = async () => {
     const payloadGenMemberIdList = otherGuests.filter(g => !g.GuestCode).map(g => {
       return genMemberIdApi({ item_id: g.GuestID })
@@ -114,7 +116,8 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       guest_name: sortedCheckinDetail[0].GuestFullName,
       guest_phone: sortedCheckinDetail[0].GuestPhone
     })
-    setOtherGuests(otherGuestsAll.filter(g => g.book_room_id === roomId))
+    console.log(bookOtherGuests, 'bookOtherGuests')
+    setOtherGuests(bookOtherGuests.filter(g => g.book_room_id === roomId))
   }
 
   const handleAddGuest = () => {
@@ -125,7 +128,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     const found = otherGuests.find(g => g.GuestID === c.GuestID)
     if (found){
       setOtherGuests(otherGuests.filter(g => g.GuestID !== c.GuestID))
-      setOtherGuestsAll(otherGuestsAll.filter(g => g.GuestID !== c.GuestID && g.book_room_id === roomId))
+      setBookOtherGuests(bookOtherGuests.filter(g => g.GuestID !== c.GuestID && g.book_room_id === roomId))
     }
   }
 
@@ -136,7 +139,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
         ...c,
         book_room_id: roomId!
       }])
-      setOtherGuestsAll([...otherGuests, {
+      setBookOtherGuests([...bookOtherGuests, {
         ...c,
         book_room_id: roomId!
       }])
@@ -150,7 +153,8 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
   }, [booking])
 
   useEffect(() => {
-    if (lastOtherGuest){
+    setCountSearch(prev => prev+1)
+    if (lastOtherGuest && counterSearch > 0){
       handleSetOtherGuest(lastOtherGuest)
     }
   }, [lastOtherGuest])
