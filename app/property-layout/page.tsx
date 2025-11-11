@@ -960,6 +960,17 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     
     // ค้นหาจุดที่ต้องการยกเลิกจาก circles ที่มีอยู่
     const circleToCancel = circles.find(circle => circle.id === propertyId)
+
+    if (circleToCancel) {
+      handleDisableDateByProperty({
+        id: circleToCancel.id,
+        name: circleToCancel.name,
+        price: "",
+        status: circleToCancel.status,
+        m_price: circleToCancel.m_price,
+        d_price: circleToCancel.d_price,
+      })
+    }
     
     // ส่งสัญญาณไปยัง Canvas Map เพื่อยกเลิกการจองโดยตรง
     const cancelledProperty: Circle = circleToCancel ? {
@@ -1252,6 +1263,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     setSelectedDates([])
     // setShopType(null)
     setProductType(null)
+    setDisableDateList({})
     // if (externalCircleUpdateRef.current){
     //   const resetProperties = circles.map((property) => {
     //     return {...property, status: 'available' as const, bookedBy: undefined, bookedAt: undefined}
