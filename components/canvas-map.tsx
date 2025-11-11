@@ -205,7 +205,6 @@ export default function CanvasMap({
 
         let circlesData = unitMatrixData.data?.map((item) => {
           const unitBooking = unit_booking_list.find((unitBook) => item.unit_number === unitBook.unit_number)
-          console.log(unitBooking, 'unitBooking')
           const isBookedStatus = unitBooking ? Object.keys(unitBooking.booking_date_list).every((date) => unitBooking?.booking_date_list[date] === 1) : false
           return {
             id: item.unit_id,
