@@ -299,7 +299,7 @@ export default function CanvasMap({
 
     const handleCircleUpdate = (updatedCircle: Circle) => {
       console.log('📡 Received real-time circle update:', updatedCircle)
-      setHasReceivedSocketData((prev) => prev+1)
+      // setHasReceivedSocketData((prev) => prev+1)
       
       // Update local state only - DO NOT broadcast again
       setCircles(prevCircles => {
@@ -318,8 +318,14 @@ export default function CanvasMap({
       toast.info(`🔄 ${updatedCircle.name} เปลี่ยนเป็น ${statusText}`)
     }
 
+    const handleReceiveCurrent = (event: CustomEvent) => {
+      console.log('📡 Processing received current booking state from server')
+      setHasReceivedSocketData((prev) => prev+1)
+    }
+
     // Add socket listener for real-time updates
     socket.on('circleUpdated', handleCircleUpdate)
+    socket.on('receiveCurrentState', handleReceiveCurrent)
     console.log('🔌 Listening for real-time circle updates...')
     
     return () => {
@@ -469,8 +475,14 @@ export default function CanvasMap({
       }
     }
 
+    const handleReceiveCurrent = (event: CustomEvent) => {
+      console.log('📡 Processing received current booking state from server')
+      setHasReceivedSocketData((prev) => prev+1)
+    }
+
     // Listen for custom event from socket hook
     window.addEventListener('bookingsReleased', handleBookingsReleased as EventListener)
+    window.addEventListener('receiveCurrentState', handleReceiveCurrent as EventListener)
     
     return () => {
       window.removeEventListener('bookingsReleased', handleBookingsReleased as EventListener)

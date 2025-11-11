@@ -266,6 +266,15 @@ export function useRealtimeBooking() {
     setCurrentRoom(roomName);
   }, [socket, isConnected, currentRoom]);
 
+  const broadcastRoomUpdate = useCallback(() => {
+    console.log("📡 Broadcasting room update...");
+    if (!socket || !isConnected) {
+      console.log("❌ Cannot broadcast - not connected");
+      return;
+    }
+    socket.emit('broadcastCurrentState');
+  }, [socket, isConnected, currentRoom]);
+
   return {
     socket,
     isConnected,
@@ -278,5 +287,6 @@ export function useRealtimeBooking() {
     onSelectBooking,
     broadcastCircleUpdate,
     joinRoom,
+    broadcastRoomUpdate
   };
 }

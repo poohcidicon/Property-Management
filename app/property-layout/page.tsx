@@ -112,7 +112,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const { setUnitBookingList: setUnitBookingListAll } = useUnitBookingStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
-  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking, joinRoom, currentRoom } = useRealtimeBooking()
+  const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking, joinRoom, currentRoom, broadcastRoomUpdate } = useRealtimeBooking()
   const { isLoading: isLoadingUser } = useAuth()
   const customerData = useCustomerStore((state) => state.customer); // ใช้ zustand อ่านข้อมูลลูกค้า
   const [activeTab, setActiveTab] = useState("monthly")
@@ -1410,6 +1410,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
           description: ``,
           duration: 5000,
         })
+        broadcastRoomUpdate()
       } else {
         // ถ้าไม่มีจุดไหนอัพเดทสำเร็จเลย
         toast({

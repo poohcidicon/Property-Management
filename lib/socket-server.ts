@@ -669,6 +669,14 @@ const getSocketIO = async (): Promise<{ io: SocketIOServer; port: number }> => {
             // console.log(`📦 Sent current state to ${socket.id}: ${currentBookings.length} bookings`);
           });
 
+          socket.on("broadcastCurrentState", () => {
+            const room = socketRooms.get(socket.id);
+            console.log(`📡 Client ${socket.id} requested current booking state`);
+            if (room){
+              socket.to(room).emit("receiveCurrentState", true);
+            }
+          })
+
           socket.on("disconnect", (reason) => {
             console.log(`🔴 Client disconnected: ${socket.id}, reason: ${reason}`);
             
