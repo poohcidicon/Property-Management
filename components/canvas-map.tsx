@@ -51,7 +51,8 @@ interface CanvasMapProps {
   focus: {x: number | null, y: number | null},
   projectId: string;
   phase: number | null;
-  viewOnly?: boolean
+  viewOnly?: boolean;
+  isFullscreen?: boolean
 }
 
 export default function CanvasMap({ 
@@ -68,7 +69,8 @@ export default function CanvasMap({
   focus,
   projectId,
   phase,
-  viewOnly
+  viewOnly,
+  isFullscreen
 }: CanvasMapProps) {
   const { activeDate, floor } = useFilterStore()
   const { unit_booking_list } = useUnitBookingStore()
@@ -1139,7 +1141,7 @@ export default function CanvasMap({
       )}
 
       {/* Filter and Control Buttons */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2">
+      {!isFullscreen && <div className="absolute top-4 left-4 flex flex-col gap-2">
         {/* User Info */}
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-gray-200">
           {!viewOnly && <CardContent className="p-3">
@@ -1258,7 +1260,7 @@ export default function CanvasMap({
             รีเซ็ตมุมมอง
           </Button>
         </div>
-      </div>
+      </div>}
 
       {/* Hidden file input */}
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInputChange} className="hidden" />
@@ -1281,7 +1283,7 @@ export default function CanvasMap({
       )}
 
       {/* Enhanced Instructions */}
-      {(showInstructions && !viewOnly) && (
+      {(showInstructions && !viewOnly && !isFullscreen) && (
         <div className="absolute bottom-4 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
           <Button
             variant="ghost"

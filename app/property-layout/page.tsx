@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert, PlusIcon, ChevronDown } from "lucide-react"
+import { Search, Calendar, MapPin, Info, Menu, X, Upload, Send, RefreshCw, SearchIcon, CircleAlert, PlusIcon, ChevronDown, Fullscreen } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -138,6 +138,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   const [compensateUnitist, setCompensateUnitist] = useState<CompensateUnit[]>([])
   const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
   const [selectPhase, setSelectPhase] = useState<number | null>(!isNaN(Number(initZone)) ? Number(initZone) : null)
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { toast } = useToast()
 
   // Mock property data for the selected area
@@ -152,6 +153,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
   
   // Ref for external circle update handler
   const externalCircleUpdateRef = useRef<((circles: Circle[]) => void) | null>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
   
   // State สำหรับ circles จาก CanvasMap
   const [circles, setCircles] = useState<Circle[]>([])
@@ -306,6 +308,30 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     setIsLoadingUnitMatrix(false)
   }, [])
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreenElement =
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+
+      setIsFullscreen(fullscreenElement === canvasRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, []);
+
   // Join initial room when component mounts and socket is connected
   useEffect(() => {
     if (isConnected && joinRoom && selectedYear && selectedMonth) {
@@ -356,6 +382,24 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       setZoneList([])
     }
   }
+
+  const toggleFullscreen = async () => {
+    if (!canvasRef.current) return;
+
+    if (!isFullscreen) {
+      if (canvasRef.current.requestFullscreen) {
+        await canvasRef.current.requestFullscreen();
+      } else if ((canvasRef.current as any).webkitRequestFullscreen) {
+        (canvasRef.current as any).webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    }
+  };
 
   const getCompensateUnits = async (customerId: string): Promise<CompensateUnit[]> => {
     const result = await compensateUnitsApi({
@@ -1432,10 +1476,10 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         <div className="w-full lg:w-72 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 shadow-lg lg:shadow-lg">
         <div className="p-4 lg:p-6 space-y-6">
           {/* Header */}
-          <div className="text-center">
+          {!isFullscreen && <div className="text-center">
             <h3 className="text-lg lg:text-lg font-bold text-gray-800 mb-1">ระบบจัดการการเช่าตลาดนัด</h3>
             <p className="text-sm text-gray-500">Market Rental Management System</p>
-          </div>
+          </div>}
 
           {/* Tab Buttons */}
           {!viewOnly && <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
@@ -1957,6 +2001,13 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                 แสดงทั้งหมด
               </Badge>
               <span className="text-sm text-gray-600">อัพเดทล่าสุด: {lastRefreshTime.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+              <Button
+                variant="outline" 
+                onClick={toggleFullscreen}
+              >
+                <Fullscreen/>
+                {isFullscreen ? "ออก" : "แสดงเต็มจอ"}
+              </Button>
             </div>
             {/* <div className="flex items-center gap-2">
               <Button 
@@ -1975,10 +2026,13 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
 
         {/* Interactive Map Area */}
         <div className="flex-1 relative overflow-hidden bg-gray-50 min-h-[300px] lg:min-h-0">
-          <div className="absolute inset-0">
+          <div 
+            ref={canvasRef}
+            className="absolute inset-0">
             <div className="w-full h-full bg-white rounded-lg shadow-inner m-2 lg:m-4 overflow-hidden">
               <Spinner loading={isLoadingUnitMatrix} showSVG={isShowOverlay}>
                 <CanvasMap
+                  isFullscreen={isFullscreen}
                   backgroundImageUrl={canvasBackgroundImage}
                   onCircleClick={handlePropertyClick}
                   onImageUpload={handleImageUpload}

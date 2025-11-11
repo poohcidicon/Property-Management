@@ -20,6 +20,7 @@ export default function LoginUserPage() {
         window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH !== "" ? process.env.NEXT_PUBLIC_BASE_PATH : '/') 
         + (projectId ? `?p=${projectId}` : '')
         + (type ? `${projectId ? '&' : '?'}type=${type}` : '')
+        + (viewOnly ? `${projectId || type ? '&' : '?'}view=y` : '')
       } else {
         alert('Login failed: ' + resultLogin.message);
       }
