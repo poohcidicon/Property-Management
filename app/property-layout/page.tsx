@@ -23,7 +23,7 @@ import { useCustomerStore } from "../customer-store"; // เพิ่มบร�
 import { axiosPublic } from "@/lib/axios"
 import CustomerBookingCard from "@/components/customer-booking-card"
 import { useAuth } from "@/hooks/use-auth"
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipArrow, TooltipPortal } from "@radix-ui/react-tooltip"
@@ -331,6 +331,34 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
     };
   }, []);
+
+  // change phase every 5 seconds if viewOnly
+  useEffect(() => {
+    if (viewOnly) {
+      const handleReloadFilter = () => {
+        // phase
+        const newPhase = localStorage.getItem('phase')
+        if (newPhase && (Number(newPhase) !== selectPhase)) {
+          onChangeSearchZone(newPhase)
+        }
+
+        // // image
+        // const newImage = JSON.parse(localStorage.getItem('image_path') || "")
+        // console.log(newImage)
+        // if (newImage !== canvasBackgroundImage) {
+        //   setCanvasBackgroundImage(newImage)
+        // }
+      }
+
+      const interval = setInterval(() => {
+        handleReloadFilter()
+      }, 5000)
+
+      return () => {
+        clearInterval(interval)
+      }
+    }
+  }, [viewOnly, zoneList])
 
   // Join initial room when component mounts and socket is connected
   useEffect(() => {
@@ -689,6 +717,10 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
     // setCurrentMonth(Number(value))
   }
 
+  const handleSetLocalStorage = (key: string, data: any) => {
+    localStorage.setItem(key, JSON.stringify(data))
+  }
+
   const onChangeSearchZone = (zone_id: string) => {
     setSelectedZone(zone_id)
     const zoneData = zoneList.find((item) => {
@@ -701,10 +733,12 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         x: zoneData?.x || null,
         y: zoneData?.y || null
       })
+      handleSetLocalStorage('image_path', zoneData.imagePath)
     }
     const params = new URLSearchParams(window.location.search);
     params.set('zone', zone_id);
     window.history.pushState({}, '', `?${params.toString()}`)
+    handleSetLocalStorage('phase', Number(zone_id))
   }
 
   const onChangeSelectBookType = (value: string) => {
