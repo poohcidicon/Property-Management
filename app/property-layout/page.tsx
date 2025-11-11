@@ -33,6 +33,7 @@ import SpinnerSmall from "@/components/ui/spinner-small"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useUnitBookingStore } from "../unit-booking-store"
 interface Property {
   id: string
   name: string;
@@ -107,6 +108,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear, initZone }: PropertyLayoutProps) {
   // test project
   const { activeDate, floor } = useFilterStore()
+  const { setUnitBookingList: setUnitBookingListAll } = useUnitBookingStore()
   const setCustomer = useCustomerStore((state) => state.setCustomer)
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
   const { isConnected, isLoading, connectionError, retryCount, maxRetries, onSelectBooking, joinRoom, currentRoom } = useRealtimeBooking()
@@ -422,6 +424,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       // })
       // setUnitBookingDateList(newBookingDateList)
       setUnitBookingDateList(unitBookingDateData.data)
+      setUnitBookingListAll(unitBookingDateData.data)
     }
     else{
       setUnitBookingDateList([])

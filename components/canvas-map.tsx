@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
 import { useFilterStore } from "@/app/filter-store"
+import { useUnitBookingStore } from "@/app/unit-booking-store"
 
 export interface Circle {
   x: number
@@ -68,6 +69,7 @@ export default function CanvasMap({
   phase
 }: CanvasMapProps) {
   const { activeDate, floor } = useFilterStore()
+  const { unit_booking_list } = useUnitBookingStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
@@ -189,6 +191,9 @@ export default function CanvasMap({
         if (!phase){
           return
         }
+        if (unit_booking_list.length === 0) {
+          return
+        }
         const searchUnitMatrixPayload = {
           project_id: projectId,
           year: filterUnitMatrix?.year || 2025,
@@ -199,11 +204,14 @@ export default function CanvasMap({
         const unitMatrixData = await getUnitMatrixApi(searchUnitMatrixPayload)
 
         let circlesData = unitMatrixData.data?.map((item) => {
+          const unitBooking = unit_booking_list.find((unitBook) => item.unit_number === unitBook.unit_number)
+          console.log(unitBooking, 'unitBooking')
+          const isBookedStatus = unitBooking ? Object.keys(unitBooking.booking_date_list).every((date) => unitBooking?.booking_date_list[date] === 1) : false
           return {
             id: item.unit_id,
             r: 23,
-            status: item.status_desc.toLocaleLowerCase(),
-            initStatus: item.status_desc.toLocaleLowerCase(),
+            status: isBookedStatus ? 'booked' : item.status_desc.toLocaleLowerCase(),
+            initStatus: isBookedStatus ? 'booked' : item.status_desc.toLocaleLowerCase(),
             x: item.x,
             y: item.y,
             name: item.unit_number,
@@ -280,7 +288,7 @@ export default function CanvasMap({
       console.log(hasReceivedSocketData, 'hasReceivedSocketData')
       loadCircles()
     }
-  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, userLogin, phase])
+  }, [hasReceivedSocketData, filterUnitMatrix, filterDay, userLogin, phase, unit_booking_list])
 
   // Listen for real-time circle updates from other clients
   useEffect(() => {
