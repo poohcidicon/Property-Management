@@ -51,6 +51,7 @@ interface CanvasMapProps {
   focus: {x: number | null, y: number | null},
   projectId: string;
   phase: number | null;
+  viewOnly?: boolean
 }
 
 export default function CanvasMap({ 
@@ -66,7 +67,8 @@ export default function CanvasMap({
   onChangeFilterDay,
   focus,
   projectId,
-  phase
+  phase,
+  viewOnly
 }: CanvasMapProps) {
   const { activeDate, floor } = useFilterStore()
   const { unit_booking_list } = useUnitBookingStore()
@@ -112,7 +114,7 @@ export default function CanvasMap({
     // Check if this circle is selected in Property List
     const isSelectedInList = selectedPropertyIds?.has(circle.id) || false
     
-    if (circle.status === 'available' && circle.initStatus === 'available') {
+    if ((circle.status === 'available' && circle.initStatus === 'available')) {
       if (isSelectedInList) {
         // Selected in Property List - blue highlight
         return {
@@ -605,7 +607,7 @@ export default function CanvasMap({
       ctx.fillText(circle.name, circle.x, circle.y - 8 / scaleRef.current)
       
       // Draw username for pending bookings with different colors
-      if (circle.status === "pending" && circle.bookedBy) {
+      if (circle.status === "pending" && circle.bookedBy && !viewOnly) {
         const isOwnBooking = circle.bookedBy === currentUsername
         ctx.fillStyle = isOwnBooking ? "#473f3e" : "#786665" // Gold for own, orange for others
         ctx.font = `${10 / scaleRef.current}px Arial`
@@ -621,7 +623,7 @@ export default function CanvasMap({
     })
 
     ctx.restore()
-  }, [backgroundImage, circles, currentUsername])
+  }, [backgroundImage, circles, currentUsername, viewOnly])
 
   // Initialize canvas
   useEffect(() => {
@@ -819,6 +821,9 @@ export default function CanvasMap({
   // Handle circle click logic
   const handleCircleClick = useCallback(
     async (circle: Circle) => {
+      if (viewOnly) {
+        return
+      }
       try {
         let newStatus: Circle['status']
         let newBookedBy: string | undefined
@@ -874,7 +879,7 @@ export default function CanvasMap({
         toast.error('ไม่สามารถอัปเดตสถานะได้')
       }
     },
-    [currentUsername, broadcastCircleUpdate, onCircleClick]
+    [currentUsername, broadcastCircleUpdate, onCircleClick, viewOnly]
   )
 
   // Handle canvas click
@@ -1137,7 +1142,7 @@ export default function CanvasMap({
       <div className="absolute top-4 left-4 flex flex-col gap-2">
         {/* User Info */}
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border-gray-200">
-          <CardContent className="p-3">
+          {!viewOnly && <CardContent className="p-3">
             {/* User Info and Connection Status in one row */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -1170,7 +1175,7 @@ export default function CanvasMap({
                 </span>
               </div>
             </div>
-          </CardContent>
+          </CardContent>}
         </Card>
 
         {/* Filter Options */}
@@ -1276,7 +1281,7 @@ export default function CanvasMap({
       )}
 
       {/* Enhanced Instructions */}
-      {showInstructions && (
+      {(showInstructions && !viewOnly) && (
         <div className="absolute bottom-4 left-4 bg-black/80 text-white text-xs p-3 rounded-lg max-w-xs backdrop-blur-sm">
           <Button
             variant="ghost"

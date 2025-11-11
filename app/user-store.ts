@@ -4,6 +4,7 @@ type User = {
   id: string;
   username: string;
   user_id: string;
+  view_only: boolean;
 }
 
 type UserState = {

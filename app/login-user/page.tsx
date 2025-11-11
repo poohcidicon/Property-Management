@@ -12,9 +12,10 @@ export default function LoginUserPage() {
     const username = params.get('username');
     const projectId = params.get('p');
     const type = params.get('type')
+    const viewOnly = params.get('view') && params.get('view')?.toLocaleLowerCase() === 'y' ? true : false
 
     if (user_id && username) {
-      const resultLogin = await loginUser({ user_id, username });
+      const resultLogin = await loginUser({ user_id, username, view_only: viewOnly });
       if (resultLogin.success) {
         window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH !== "" ? process.env.NEXT_PUBLIC_BASE_PATH : '/') 
         + (projectId ? `?p=${projectId}` : '')

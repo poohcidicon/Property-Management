@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 export interface ILoginExternalPayload {
   username: string;
   user_id: string;
+  view_only: boolean
 }
 
 export const loginExternalController = async (payload: ILoginExternalPayload) => {
@@ -17,7 +18,8 @@ export const loginExternalController = async (payload: ILoginExternalPayload) =>
         session_id,
         username: payload.username,
         user_id: payload.user_id,
-        id: payload.user_id
+        id: payload.user_id,
+        view_only: payload.view_only
       },
       expiresIn: '24h'
     })
@@ -54,7 +56,8 @@ export const autherizeUser = async (): Promise<IResponse<IUserSession | null>> =
       session_id: decoded.session_id,
       username: decoded.username,
       user_id: decoded.user_id,
-      id: decoded.id
+      id: decoded.id,
+      view_only: decoded.view_only
     }
     return {
       success: true,

@@ -3,6 +3,7 @@ import { axiosPrivate } from "../axios";
 export interface ILoginUserPayload {
   user_id: string;
   username: string;
+  view_only: boolean
 }
 
 export const loginUser = async (payload: ILoginUserPayload) => {

@@ -3,4 +3,5 @@ export interface IUserSession {
   id: string; 
   username: string;
   user_id: string;
+  view_only: boolean
 }

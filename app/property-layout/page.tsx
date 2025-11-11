@@ -103,9 +103,10 @@ export interface PropertyLayoutProps {
   initMonth?: string | null
   initYear?: string | null
   initZone?: string | null
+  viewOnly?: boolean
 }
 
-export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear, initZone }: PropertyLayoutProps) {
+export default function PropertyLayout({ typeBusiness, projectId, initMonth, initYear, initZone, viewOnly }: PropertyLayoutProps) {
   // test project
   const { activeDate, floor } = useFilterStore()
   const { setUnitBookingList: setUnitBookingListAll } = useUnitBookingStore()
@@ -1437,7 +1438,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
           </div>
 
           {/* Tab Buttons */}
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+          {!viewOnly && <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
             <Button
               variant={activeTab === "monthly" ? "default" : "ghost"}
               onClick={() => onChangeSelectBookType("monthly")}
@@ -1458,7 +1459,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
               <Calendar className="w-4 h-4 mr-2" />
               รายวัน
             </Button>
-          </div>
+          </div>}
 
           {/* Filters Card */}
           <Card className="shadow-sm border-gray-200">
@@ -1995,6 +1996,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                   focus={focusCanvas}
                   projectId={projectId}
                   phase={selectPhase}
+                  viewOnly={viewOnly}
                 />
               </Spinner>
             </div>
@@ -2562,7 +2564,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
           </div>
 
           {/* Detail Panel Toggle Button - แสดงเฉพาะเมื่อไม่มีกรอบใดแสดงอยู่ */}
-          {!showPropertyList && !showDetailPanel && (
+          {!showPropertyList && !showDetailPanel && !viewOnly && (
             <Button
               onClick={() => setShowDetailPanel(!showDetailPanel)}
               className="absolute top-4 right-4 transition-all duration-300 h-12 w-12 rounded-full bg-green-500 hover:bg-green-600 shadow-lg z-10"
