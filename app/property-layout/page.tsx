@@ -358,7 +358,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
         clearInterval(interval)
       }
     }
-  }, [viewOnly, zoneList])
+  }, [viewOnly, zoneList, selectPhase])
 
   // Join initial room when component mounts and socket is connected
   useEffect(() => {
