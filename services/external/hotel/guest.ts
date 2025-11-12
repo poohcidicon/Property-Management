@@ -21,7 +21,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
       INNER JOIN Sys_Hotel_BookRoom gbr ON (g.BookRoomID = gbr.BookRoomID)
-      WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P'
+      WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P' and gbr.Status <> 'O'
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
