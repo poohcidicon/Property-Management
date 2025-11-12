@@ -278,7 +278,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
           })}
           <div className="flex justify-between pt-2 border-t border-gray-200">
             <span className="text-gray-800 font-semibold">ค่าจองทั้งหมด:</span>
-            <span className="font-bold text-lg text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || '0'}</span>
+            <span className="font-bold text-lg text-green-600">฿ {checkinDetail?.amount?.toLocaleString() || '0'}</span>
           </div>
         </div>
       </div>

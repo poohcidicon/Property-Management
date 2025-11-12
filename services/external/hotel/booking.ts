@@ -33,7 +33,7 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
     delete checkinBooking.parameters['UnitID']
     let insertListOnDate = []
     let count = 0
-    for(let d = dayjs(payload.start_date); (d.isBefore(dayjs(payload.end_date)) || d.isSame(dayjs(payload.end_date))); d = d.add(1, 'day')){
+    for(let d = dayjs(payload.start_date); d.isBefore(dayjs(payload.end_date)); d = d.add(1, 'day')){
       checkinBooking.input(`UnitID_${count}`, payload.unit_id)
       checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
       checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
