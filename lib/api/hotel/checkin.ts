@@ -208,6 +208,7 @@ export interface CheckinDetail {
   BookRoomID: string;
   BookingID: string;
   CheckIn: string;
+  CheckOut: string;
   RoomNumber: string;
   Status: string;
   Amount: number;

@@ -40,7 +40,10 @@ export const getUnitsHotelService = async (payload: {
       }>(`
         SELECT * FROM Sys_Hotel_CheckIn
         WHERE Status = 'A'
-        AND CheckIn = convert(date, @CheckInDate)
+        AND (
+          CheckIn = convert(date, @CheckInDate)
+          OR CheckIn = DATEADD(day, -1, CONVERT(date, @CheckInDate))
+        )
       `)
 
     const mappingData = result.recordset.map<UnitMatrixHotel>((item, index) => {

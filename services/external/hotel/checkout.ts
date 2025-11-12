@@ -233,7 +233,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("BookRoomID", bookingData.BookRoomID)
       .query(`
         UPDATE Sys_Hotel_BookRoom
-        SET Status = 'P'
+        SET Status = 'O'
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
       `)
 

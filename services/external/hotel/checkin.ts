@@ -199,11 +199,12 @@ export interface CheckinDetail {
   BookRoomID: string;
   BookingID: string;
   CheckIn: string;
+  CheckOut: string;
   RoomNumber: string;
   Status: string;
   Amount: number
   GuestFullName: string;
-  GuestPhone: string
+  GuestPhone: string;
 }
 
 export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<CheckinDetail[]> => {
@@ -211,11 +212,13 @@ export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<
   const result = await pool.request()
     .input("BookRoomID", payload.book_room_id)
     .query(`
-      SELECT c.BookRoomID, c.BookingID, c.CheckIn, c.RoomNumber, b.Status
+      SELECT c.BookRoomID, c.BookingID, c.RoomNumber, b.Status
       , b.Amount, b.LeadGuest as GuestFullName, b.LeadPhone as GuestPhone
+      , br.CheckIn, br.CheckOut
       FROM Sys_Hotel_CheckIn c
       inner join Sys_Hotel_Booking b on (c.BookingID = b.BookingID)
-      WHERE BookRoomID = @BookRoomID
+      inner join Sys_Hotel_BookRoom br on (c.BookRoomID = br.BookRoomID)
+      WHERE c.BookRoomID = @BookRoomID
       ORDER BY CheckIn
     `)
   return result.recordset

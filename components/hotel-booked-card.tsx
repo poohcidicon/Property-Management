@@ -103,13 +103,11 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       const dateB = new Date(b.CheckIn);
       return dateA.getTime() - dateB.getTime();
     })
-    const checkinDate = sortedCheckinDetail[0].CheckIn
-    const checkoutDate = sortedCheckinDetail[sortedCheckinDetail.length - 1].CheckIn
     setCheckinDetail({
       booking_id: sortedCheckinDetail[0].BookingID,
       book_room_id: sortedCheckinDetail[0].BookRoomID,
-      check_in: checkinDate,
-      check_out: checkoutDate,
+      check_in: sortedCheckinDetail[0].CheckIn,
+      check_out: sortedCheckinDetail[0].CheckOut,
       room_number: sortedCheckinDetail[0].RoomNumber,
       status: sortedCheckinDetail[0].Status,
       amount: sortedCheckinDetail[0].Amount,
