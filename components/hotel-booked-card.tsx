@@ -252,14 +252,14 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
                   <div className="flex justify-between">
                     <span className="text-gray-600">เช็คอินวันที่:</span>
                     <span className="font-medium text-gray-800">
-                      {selectGuest?.start_booking ? new Date(selectGuest?.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'}
+                      {checkinDetail?.check_in ? format(new Date(checkinDetail?.check_in), "dd MMM yyyy", { locale: th }) : '08 ต.ค. 2025'}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
                     <span className="text-gray-600">เช็คเอาท์วันที่:</span>
                     <span className="font-medium text-gray-800">
-                      {selectGuest?.end_booking ? new Date(selectGuest?.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'}
+                      {checkinDetail?.check_out ? format(new Date(checkinDetail?.check_out), "dd MMM yyyy", { locale: th }) : '11 ต.ค. 2025'}
                     </span>
                   </div>
                 </div>

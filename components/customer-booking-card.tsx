@@ -133,7 +133,7 @@ export default function CustomerBookingCard({
       const pendingList = guestList.data.filter(g => !g.checkin).map<PendingBooking>((g) => {
         const checkInDate = g.start_booking ? g.start_booking : new Date().toISOString();
         const checkOutDate = g.end_booking ? g.end_booking: new Date().toISOString();
-        const numberOfDays = g.night || 1
+        const numberOfDays = dayjs(g.end_booking).diff(dayjs(g.start_booking), 'day');
         const totalAmount = g.total_amount || 0;
         return {
           id: g.id,
