@@ -5,12 +5,14 @@ import dayjs from "dayjs";
 
 export interface IPayloadGetGuestListController {
   checkin_date: string; // ISO date string
+  project_id: string
 }
 
 export const getGuestListController = async (payload: IPayloadGetGuestListController): Promise<IResponse<IGuest[]>> => {
   try {
     const result = await getGuestList({
-      checkin_date: payload.checkin_date
+      checkin_date: payload.checkin_date,
+      project_id: payload.project_id
     })
     return result
   }

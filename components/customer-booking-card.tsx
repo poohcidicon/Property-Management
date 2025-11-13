@@ -15,6 +15,7 @@ import dayjs from "dayjs"
 import { useCustomerStore } from "@/app/customer-store"
 import { useFilterStore } from "@/app/filter-store"
 import SpinnerSmall from "./ui/spinner-small"
+import { useProjectStore } from "@/app/project-store"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -27,6 +28,7 @@ export default function CustomerBookingCard({
     onPendingBookingsChange?: (guest: any) => void
     onCheckedInBookingsChange?: (guest: any) => void
 }) {
+    const { projectId } = useProjectStore()
     const { activeDate } = useFilterStore()
     const [selectedBooking, setSelectedBooking] = useState<PendingBooking | null>(null);
     const [selectedRoomType, setSelectedRoomType] = useState<"standard" | "family" | "superior" | "deluxe" |null>(null);
@@ -104,6 +106,9 @@ export default function CustomerBookingCard({
     const loadGuest = async () => {
       // test checkin date 2025-10-12
       // const checkinDate = '2025-10-12';)
+      if (!projectId) {
+        return
+      }
       let checkinDate = dayjs().format('YYYY-MM-DD')
       
       const params = new URLSearchParams(window.location.search);
@@ -122,7 +127,8 @@ export default function CustomerBookingCard({
       }
       setIsLoading(true)
       const guestList = await getGuestListApi({
-        checkin_date: checkinDate
+        checkin_date: checkinDate,
+        project_id: projectId
       });
       setIsLoading(false)
       if(!guestList.success || !guestList.data){
@@ -171,7 +177,7 @@ export default function CustomerBookingCard({
 
     useEffect(() => {
       loadGuest();
-    }, [counter, activeDate])
+    }, [counter, activeDate, projectId])
 
 
     return (

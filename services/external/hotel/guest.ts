@@ -7,6 +7,7 @@ import { getCustomerRental } from "../test-rental/get-customer";
 
 export interface IPayloadGetGuestListService {
   checkin_date?: string; // ISO date string
+  project_id: string
 }
 export const getGuestList = async (payload: IPayloadGetGuestListService): Promise<IResponse<IGuest[]>> => {
   try {
@@ -22,9 +23,11 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
       INNER JOIN Sys_Hotel_BookRoom gbr ON (g.BookRoomID = gbr.BookRoomID)
       WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P' and gbr.Status <> 'O'
+      AND g.ProjectID = @ProjectID
     `
     const result = await pool.request()
       .input("CheckInDate", payload.checkin_date || null)
+      .input("ProjectID", payload.project_id)
       .query<BookingGuest>(query)
     
     const haveSetCheckin: Record<string, boolean> = {}

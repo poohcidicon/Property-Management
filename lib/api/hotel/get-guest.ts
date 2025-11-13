@@ -40,11 +40,13 @@ export interface Guest {
 
 export interface GetGuestListPayload {
   checkin_date: string; // ISO date string
+  project_id: string
 }
 export const getGuestListApi = async (payload: GetGuestListPayload): Promise<ApiResponse<Guest[]>> => {
   try{
     const response = await axiosPublic.post('/api/hotel/get-guests', {
-      checkin_date: payload.checkin_date
+      checkin_date: payload.checkin_date,
+      project_id: payload.project_id
     });
     return response.data
   }

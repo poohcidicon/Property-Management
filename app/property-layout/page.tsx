@@ -164,6 +164,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
 
   const handleGetGuestList = async () => {
+    if (!projectId){
+      return
+    }
     let checkDate = dayjs().format('YYYY-MM-DD')
 
     const params = new URLSearchParams(window.location.search);
@@ -180,6 +183,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setMainLoading(true)
     const guestList = await getGuestListApi({
       checkin_date: checkDate,
+      project_id: projectId
     })
     setMainLoading(false)
     setGuestList(guestList.data || [])
@@ -315,7 +319,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     }
     init()
     setIsLoadingUnitMatrix(false)
-  }, [currentBusinessType, activeDate])
+  }, [currentBusinessType, activeDate, projectId])
   const getZoneList = async () => {
     const zoneData = await getZonesByProjectApi({ project_id: projectId })
     if (zoneData.data && zoneData.data?.length > 0){
