@@ -1000,6 +1000,10 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     console.log('property', property)
     // For hotel business type, show room dialog instead of property list
     if (currentBusinessType === "hotel") {
+      if (pendingBookingHotel?.assignedRoomId && (pendingBookingHotel?.assignedRoomId !== property.id)){
+        handleHotelRoomDialogClose()
+        return
+      }
       setSelectedProperty(property)
       
       // Dispatch custom event to notify CanvasMap about the selected property
@@ -1102,7 +1106,22 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     setSelectedProperty(null)
     // Reset selected room type to stop blinking animation
     setSelectedRoomType(null)
+    setShowHotelRoomDialog(false)
     window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
+  }
+
+  const handleClickPendingBookRoom = (guest: PendingBooking) => {
+    if (!guest){
+      handleHotelRoomDialogClose()
+    }
+    if (guest && guest.assignedRoomId){
+      const property = circles.find((c) => c.id === guest.assignedRoomId)
+      if (property){
+        handlePropertyClick(property)
+        setSelectedRoomType(null)
+      }
+    }
+    setPendingBookingHotel(guest)
   }
 
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -1594,7 +1613,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         <CustomerBookingCard
           counter={searchUnitMatrix.counter}
           onRoomTypeChange={(roomType: string | null) => setSelectedRoomType(roomType as "standard" | "family" | null)}
-          onPendingBookingsChange={(guest: PendingBooking) => setPendingBookingHotel(guest)}
+          onPendingBookingsChange={(guest: PendingBooking) => {
+            handleClickPendingBookRoom(guest)
+          }}
           onCheckedInBookingsChange={(guest: CheckedInBooking) => {
             // if (guest?.assignedRoomId){
             //   handlePropertyClick(circles.find(circle => circle.id === guest.assignedRoomId) as Circle)
@@ -1962,6 +1983,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   selectedRoomType={selectedRoomType}
                   businessType={currentBusinessType as "hotel" | "market"}
                   selectedFloor={selectedFloor}
+                  selectPendingGuest={pendingBookingHotel}
                 />
               </Spinner>
             </div>

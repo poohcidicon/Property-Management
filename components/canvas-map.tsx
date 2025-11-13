@@ -17,6 +17,7 @@ import { useProjectStore } from "@/app/project-store"
 import { useFilterStore } from "@/app/filter-store"
 import Spinner from "./ui/Spinner"
 import SpinnerSmall from "./ui/spinner-small"
+import { PendingBooking } from "@/data/booking-mock-data"
 
 export interface Circle {
   x: number
@@ -81,6 +82,7 @@ interface CanvasMapProps {
   onCustomerSelect?: (customer: Customer | null) => void // callback เมื่อเลือกลูกค้า
   businessType?: "hotel" | "market" // 🆕 เพิ่ม prop นี้
   selectedFloor?: number // 🆕 เพิ่ม prop นี้สำหรับเลือกชั้น
+  selectPendingGuest?: PendingBooking | null
 }
 
 export const ROOM_TYPE_COLORS = {
@@ -129,6 +131,7 @@ export default function CanvasMap({
   onCustomerSelect,
   businessType = "market",
   selectedFloor = 1,
+  selectPendingGuest
 }: CanvasMapProps) {
   const { projectId } = useProjectStore()
   const { activeDate, floor } = useFilterStore()
@@ -1202,7 +1205,9 @@ export default function CanvasMap({
 
       // For hotel mode, update selectedProperty and call onCircleClick
       if (businessType === "hotel") {
-        setSelectedProperty(circle) // Set the selected property to show yellow highlight
+        if (!selectPendingGuest || (selectPendingGuest.assignedRoomId === circle.id)){
+          setSelectedProperty(circle)
+        }
         onCircleClick?.(circle)
         return
       }
