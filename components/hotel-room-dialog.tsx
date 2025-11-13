@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import HotelClearingCard from "./hotel-clearing-card"
+import dayjs from "dayjs"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -22,6 +23,7 @@ interface HotelRoomDialogProps {
   statusType?: "available" | "booked" | "checkin" | "clearing"
   customerData?: any | null
   onDialogClose?: () => void // Add callback for dialog close
+  selectGuest?: PendingBooking | null
 }
 
 export default function HotelRoomDialog({
@@ -34,8 +36,10 @@ export default function HotelRoomDialog({
   guestList,
   statusType = "available",
   customerData,
+  selectGuest,
   onDialogClose
 }: HotelRoomDialogProps) {
+  console.log(selectGuest, 'selectGuest')
 
   const [guest, setGuest] = useState<Guest | null>(null);
 
@@ -193,7 +197,9 @@ export default function HotelRoomDialog({
           <div className="flex items-center text-sm text-gray-600">
             <Calendar className="w-4 h-4 mr-2 text-gray-500" />
             <span>
-              {selectedProperty?.booking?.start_date && selectedProperty?.booking?.end_date
+              {selectGuest?.checkInDate && selectGuest?.checkOutDate 
+                ? `${format(selectGuest?.checkInDate, "dd MMM", { locale: th })} - ${format(selectGuest?.checkOutDate, "dd MMM yyyy", { locale: th })}`
+                : selectedProperty?.booking?.start_date && selectedProperty?.booking?.end_date
                 ? `${new Date(selectedProperty.booking.start_date).toLocaleDateString('th-TH')} - ${new Date(selectedProperty.booking.end_date).toLocaleDateString('th-TH')}`
                 // : `${new Intl.DateTimeFormat('th-TH', { month: 'short', day: 'numeric' }).format(new Date())}  -  ${new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))}`
                 : `${format(new Date(), "dd MMM", { locale: th })} - ${format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "dd MMM yyyy", { locale: th })}`
@@ -204,7 +210,7 @@ export default function HotelRoomDialog({
             <CheckCircle className="w-4 h-4 mr-2" />
             <span>
               {statusType === "available"
-                ? "ห้องว่างตามวันที่ต้องการ (3 คืน)"
+                ? `ห้องว่างตามวันที่ต้องการ (${selectGuest?.checkInDate && selectGuest?.checkOutDate ? Math.abs(dayjs(selectGuest?.checkInDate).diff(dayjs(selectGuest?.checkOutDate), 'day')): '3'} คืน)`
                 : statusType === "booked"
                   ? `ถูกจองโดย ${selectedProperty?.booking?.customer_id || 'ลูกค้า'}`
                   : statusType === "checkin"

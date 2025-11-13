@@ -1111,7 +1111,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   }
 
   const handleClickPendingBookRoom = (guest: PendingBooking) => {
-    if (!guest){
+    if (!guest || (guest && (guest !== pendingBookingHotel))){
       handleHotelRoomDialogClose()
     }
     if (guest && guest.assignedRoomId){
@@ -2556,6 +2556,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             statusType={statusType}
             customerData={customerData}
             onDialogClose={handleHotelRoomDialogClose}
+            selectGuest={pendingBookingHotel}
           />
 
           {/* Detail Panel Toggle Button - แสดงเฉพาะเมื่อไม่มีกรอบใดแสดงอยู่ */}
