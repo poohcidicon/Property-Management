@@ -266,7 +266,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("BookRoomID", payload.book_room_id)
         .input("EffectDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
         .input("Description", damage.material_name)
-        .input("RefType", "Damage")
+        .input("RefType", "Service")
         .input("RefID", damage.material_id)
         .input("Quantity", 1)
         .input("Price", amount)
