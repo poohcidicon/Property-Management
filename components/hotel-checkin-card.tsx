@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Clock, X, Trash } from 'lucide-react';
+import { Plus, Clock, X, Trash, ChevronDown } from 'lucide-react';
 import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
@@ -14,6 +14,8 @@ import { useProjectStore } from '@/app/project-store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { TooltipPortal } from '@radix-ui/react-tooltip';
 import FormattedInput from './ui/formatted-input';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -48,6 +50,13 @@ interface CheckinData {
   amount: number;
 }
 
+interface MaterialPrice {
+  id: string;
+  material_id: string | null;
+  material_name: string;
+  price: number;
+}
+
 export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -60,7 +69,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [materialPrice, setMaterialPrice] = useState<number>(0)
   const [bookMaterialList, setBookMaterialList] = useState<IBookMaterialOption[]>([])
   const [damagesPrice, setDamagesPrice] = useState<number>(0)
+  const [damagesPriceList, setDamagePriceList] = useState<MaterialPrice[]>([])
   const [minibarPrice, setMinibarPrice] = useState<number>(0)
+  const [minibarPriceList, setMinibarPriceList] = useState<MaterialPrice[]>([])
   const [summaryMaterialPrice, setSummaryMaterialPrice] = useState<number>(0)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [payInDate, setPayInDate] = useState<any>(null)
@@ -69,6 +80,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [openDeleteMaterialId, setDeleteMaterialId] = useState<number | null>(null)
   const [checkinDetail, setCheckinDetail] = useState<CheckinData | null>(null)
   const [showConfirmCheckoutDialog, setShowConfirmCheckoutDialog] = useState(false)
+  const [selectMaterialDamage, setSelectMaterialDamage] = useState<string | null>(null)
+  const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
 
   const summaryPrice = (
@@ -211,6 +224,22 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     if (result.data){
       loadBookMaterialOption()
     }
+  }
+
+  const addDamagePriceList = () => {
+    setDamagePriceList([
+      ...damagesPriceList,
+      {
+        id: `damage-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        material_id: null,
+        material_name: "",
+        price: 0
+      }
+    ])
+  }
+
+  const deleteDamagePriceList = (id: string) => {
+    setDamagePriceList(damagesPriceList.filter((item) => item.id !== id))
   }
 
   const handlePreCheckout = async () => {
@@ -457,12 +486,103 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           </DialogHeader>
           <div className="flex-1 overflow-auto p-1">
             <div className='flex flex-col gap-1'>
-              <FormattedInput
-                label="ค่าความเสียหาย (บาท)"
-                type="number"
-                value={damagesPrice}
-                onChange={setDamagesPrice}
-              />
+              <div className="flex gap-4 items-center">
+                <label>ค่าความเสียหาย (บาท)</label>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
+                  onClick={addDamagePriceList}
+                >
+                  +
+                </button>
+              </div>
+              <div className="flex flex-col gap-2">
+                {damagesPriceList.map((damage, damageIndex) => {
+                  return (
+                    <div
+                      key={damage.id}
+                      className="flex gap-4 items-center"
+                    >
+                      <div className='w-full max-w-41'>
+                        <Popover open={selectMaterialDamage === damage.id} onOpenChange={() => {
+                          if (selectMaterialDamage === damage.id) {
+                            setSelectMaterialDamage(null)
+                          }
+                          else{
+                            setSelectMaterialDamage(damage.id)
+                          }
+                        }}>
+                          <PopoverTrigger asChild>
+                            <input
+                              type="text"
+                              placeholder=""
+                              value={damage.material_name}
+                              onChange={(e) => {
+                                setDamagePriceList((prev) => {
+                                  prev[damageIndex].material_name = e.target.value
+                                  return prev
+                                })
+                                setCounter((prev) => prev+1)
+                              }}
+                              className="flex-1 w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0">
+                            <Command shouldFilter={false}>
+                              {/* <CommandInput 
+                                placeholder="ค้นหา..." 
+                                className="h-9"
+                                // value={searchProductGroup}
+                                // onValueChange={(value) => {
+                                //   setSearchProductGroup(value)
+                                // }}
+                              /> */}
+                              <CommandList>
+                                <CommandEmpty>ไม่พบข้อมูล</CommandEmpty>
+                                <CommandGroup>
+                                  {materialMas.map((material) => {
+                                    return (
+                                      <CommandItem
+                                        key={material.MaterialID}
+                                        value={material.MaterialID}
+                                        onSelect={(curr) => {
+                                          if (damageIndex !== -1){
+                                            console.log(damageIndex, 'damageIndex')
+                                            setDamagePriceList((prev) => {
+                                              prev[damageIndex].material_id = curr
+                                              prev[damageIndex].material_name = material.MaterialName
+                                              prev[damageIndex].price = 0
+                                              return prev
+                                            })
+                                            setSelectMaterialDamage(null)
+                                          }
+                                        }}
+                                        data-selected={!(damage.material_id === material.MaterialID)}
+                                      >
+                                        {material.MaterialName}
+                                      </CommandItem>
+                                    )
+                                  })}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <FormattedInput
+                        label=""
+                        type="number"
+                        value={damagesPrice}
+                        onChange={setDamagesPrice}
+                      />
+                      <div 
+                        className='rounded-full border p-1 cursor-pointer'
+                        onClick={() => deleteDamagePriceList(damage.id)}
+                      >
+                        <Trash className='text-gray-600' size={12}/>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
               <FormattedInput
                 label="ค่า Minibar (บาท)"
                 type="number"
