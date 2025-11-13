@@ -1105,7 +1105,6 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
     // Clear selected property when dialog closes
     setSelectedProperty(null)
     // Reset selected room type to stop blinking animation
-    // setSelectedRoomType(null)
     setShowHotelRoomDialog(false)
     window.dispatchEvent(new CustomEvent("selectedPropertyChanged", { detail: null }))
   }
