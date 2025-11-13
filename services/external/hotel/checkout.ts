@@ -14,7 +14,6 @@ export interface IPayloadCheckoutUnitService {
   create_by: string;
   remark?: string
   damages: Array<{ id: string; material_id: string; material_name: string; price: number }>;
-  minibars: Array<{ id: string; material_id: string; material_name: string; price: number }>;
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -269,33 +268,6 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("Description", damage.material_name)
         .input("RefType", "Damage")
         .input("RefID", damage.material_id)
-        .input("Quantity", 1)
-        .input("Price", amount)
-        .input("Discount", 0)
-        .input("FeeQuantity", 0)
-        .input("BaseAmount", baseAmount)
-        .input("VATPercent", VAT*100)
-        .input("VATAmount", vatAmount)
-        .input("TotalAmount", amount)
-        .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
-        .query(insertPayTransQuery)
-    }
-
-    for (const minibar of payload.minibars) {
-      const VAT = 0.07
-      const amount = minibar.price * 1
-      const baseAmount = Number((amount / (1 + VAT)).toFixed(2))
-      const vatAmount = baseAmount * VAT
-      const { recordset: [payTransID] } = await transaction.request().query(`
-        SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
-      `)
-      await transaction.request()
-        .input("PayTransID", payTransID.PayTransID)
-        .input("BookRoomID", payload.book_room_id)
-        .input("EffectDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
-        .input("Description", minibar.material_name)
-        .input("RefType", "Minibar")
-        .input("RefID", minibar.material_id)
         .input("Quantity", 1)
         .input("Price", amount)
         .input("Discount", 0)

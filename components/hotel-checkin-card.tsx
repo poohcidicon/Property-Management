@@ -85,10 +85,11 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
 
+  const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+curr.price, 0)
   const summaryPrice = (
     checkinDetail?.amount || total_amount || 0
   ) + (
-    damagesPrice
+    summaryDamage
   ) + (
     minibarPrice
   ) + (
@@ -101,8 +102,15 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   }
 
   const handleCheckout = async () => {
-    console.log(paymentRemark, 'paymentRemark')
     const checkin_customer = checkin_customers[0]
+    const damages = damagesPriceList.map<{ id: string; material_id: string; material_name: string; price: number }>((damage) => {
+      return {
+        id: damage.id,
+        material_id: damage.material_id || "",
+        material_name: damage.material_name,
+        price: damage.price
+      }
+    })
     const payloadCheckout = {
       unit_id: roomId || '',
       checkout_date: dayjs().format('YYYY-MM-DD'),
@@ -110,7 +118,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       project_id: projectId,
       payment_method: paymentMethod,
       book_room_id: checkin_customer.book_room_id,
-      remark: paymentRemark || null
+      remark: paymentRemark || null,
+      damages
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
@@ -608,113 +617,6 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   })}
                 </div>
               </div>
-              <div
-                className="flex flex-col gap-2"
-              >
-                <div className="flex gap-4 items-center">
-                  <label>ค่า Minibar (บาท)</label>
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
-                    onClick={addMinibarPriceList}
-                  >
-                    +
-                  </button>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {minibarPriceList.map((minibar, minibarIndex) => {
-                    return (
-                      <div
-                        key={minibar.id}
-                        className="flex gap-4 items-center"
-                      >
-                        <div className='w-full max-w-41'>
-                          <Popover open={selectMaterialMinibar === minibar.id} onOpenChange={() => {
-                            if (selectMaterialMinibar === minibar.id) {
-                              setSelectMaterialMinibar(null)
-                            }
-                            else{
-                              setSelectMaterialMinibar(minibar.id)
-                            }
-                          }}>
-                            <PopoverTrigger asChild>
-                              <input
-                                type="text"
-                                placeholder="ระบุชื่อ Minibar"
-                                value={minibar.material_name}
-                                onChange={(e) => {
-                                  setMinibarPriceList((prev) => {
-                                    prev[minibarIndex].material_name = e.target.value
-                                    return prev
-                                  })
-                                  setCounter((prev) => prev+1)
-                                }}
-                                className="flex-1 w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                            </PopoverTrigger>
-                            <PopoverContent className="p-0">
-                              <Command shouldFilter={false}>
-                                {/* <CommandInput 
-                                  placeholder="ค้นหา" 
-                                  className="h-9"
-                                  // value={searchProductGroup}
-                                  // onValueChange={(value) => {
-                                  //   setSearchProductGroup(value)
-                                  // }}
-                                /> */}
-                                <CommandList>
-                                  <CommandEmpty>ไม่พบข้อมูล</CommandEmpty>
-                                  <CommandGroup>
-                                    {materialMas.map((material) => {
-                                      return (
-                                        <CommandItem
-                                          key={material.MaterialID}
-                                          value={material.MaterialID}
-                                          onSelect={(curr) => {
-                                            if (minibarIndex !== -1){
-                                              console.log(minibarIndex, 'minibarIndex')
-                                              setMinibarPriceList((prev) => {
-                                                prev[minibarIndex].material_id = curr
-                                                prev[minibarIndex].material_name = material.MaterialName
-                                                prev[minibarIndex].price = 0
-                                                return prev
-                                              })
-                                              setSelectMaterialMinibar(null)
-                                            }
-                                          }}
-                                          data-selected={!(minibar.material_id === material.MaterialID)}
-                                        >
-                                          {material.MaterialName}
-                                        </CommandItem>
-                                      )
-                                    })}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        <FormattedInput
-                          label=""
-                          type="number"
-                          value={minibar.price}
-                          onChange={(e) => {
-                            setMinibarPriceList((prev) => {
-                              prev[minibarIndex].price = e
-                              return prev
-                            })
-                            setCounter((prev) => prev+1)
-                          }}
-                        />
-                        <div 
-                          className='rounded-full border p-1 cursor-pointer'
-                          onClick={() => deleteMinibarPriceList(minibar.id)}
-                        >
-                          <Trash className='text-gray-600' size={12}/>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
               <div className='flex flex-col gap-2 text-sm'>
                 <label>หมายเหตุ</label>
                 <textarea
@@ -741,14 +643,14 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 <div>
                   ค่าความเสียหาย
                 </div>
-                <div>฿ {damagesPrice?.toLocaleString() || 0}</div>
+                <div>฿ {summaryDamage?.toLocaleString() || 0}</div>
               </div>
-              <div className='flex justify-between'>
+              {/* <div className='flex justify-between'>
                 <div>
                   ค่า Minibar
                 </div>
                 <div>฿ {minibarPrice?.toLocaleString() || 0}</div>
-              </div>
+              </div> */}
             </div>
             <div className="border-t border-gray-300 mt-2 pt-4 pb-4 flex flex-col gap-4 text-xl">
               <div className='flex justify-between'>
