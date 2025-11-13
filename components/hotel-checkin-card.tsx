@@ -87,6 +87,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   }
 
   const handleCheckout = async () => {
+    console.log(paymentRemark, 'paymentRemark')
     const checkin_customer = checkin_customers[0]
     const payloadCheckout = {
       unit_id: roomId || '',
@@ -94,7 +95,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       total_amount: summaryPrice,
       project_id: projectId,
       payment_method: paymentMethod,
-      book_room_id: checkin_customer.book_room_id
+      book_room_id: checkin_customer.book_room_id,
+      remark: paymentRemark || null
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
@@ -470,8 +472,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <div className='flex flex-col gap-2 text-sm'>
                 <label>หมายเหตุ</label>
                 <textarea
-                  // value={keyword}
-                  // onChange={e => setKeyword(e.target.value)}
+                  value={paymentRemark || ""}
+                  onChange={e => setPaymentRemark(e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

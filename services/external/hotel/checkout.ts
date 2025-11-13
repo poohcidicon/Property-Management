@@ -11,7 +11,8 @@ export interface IPayloadCheckoutUnitService {
   project_id: string
   payment_method: string
   book_room_id: string
-  create_by: string
+  create_by: string;
+  remark?: string
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -173,6 +174,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       ,TransacDate
       ,CheckOut
       ,TotalAmount
+      ,Remark
       ,Status
       ,CreateDate
       ,CreateBy
@@ -183,6 +185,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       ,GETDATE()
       ,@CheckOutDate
       ,@TotalAmount
+      ,@Remark
       ,Status
       ,CreateDate
       ,@CreateBy
@@ -197,6 +200,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       .input("CheckOutDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
       .input("TotalAmount", payload.total_amount)
       .input("CreateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+      .input("Remark", payload.remark || null)
       .query(queryInsertCheckout)
     
     // set unint
