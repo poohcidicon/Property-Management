@@ -2,17 +2,23 @@ import { deleteBookMaterialOption, getBookMaterialOption, getMaterial, IBookMate
 import { IResponse } from "@/services/external/models/master"
 
 export interface IMaterial {
-  materialID: string;
-  materialName: string;
-  materialNameEN: string;
-  materialTypeID: string;
-  categoryID: string;
-  isDelete: boolean;
-  isShow: boolean;
-  createDate: Date;
-  createBy: string;
-  modifyDate: Date;
-  modifyBy: string;
+  MaterialID: string;
+  MaterialName: string;
+  MaterialNameEN: string;
+  MaterialTypeID: string;
+  CategoryID: string;
+  IsDelete: boolean;
+  IsShow: boolean;
+  CreateDate: Date;
+  CreateBy: string;
+  ModifyDate: Date;
+  ModifyBy: string;
+  PriceList: Array<{
+    MaterialPriceID: string;
+    StartDate: Date;
+    EndDate: Date;
+    Price: number
+  }>
 }
 
 export const getMaterialController = async (): Promise<IResponse<IMaterial[]>> => {

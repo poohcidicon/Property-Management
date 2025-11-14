@@ -2,26 +2,61 @@ import { getConnection } from "@/lib/db";
 import sql from "mssql";
 
 export interface IMaterial {
-  materialID: string;
-  materialName: string;
-  materialNameEN: string;
-  materialTypeID: string;
-  categoryID: string;
-  isDelete: boolean;
-  isShow: boolean;
-  createDate: Date;
-  createBy: string;
-  modifyDate: Date;
-  modifyBy: string;
+  MaterialID: string;
+  MaterialName: string;
+  MaterialNameEN: string;
+  MaterialTypeID: string;
+  CategoryID: string;
+  IsDelete: boolean;
+  IsShow: boolean;
+  CreateDate: Date;
+  CreateBy: string;
+  ModifyDate: Date;
+  ModifyBy: string;
+  PriceList: Array<{
+    MaterialPriceID: string;
+    StartDate: Date;
+    EndDate: Date;
+    Price: number
+  }>
 }
 export const getMaterial = async (): Promise<IMaterial[]> => {
   try{
     const pool = await getConnection();
     const query = `
-      SELECT * FROM Sys_Hotel_Material
+      select m.*
+      , mp.MaterialPriceID, mp.StartDate, mp.EndDate, mp.Price
+      from Sys_Hotel_Material m
+      left join Sys_Hotel_MaterialPrice mp on m.MaterialID = mp.MaterialID
     `
     const result = await pool.request().query(query);
-    return result.recordset
+    const mapping = result.recordset.reduce<IMaterial[]>((acc, cur) => {
+      const index = acc.findIndex((g: IMaterial) => g.MaterialID === cur.MaterialID);
+      if (index === -1) {
+        acc.push({
+          MaterialID: cur.MaterialID,
+          MaterialName: cur.MaterialName,
+          MaterialNameEN: cur.MaterialNameEN,
+          CategoryID: cur.CategoryID,
+          CreateBy: cur.CreateBy,
+          CreateDate: cur.CreateDate,
+          IsDelete: cur.IsDelete,
+          IsShow: cur.IsShow,
+          MaterialTypeID: cur.MaterialTypeID,
+          ModifyBy: cur.ModifyBy,
+          ModifyDate: cur.ModifyDate,
+          PriceList: [{
+            MaterialPriceID: cur.MaterialPriceID, StartDate: cur.StartDate, EndDate: cur.EndDate, Price: cur.Price
+          }]
+        });
+      } else {
+        acc[index].PriceList.push({
+          MaterialPriceID: cur.MaterialPriceID, StartDate: cur.StartDate, EndDate: cur.EndDate, Price: cur.Price
+        });
+      }
+      return acc;
+    }, [] as IMaterial[])
+    return mapping
   }catch(e){
     return []
   }
