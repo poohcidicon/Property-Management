@@ -156,9 +156,19 @@ export const getFloorMas = async (payload: { project_id: string }): Promise<IRes
         WHERE vr.ProjectID = @ProjectID
         GROUP BY vr.FloorID, vr.FloorName, F.Id
       `)
+    const unqineResult = result.recordset.reduce((acc: IFloorMas[], curr: IFloorMas) => {
+      const existingIndex = acc.findIndex((item) => item.FloorID === curr.FloorID)
+      if (existingIndex === -1) {
+        acc.push(curr)
+      }
+      else if (!acc[existingIndex].FileID) {
+        acc[existingIndex] = curr
+      }
+      return acc
+    }, [])
     return {
       success: true,
-      data: result.recordset,
+      data: unqineResult,
       message: "Success",
       error: ""
     }

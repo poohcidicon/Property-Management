@@ -92,14 +92,17 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         ,GETDATE()
         ,@UpdateBy)
     `
+
+    // use amount from BathPerNight
     const checkinQuery = `
-      SELECT * FROM Sys_Hotel_Booking
-      WHERE BookingID = @BookingID
+      SELECT * FROM Sys_Hotel_BookRoom
+      WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
     `
-    const {recordset: bookingResult=[]} = await transaction.request()
+    const {recordset: bookRoomResult=[]} = await transaction.request()
       .input("BookingID", payload.customers[0].booking_id)
+      .input("BookRoomID", payload.customers[0].book_room_id)
       .query(checkinQuery)
-    if(bookingResult.length === 0){
+    if(bookRoomResult.length === 0){
       await transaction.rollback();
       return false
     }
@@ -110,8 +113,13 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         select * from Sys_Hotel_CheckIn
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
       `)
+    const roomPrice = bookRoomResult[0].BathPerNight
+    if (!roomPrice && roomPrice !== 0) {
+      await transaction.rollback();
+      return false
+    }
     const VAT = 0.07
-    const baseAmount = Number((bookingResult[0].Amount / (1 + VAT)).toFixed(2))
+    const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
     const vatAmount = baseAmount * VAT
 
     for (const checkin of checkinResult){
@@ -126,13 +134,13 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       insertPayTrans.input("RefType", "Book")
       insertPayTrans.input("RefID", checkin.BookingID)
       insertPayTrans.input("Quantity", 1)
-      insertPayTrans.input("Price", bookingResult[0].Amount)
+      insertPayTrans.input("Price", roomPrice)
       insertPayTrans.input("Discount", 0)
       insertPayTrans.input("FeeQuantity", 0)
       insertPayTrans.input("BaseAmount", baseAmount)
       insertPayTrans.input("VATPercent", VAT*100)
       insertPayTrans.input("VATAmount", vatAmount)
-      insertPayTrans.input("TotalAmount", bookingResult[0].Amount)
+      insertPayTrans.input("TotalAmount", roomPrice)
       insertPayTrans.input("UpdateBy", payload.create_by)
       await insertPayTrans.query(insertPayTransQuery)
       delete insertPayTrans.parameters['BookRoomID']
