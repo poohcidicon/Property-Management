@@ -86,12 +86,30 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         ,@TotalAmount
         ,0
         ,null
-        ,'A'
+        ,@Status
         ,GETDATE()
         ,@UpdateBy
         ,GETDATE()
         ,@UpdateBy)
     `
+
+    // Book Detail
+    const bookDetailQuery = `
+      SELECT * FROM Sys_Hotel_Booking
+      WHERE BookingID = @BookingID
+    `
+    const { recordset: [bookDetailResult]} = await transaction.request()
+      .input("BookingID", payload.customers[0].booking_id)
+      .query(bookDetailQuery)
+    if(bookDetailResult.length === 0){
+      await transaction.rollback();
+      return false
+    }
+
+    if (!bookDetailResult) {
+      await transaction.rollback();
+      return false
+    }
 
     // use amount from BathPerNight
     const checkinQuery = `
@@ -121,6 +139,8 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
     const VAT = 0.07
     const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
     const vatAmount = baseAmount * VAT
+    const paidType = bookDetailResult.PaidType // postpaid or prepaid
+    const paytransStatus = paidType === "prepaid" ? "P" : "A"
 
     for (const checkin of checkinResult){
       const { recordset: [payTransID] } = await transaction.request().query(`
@@ -141,6 +161,7 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       insertPayTrans.input("VATPercent", VAT*100)
       insertPayTrans.input("VATAmount", vatAmount)
       insertPayTrans.input("TotalAmount", roomPrice)
+      insertPayTrans.input("Status", paytransStatus)
       insertPayTrans.input("UpdateBy", payload.create_by)
       await insertPayTrans.query(insertPayTransQuery)
       delete insertPayTrans.parameters['BookRoomID']
@@ -156,6 +177,7 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       delete insertPayTrans.parameters['VATPercent']
       delete insertPayTrans.parameters['VATAmount']
       delete insertPayTrans.parameters['TotalAmount']
+      delete insertPayTrans.parameters['Status']
       delete insertPayTrans.parameters['UpdateBy']
     }
 
