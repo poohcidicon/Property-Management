@@ -48,7 +48,6 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       await transaction.rollback();
       return false
     }
-
     // const runningNumber = await getRunNumberHotel({
     //   projectID: payload.project_id,
     //   runKey: process.env.RUN_KEY || 'Receipt_Hotel',
@@ -279,6 +278,22 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
         .query(insertPayTransQuery)
     }
+
+    // paytrans daily detail
+    const { recordset: dailyPaytrans } = await transaction.request()
+      .input("BookRoomID", payload.book_room_id)
+      .query<{
+        BookRoomID: string;
+        PayTransID: string;
+        RefType: string;
+        Status: string;
+      }>(`
+        SELECT *
+        FROM Sys_Hotel_PayTrans
+        WHERE BookRoomID = @BookRoomID
+      `)
+
+    const haveNotPaidPayTrans = dailyPaytrans.findIndex((paytrans) => paytrans.Status === "A")
     
     // set unint
     await transaction.request()
@@ -312,9 +327,10 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     await transaction.request()
       .input("BookingID", bookingData.BookingID)
       .input("BookRoomID", bookingData.BookRoomID)
+      .input("Status", haveNotPaidPayTrans === -1 ? "P" : "O")
       .query(`
         UPDATE Sys_Hotel_BookRoom
-        SET Status = 'O'
+        SET Status = @Status
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
       `)
 
