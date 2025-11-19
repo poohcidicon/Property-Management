@@ -131,7 +131,8 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         select * from Sys_Hotel_CheckIn
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
       `)
-    const roomPrice = bookRoomResult[0].BathPerNight
+    const bookRoom = bookRoomResult[0]
+    const roomPrice = bookRoom.BathPerNight
     if (!roomPrice && roomPrice !== 0) {
       await transaction.rollback();
       return false
@@ -140,16 +141,18 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
     const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
     const vatAmount = baseAmount * VAT
     const paidType = bookDetailResult.PaidType // postpaid or prepaid
-    const paytransStatus = paidType === "prepaid" ? "P" : "A"
+    // const paytransStatus = paidType === "prepaid" ? "P" : "A"
+    const paytransStatus = "A"
+    const checkin = checkinResult[0]
 
-    for (const checkin of checkinResult){
+    for (let d = dayjs(bookRoom.CheckIn); d.isBefore(dayjs(bookRoom.CheckOut)); d = d.add(1, 'day')){
       const { recordset: [payTransID] } = await transaction.request().query(`
         SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
       `)
       const insertPayTrans = transaction.request()
       insertPayTrans.input("PayTransID", payTransID.PayTransID)
       insertPayTrans.input("BookRoomID", checkin.BookRoomID)
-      insertPayTrans.input("EffectDate", checkin.CheckIn)
+      insertPayTrans.input("EffectDate", d.format('YYYY-MM-DD'))
       insertPayTrans.input("Description", "เช่ารายวัน")
       insertPayTrans.input("RefType", "Book")
       insertPayTrans.input("RefID", checkin.BookingID)

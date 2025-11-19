@@ -38,13 +38,18 @@ export const getUnitsHotelService = async (payload: {
         Status: string;
         CheckIn: string;
       }>(`
-        SELECT * FROM Sys_Hotel_CheckIn
-        WHERE Status = 'A'
+        SELECT c.* FROM Sys_Hotel_CheckIn c
+        INNER JOIN Sys_Hotel_BookRoom br ON (c.BookRoomID = br.BookRoomID)
+        WHERE c.Status = 'A'
         AND (
-          CheckIn = convert(date, @CheckInDate)
-          OR CheckIn = DATEADD(day, -1, CONVERT(date, @CheckInDate))
+          @CheckInDate between br.CheckIn and br.CheckOut
         )
       `)
+
+    // AND (
+    //       CheckIn = convert(date, @CheckInDate)
+    //       OR CheckIn = DATEADD(day, -1, CONVERT(date, @CheckInDate))
+    //     )
 
     const mappingData = result.recordset.map<UnitMatrixHotel>((item, index) => {
       let checkInstartDate = ""
