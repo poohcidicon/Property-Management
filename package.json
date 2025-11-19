@@ -6,6 +6,7 @@
     "build": "next build",
     "build:uat": "env-cmd -f ./env/.env.uat next build",
     "build:citi-uat": "env-cmd -f ./env/.env.citi-uat next build",
+    "build:ss": "env-cmd -f ./env/.env.hotel-ss next build",
     "dev": "next dev",
     "dev:citi": "env-cmd -f ./env/.env.citi next dev",
     "lint": "next lint",

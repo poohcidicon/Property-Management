@@ -8,6 +8,7 @@ import { Circle } from "./canvas-map";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import SpinnerSmall from "./ui/spinner-small";
+import { useModalOtherGuestStore } from "@/app/modal-other-guest-store";
 
 export interface SelectHotelOtherGuestProps {
   setShowModal: (show: boolean) => void;
@@ -20,6 +21,7 @@ export default function SelectHotelOtherGuest({
   setOtherGuest,
   selectedProperty
 }: SelectHotelOtherGuestProps) {
+  const { bookOtherGuests, setBookOtherGuests, lastRoomId } = useModalOtherGuestStore()
   const router = useRouter();
   const [customers, setCustomers] = useState<SysHotelGuests[]>([]);
   const [keyword, setKeyword] = useState("");
@@ -52,6 +54,12 @@ export default function SelectHotelOtherGuest({
     // router.push("/property-layout"); // redirect ไปหน้า property-layout
     if (setOtherGuest){
       setOtherGuest(c)
+    }
+    if (lastRoomId){
+      setBookOtherGuests([...bookOtherGuests, {
+          ...c,
+          book_room_id: lastRoomId!
+      }])
     }
   }
 

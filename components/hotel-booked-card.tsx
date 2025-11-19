@@ -46,7 +46,8 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     lastOtherGuest,
     bookOtherGuests,
     setBookOtherGuests,
-    ...modalOtherGuests 
+    setLastRoomId,
+    ...modalOtherGuests
   } = useModalOtherGuestStore()
   const [selectGuest, setSelectGuest] = useState<Guest | null>(null);
   const [otherGuests, setOtherGuests] = useState<SysHotelBookGuests[]>([]);
@@ -116,6 +117,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     })
     console.log(bookOtherGuests, 'bookOtherGuests')
     setOtherGuests(bookOtherGuests.filter(g => g.book_room_id === roomId))
+    setLastRoomId(roomId!)
   }
 
   const handleAddGuest = () => {
@@ -137,10 +139,11 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
         ...c,
         book_room_id: roomId!
       }])
-      setBookOtherGuests([...bookOtherGuests, {
-        ...c,
-        book_room_id: roomId!
-      }])
+      // ใช้ผ่าน modal add guest แทน
+      // setBookOtherGuests([...bookOtherGuests, {
+      //   ...c,
+      //   book_room_id: roomId!
+      // }])
     }
   }
 

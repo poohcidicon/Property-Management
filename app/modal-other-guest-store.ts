@@ -9,6 +9,8 @@ interface ModalOtherGuestState {
   bookOtherGuests: SysHotelBookGuests[]
   setLastOtherGuest: (guest: SysHotelGuests) => void;
   setBookOtherGuests: (guest: SysHotelBookGuests[]) => void
+  lastRoomId: string | null
+  setLastRoomId: (roomId: string) => void
 }
 
 export const useModalOtherGuestStore = create<ModalOtherGuestState>((set) => ({
@@ -19,4 +21,6 @@ export const useModalOtherGuestStore = create<ModalOtherGuestState>((set) => ({
   bookOtherGuests: [],
   setLastOtherGuest: (guest: SysHotelGuests) => set({ lastOtherGuest: guest }),
   setBookOtherGuests: (guest: SysHotelBookGuests[]) => set({ bookOtherGuests: guest }),
+  lastRoomId: null,
+  setLastRoomId: (roomId: string) => set({ lastRoomId: roomId }),
 }));
