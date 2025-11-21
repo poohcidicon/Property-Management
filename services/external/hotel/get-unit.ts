@@ -225,3 +225,91 @@ export const updateRoomStatusService = async (payload: IUpdateRoomStatus): Promi
     }
   }
 }
+
+export interface RoomTypeMaster {
+  Id: number;
+  Value: string;
+  Name: string;
+  NameEng: string;
+  Sequence: number;
+  color?: {
+    primary: string;
+    secondary: string;
+    glow: string;
+  };
+}
+
+// mock
+export const ROOM_TYPE_COLORS = {
+  "standard": {
+    primary: "#6b7280", // gray-500 - plain, normal color
+    secondary: "#4b5563",
+    glow: "rgba(107, 114, 128, 0.6)",
+  },
+  "Standard Double": {
+    primary: "#6b7280", // gray-500 - plain, normal color
+    secondary: "#4b5563",
+    glow: "rgba(107, 114, 128, 0.6)",
+  },
+  "family": {
+    primary: "#f59e0b", // amber-500 - premium color for special privileges
+    secondary: "#d97706",
+    glow: "rgba(245, 158, 11, 0.6)",
+  },
+  "superior": {
+    primary: "#3b82f6" ,
+    secondary: "#3baef6ff",
+    glow: "rgba(112, 11, 245, 0.6)",
+  },
+  "deluxe": {
+    primary: "#7b0f81ff" ,
+    secondary: "#ca3bf6ff",
+    glow: "rgba(105, 11, 245, 0.6)",
+  },
+  "suite": {
+    primary: "#FF1493",
+    secondary: "#ca3bf6ff",
+    glow: "rgba(206, 11, 245, 0.6)",
+  }
+} as const
+
+const mappingColorRoomType = (roomType: RoomTypeMaster) => {
+  let color = ROOM_TYPE_COLORS[roomType.Value as keyof typeof ROOM_TYPE_COLORS]
+  if (!color) {
+    color = {
+      primary: "#6b7280", // gray-500 - plain, normal color
+      secondary: "#4b5563",
+      glow: "rgba(107, 114, 128, 0.6)",
+    }
+  }
+  return {...roomType, color}
+}
+
+export const getRoomTypeMasService = async (): Promise<IResponse<RoomTypeMaster[]>> => {
+  try{
+    const pool = await getConnection();
+    const result = await pool.request()
+      .query<RoomTypeMaster>(`
+        select Id, Value, Name, NameEng, Sequence
+        from Sys_Master_AllType 
+        where Groups = 'RoomTypeHotel'
+        AND isnull(isDelete, 0) = 0
+      `)
+
+    const mappedResult = result.recordset.map(mappingColorRoomType)
+    return {
+      success: true,
+      data: mappedResult,
+      message: "Success",
+      error: ""
+    }
+  }
+  catch (err) {
+    return {
+      success: false,
+      error: (err as Error).message,
+      data: [],
+      message: (err as Error).message
+    }
+  }
+}

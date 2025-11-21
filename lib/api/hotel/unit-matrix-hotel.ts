@@ -89,3 +89,32 @@ export const updateRoomStatusApi = async (payload: IUpdateRoomStatus): Promise<A
     }
   }
 }
+
+export interface RoomTypeMaster {
+  Id: number;
+  Value: string;
+  Name: string;
+  NameEng: string;
+  Sequence: number;
+  color?: {
+    primary: string;
+    secondary: string;
+    glow: string;
+  };
+}
+
+export const getRoomTypeMasterApi = async (): Promise<ApiResponse<RoomTypeMaster[]>> => {
+  try{
+    const response = await axiosPublic.get<ApiResponse<RoomTypeMaster[]>>('/api/hotel/get-room-type');
+    return response.data
+  }
+  catch (error: any) {
+    console.error('Error fetching unit matrix hotel:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}
