@@ -287,7 +287,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     `
     for (const damage of payload.damages) {
       const VAT = 0.07
-      const amount = damage.price * 1
+      const amount = damage.price * damage.qty
       const baseAmount = Number((amount / (1 + VAT)).toFixed(2))
       const vatAmount = baseAmount * VAT
       const { recordset: [payTransID] } = await transaction.request().query(`
@@ -368,59 +368,59 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
     }
 
     // paytrans daily detail
-    // const { recordset: dailyPaytrans } = await transaction.request()
-    //   .input("BookRoomID", payload.book_room_id)
-    //   .query<{
-    //     BookRoomID: string;
-    //     PayTransID: string;
-    //     RefType: string;
-    //     Status: string;
-    //   }>(`
-    //     SELECT *
-    //     FROM Sys_Hotel_PayTrans
-    //     WHERE BookRoomID = @BookRoomID
-    //   `)
+    const { recordset: dailyPaytrans } = await transaction.request()
+      .input("BookRoomID", payload.book_room_id)
+      .query<{
+        BookRoomID: string;
+        PayTransID: string;
+        RefType: string;
+        Status: string;
+      }>(`
+        SELECT *
+        FROM Sys_Hotel_PayTrans
+        WHERE BookRoomID = @BookRoomID
+      `)
 
-    // const haveNotPaidPayTrans = dailyPaytrans.findIndex((paytrans) => paytrans.Status === "A")
+    const haveNotPaidPayTrans = dailyPaytrans.findIndex((paytrans) => paytrans.Status === "A")
     
-    // // set unint
-    // await transaction.request()
-    //   .input("UnitID", payload.unit_id)
-    //   .input("ActiveDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
-    //   .query(`
-    //     UPDATE Sys_Hotel_RoomStatus
-    //     SET Status = '3'
-    //     WHERE UnitID = @UnitID AND ActiveDate = @ActiveDate
-    //   `)
+    // set unint
+    await transaction.request()
+      .input("UnitID", payload.unit_id)
+      .input("ActiveDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
+      .query(`
+        UPDATE Sys_Hotel_RoomStatus
+        SET Status = '3'
+        WHERE UnitID = @UnitID AND ActiveDate = @ActiveDate
+      `)
     
-    // // set checkin
-    // await transaction.request()
-    //   .input("UnitID", payload.unit_id)
-    //   .query(`
-    //     UPDATE Sys_Hotel_CheckIn
-    //     SET Status = 'P'
-    //     WHERE UnitID = @UnitID AND Status = 'A'
-    //   `)
+    // set checkin
+    await transaction.request()
+      .input("UnitID", payload.unit_id)
+      .query(`
+        UPDATE Sys_Hotel_CheckIn
+        SET Status = 'P'
+        WHERE UnitID = @UnitID AND Status = 'A'
+      `)
     
-    // // set hotel booking
-    // await transaction.request()
-    //   .input("BookingID", bookingData.BookingID)
-    //   .query(`
-    //     UPDATE Sys_Hotel_Booking
-    //     SET Status = 'P'
-    //     WHERE BookingID = @BookingID
-    //   `)
+    // set hotel booking
+    await transaction.request()
+      .input("BookingID", bookingData.BookingID)
+      .query(`
+        UPDATE Sys_Hotel_Booking
+        SET Status = 'P'
+        WHERE BookingID = @BookingID
+      `)
 
-    // // set hotel book Room
-    // await transaction.request()
-    //   .input("BookingID", bookingData.BookingID)
-    //   .input("BookRoomID", bookingData.BookRoomID)
-    //   .input("Status", haveNotPaidPayTrans === -1 ? "P" : "O")
-    //   .query(`
-    //     UPDATE Sys_Hotel_BookRoom
-    //     SET Status = @Status
-    //     WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
-    //   `)
+    // set hotel book Room
+    await transaction.request()
+      .input("BookingID", bookingData.BookingID)
+      .input("BookRoomID", bookingData.BookRoomID)
+      .input("Status", haveNotPaidPayTrans === -1 ? "P" : "O")
+      .query(`
+        UPDATE Sys_Hotel_BookRoom
+        SET Status = @Status
+        WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
+      `)
 
 
     await transaction.commit();

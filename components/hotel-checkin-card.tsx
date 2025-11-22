@@ -79,7 +79,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [materialPriceList, setMaterialPriceList] = useState<MaterialPriceWithAction[]>([])
   const [minibarPrice, setMinibarPrice] = useState<number>(0)
   const [minibarPriceList, setMinibarPriceList] = useState<MaterialPrice[]>([])
-  const [summaryMaterialPrice, setSummaryMaterialPrice] = useState<number>(0)
+  const [, setSummaryMaterialPrice] = useState<number>(0)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [payInDate, setPayInDate] = useState<any>(null)
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
@@ -95,7 +95,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
 
-  const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+curr.price, 0)
+  const summaryMaterialPrice = materialPriceList.reduce((acc, curr) => acc+( curr.price * curr.qty ), 0)
+  const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+( curr.price * curr.qty), 0)
   const summaryPrice = (
     checkinDetail?.amount || total_amount || 0
   ) + (
@@ -122,6 +123,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         qty: damage.qty
       }
     })
+    console.log(deleteActionMaterialPriceList, 'deleteActionMaterialPriceList')
     const materials = [
       ...materialPriceList.map<IPayloadCheckoutMaterials>((material) => ({
         action: material.action,
@@ -153,14 +155,13 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       damages,
       materials: materials
     } as IPayloadCheckout
-    console.log(payloadCheckout, 'payloadCheckout')
-    // const result = await CheckoutUnitApi(payloadCheckout);
-    // if (result.data) {
-    //   gotoReservationsRental(checkin_customer.book_room_id)
-    //   if (onChangeStatus) {
-    //     onChangeStatus(true);
-    //   }
-    // }
+    const result = await CheckoutUnitApi(payloadCheckout);
+    if (result.data) {
+      gotoReservationsRental(checkin_customer.book_room_id)
+      if (onChangeStatus) {
+        onChangeStatus(true);
+      }
+    }
   };
 
   const handleSetCheckin = async () => {
@@ -591,7 +592,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           </DialogHeader>
           <div className="flex-1 overflow-auto p-1">
             <div className='flex flex-col gap-6'>
-              <div className='flex flex-col gap-2'>
+              <div className='flex flex-col'>
                 <div className="flex gap-4 items-center justify-between">
                   <label>ค่าบริการเพิ่มเติม</label>
                   <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
@@ -660,6 +661,11 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                           value={materialMasterData.MaterialID}
                                           onSelect={(curr) => {
                                             if (materialIndex !== -1 && (curr !== material.material_id)) {
+                                              if (material.action === 'edit'){
+                                                setDeleteActionMaterialPriceList((prev) => {
+                                                  return [...prev, {...material}]
+                                                })
+                                              }
                                               setMaterialPriceList((prev) => {
                                                 prev[materialIndex].action = 'add'
                                                 prev[materialIndex].id = `material-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
@@ -670,11 +676,6 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                                 return prev
                                               })
                                               setSelectMaterial(null)
-                                              if (material.action === 'edit'){
-                                                setDeleteActionMaterialPriceList((prev) => {
-                                                  return [...prev, material]
-                                                })
-                                              }
                                             }
                                           }}
                                           data-selected={!(material.material_id === materialMasterData.MaterialID)}
@@ -731,7 +732,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   })}
                 </div>
               </div>
-              <div className='flex flex-col gap-2'>
+              <div className='flex flex-col'>
                 <div className="flex gap-4 items-center justify-between">
                   <label>ค่าความเสียหาย (บาท)</label>
                   <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
