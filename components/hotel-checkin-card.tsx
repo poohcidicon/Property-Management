@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X, Trash, ChevronDown } from 'lucide-react';
-import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, getBookPayTransApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -88,6 +88,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [showConfirmCheckoutDialog, setShowConfirmCheckoutDialog] = useState(false)
   const [selectMaterialDamage, setSelectMaterialDamage] = useState<string | null>(null)
   const [selectMaterial, setSelectMaterial] = useState<string | null>(null)
+  const [loadingBookPayTrans, setLoadingBookPayTrans] = useState(false)
   const [selectMaterialMinibar, setSelectMaterialMinibar] = useState<string | null>(null)
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
@@ -241,6 +242,28 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     if (result.data){
       loadBookMaterialOption()
     }
+  }
+
+  const handleSetBookServicePayTrans = async () => {
+    setLoadingBookPayTrans(true)
+    const payload = {
+      book_room_id: checkin_customers[0].book_room_id,
+      status: 'A',
+      ref_type: 'Service'
+    }
+    const result = await getBookPayTransApi(payload)
+    if (result.data){
+      const mapping = result.data.map<MaterialPriceWithAction>((item) => ({
+        id: item.PayTransID,
+        material_id: item.RefID,
+        action: "edit",
+        material_name: item.Description,
+        price: item.Price,
+        qty: item.Quantity
+      }))
+      setMaterialPriceList(mapping)
+    }
+    setLoadingBookPayTrans(false)
   }
 
   const addDamagePriceList = () => {
@@ -529,7 +552,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         <button
           onClick={() => {
             setShowDialogCheckout(true)
-            initialMaterialPriceList()
+            handleSetBookServicePayTrans()
           }}
           className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
         >
@@ -560,6 +583,11 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     +
                   </button>
                 </div>
+                {loadingBookPayTrans && (
+                  <SpinnerSmall loading={loadingBookPayTrans}>
+                    <div className='w-14 h-14'></div>
+                  </SpinnerSmall>
+                )}
                 <div className="flex flex-col gap-2">
                   {materialPriceList.map((material, materialIndex) => {
                     return (

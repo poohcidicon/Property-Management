@@ -232,3 +232,42 @@ export const GetCheckinDetailApi = async (payload: { book_room_id: string }): Pr
     }
   }
 }
+
+export interface IPayloadBookPayTrans {
+  book_room_id: string;
+  status: string;
+  ref_type?: string;
+}
+
+export interface BookPayTrans {
+  PayTransID: string;
+  RefID: string;
+  RefType: string;
+  Description: string;
+  BookRoomID: string;
+  Quantity: number;
+  Price: number;
+  Discount: number;
+  FeeQuantity: number;
+  BaseAmount: number;
+  VATPercent: number;
+  VATAmount: number;
+  TotalAmount: number;
+  Status: string;
+  UpdateBy: string;
+}
+
+export const getBookPayTransApi = async (payload: IPayloadBookPayTrans): Promise<ApiResponse<BookPayTrans[]>> => {
+  try{
+    const res = await axiosPublic.post<ApiResponse<BookPayTrans[]>>('/api/hotel/get-book-paytrans', payload);
+    return res.data
+  }
+  catch (error: any) {
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Error fetching circles',
+      message: 'Error fetching circles'
+    }
+  }
+}

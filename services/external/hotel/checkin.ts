@@ -256,3 +256,41 @@ export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<
     `)
   return result.recordset
 }
+
+export interface IPayloadBookPayTrans {
+  book_room_id: string;
+  status: string;
+  ref_type?: string;
+}
+
+export interface BookPayTrans {
+  PayTransID: string;
+  RefID: string;
+  RefType: string;
+  BookRoomID: string;
+  Quantity: number;
+  Price: number;
+  Discount: number;
+  FeeQuantity: number;
+  BaseAmount: number;
+  VATPercent: number;
+  VATAmount: number;
+  TotalAmount: number;
+  Status: string;
+  UpdateBy: string;
+}
+
+export const getBookPayTrans = async (payload: IPayloadBookPayTrans): Promise<BookPayTrans[]> => {
+  const pool = await getConnection()
+  const result = await pool.request()
+    .input("BookRoomID", payload.book_room_id)
+    .input("Status", payload.status)
+    .input("RefType", payload.ref_type)
+    .query(`
+      SELECT * FROM Sys_Hotel_PayTrans
+      WHERE BookRoomID = @BookRoomID
+      AND Status = @Status
+      ${payload.ref_type ? `AND RefType = @RefType` : ''}
+    `)
+  return result.recordset
+}

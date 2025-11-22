@@ -1,5 +1,5 @@
 import { bookUnitService } from "@/services/external/hotel/booking";
-import { CheckinDetail, checkinService, getCheckinDetail, IPayloadCheckinDetail } from "@/services/external/hotel/checkin";
+import { BookPayTrans, CheckinDetail, checkinService, getBookPayTrans, getCheckinDetail, IPayloadBookPayTrans, IPayloadCheckinDetail } from "@/services/external/hotel/checkin";
 import { checkoutUnitService, preCheckout } from "@/services/external/hotel/checkout";
 import { IResponse } from "@/services/external/models/master";
 
@@ -101,7 +101,7 @@ export interface IPayloadCheckoutUnit {
   book_room_id: string
   create_by: string;
   remark?: string
-  damages: Array<{ id: string; material_id: string; material_name: string; price: number }>;
+  damages: Array<{ id: string; material_id: string; material_name: string; price: number; qty: number }>;
 }
 
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {
@@ -172,6 +172,26 @@ export const preCheckoutController = async (payload: IPayloadPreCheckout): Promi
 export const getCheckinDetailController = async (payload: IPayloadCheckinDetail): Promise<IResponse<CheckinDetail[]>> => {
   try{
     const result = await getCheckinDetail(payload)
+    return {
+      success: true,
+      data: result,
+      error: "",
+      message: ""
+    }
+  }
+  catch(err: any){
+    return {
+      success: false,
+      data: [],
+      error: err.message,
+      message: err.message
+    }
+  }
+}
+
+export const getBookPayTransController = async (payload: IPayloadBookPayTrans): Promise<IResponse<BookPayTrans[]>> => {
+  try{
+    const result = await getBookPayTrans(payload)
     return {
       success: true,
       data: result,
