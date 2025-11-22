@@ -13,7 +13,13 @@ export interface IPayloadCheckoutUnitService {
   book_room_id: string
   create_by: string;
   remark?: string
-  damages: Array<{ id: string; material_id: string; material_name: string; price: number }>;
+  damages: Array<{ 
+    id: string; 
+    material_id: string; 
+    material_name: string; 
+    price: number;
+    qty: number
+  }>;
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -252,6 +258,14 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         ,GETDATE()
         ,@UpdateBy)
     `
+    const updatePayTransQuery = `
+      UPDATE Sys_Hotel_PayTrans
+      SET ModifyDate = GETDATE()
+      , Quantity = @Quantity
+      , Price = @Price
+      , Description = @Description
+      WHERE PayTransID = @PayTransID
+    `
     for (const damage of payload.damages) {
       const VAT = 0.07
       const amount = damage.price * 1
@@ -267,7 +281,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("Description", damage.material_name)
         .input("RefType", "Service")
         .input("RefID", damage.material_id)
-        .input("Quantity", 1)
+        .input("Quantity", damage.qty || 1)
         .input("Price", amount)
         .input("Discount", 0)
         .input("FeeQuantity", 0)
