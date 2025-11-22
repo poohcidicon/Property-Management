@@ -4,6 +4,7 @@ interface FormattedInputProps {
   label: string;
   type?: string;
   value: number;
+  displayInt?: boolean;
   onChange: (value: number) => void;
   className?: string;
 }
@@ -12,6 +13,7 @@ export default function FormattedInput({
   label, 
   type = 'number', 
   value, 
+  displayInt = false, 
   onChange, 
   className = "flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
 }: FormattedInputProps) {
@@ -40,6 +42,18 @@ export default function FormattedInput({
       return;
     }
 
+    if (displayInt) {
+      // Format with 2 decimal places
+      const numValue = parseFloat(newValue);
+      if (!isNaN(numValue)) {
+        const formattedValue = isNaN(parseInt(newValue, 10)) ? '' : parseInt(newValue, 10).toString();
+        console.log(formattedValue, 'formattedValue')
+        setInputValue(formattedValue);
+        onChange(Number(formattedValue));
+      }
+      return
+    }
+
     setInputValue(newValue);
     
     // Convert to number and format with 2 decimal places
@@ -54,9 +68,18 @@ export default function FormattedInput({
     if (inputValue !== '' && inputValue !== "0") {
       const numValue = parseFloat(inputValue.toLocaleString());
       if (!isNaN(numValue)) {
-        const formattedValue = numValue.toFixed(2);
-        setInputValue(formattedValue);
-        onChange(parseFloat(formattedValue));
+        if (displayInt){
+          const formattedValue = isNaN(parseInt(inputValue, 10)) ? '' : parseInt(inputValue, 10).toString();
+          setInputValue(formattedValue);
+          onChange(Number(formattedValue));
+          return
+        }
+        else{
+          const formattedValue = numValue.toFixed(2);
+          setInputValue(formattedValue);
+          onChange(parseFloat(formattedValue));
+          return
+        }
       }
     }
   };

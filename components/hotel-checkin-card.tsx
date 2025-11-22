@@ -54,6 +54,7 @@ interface MaterialPrice {
   id: string;
   material_id: string | null;
   material_name: string;
+  qty: number;
   price: number;
 }
 
@@ -243,6 +244,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         id: `damage-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         material_id: null,
         material_name: "",
+        qty: 1,
         price: 0
       }
     ])
@@ -255,6 +257,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         id: `damage-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         material_id: null,
         material_name: "",
+        qty: 1,
         price: 0
       }
     ])
@@ -526,7 +529,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     return (
                       <div
                         key={damage.id}
-                        className="flex gap-4 items-center"
+                        className="flex gap-4 items-end"
                       >
                         <div className='w-full max-w-41'>
                           <Popover open={selectMaterialDamage === damage.id} onOpenChange={() => {
@@ -594,18 +597,37 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                             </PopoverContent>
                           </Popover>
                         </div>
-                        <FormattedInput
-                          label=""
-                          type="number"
-                          value={damage.price}
-                          onChange={(e) => {
-                            setDamagePriceList((prev) => {
-                              prev[damageIndex].price = e
-                              return prev
-                            })
-                            setCounter((prev) => prev+1)
-                          }}
-                        />
+                        <div className='flex flex-col gap-2 max-w-16'>
+                          <label className='text-sm'>จำนวน</label>
+                          <FormattedInput
+                            label=""
+                            type="number"
+                            displayInt
+                            value={damage.qty}
+                            onChange={(e) => {
+                              setDamagePriceList((prev) => {
+                                prev[damageIndex].qty = e
+                                return prev
+                              })
+                              setCounter((prev) => prev+1)
+                            }}
+                          />
+                        </div>
+                        <div className='flex flex-col gap-2 max-w-28'>
+                          <label className='text-sm'>ราคาต่อหน่วย</label>
+                          <FormattedInput
+                            label=""
+                            type="number"
+                            value={damage.price}
+                            onChange={(e) => {
+                              setDamagePriceList((prev) => {
+                                prev[damageIndex].price = e
+                                return prev
+                              })
+                              setCounter((prev) => prev+1)
+                            }}
+                          />
+                        </div>
                         <div 
                           className='rounded-full border p-1 cursor-pointer'
                           onClick={() => deleteDamagePriceList(damage.id)}
