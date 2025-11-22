@@ -95,8 +95,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
 
-  const summaryMaterialPrice = materialPriceList.reduce((acc, curr) => acc+( curr.price * curr.qty ), 0)
-  const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+( curr.price * curr.qty), 0)
+  const summaryMaterialPrice = materialPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)
+  const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)
   const summaryPrice = (
     checkinDetail?.amount || total_amount || 0
   ) + (
