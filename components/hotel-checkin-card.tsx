@@ -60,6 +60,7 @@ interface MaterialPrice {
 
 interface MaterialPriceWithAction extends MaterialPrice {
   action: string;
+  paytrans_id?: string
 }
 
 export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
@@ -89,6 +90,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [selectMaterialDamage, setSelectMaterialDamage] = useState<string | null>(null)
   const [selectMaterial, setSelectMaterial] = useState<string | null>(null)
   const [loadingBookPayTrans, setLoadingBookPayTrans] = useState(false)
+  const [deleteActionMaterialPriceList, setDeleteActionMaterialPriceList] = useState<MaterialPriceWithAction[]>([])
   const [selectMaterialMinibar, setSelectMaterialMinibar] = useState<string | null>(null)
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
@@ -127,7 +129,8 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       payment_method: paymentMethod,
       book_room_id: checkin_customer.book_room_id,
       remark: paymentRemark || null,
-      damages
+      damages,
+      materials: []
     } as IPayloadCheckout
     const result = await CheckoutUnitApi(payloadCheckout);
     if (result.data) {
@@ -256,6 +259,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       const mapping = result.data.map<MaterialPriceWithAction>((item) => ({
         id: item.PayTransID,
         material_id: item.RefID,
+        paytrans_id: item.PayTransID,
         action: "edit",
         material_name: item.Description,
         price: item.Price,
@@ -306,24 +310,15 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     ])
   }
 
-  const initialMaterialPriceList = () => {
-    const payload = bookMaterialList.map<MaterialPriceWithAction>((item) => ({
-      id: item.ID+"",
-      material_id: item.MaterialID,
-      action: "edit",
-      material_name: item.MaterialName,
-      price: item.Price,
-      qty: item.Quantity
-    }))
-    setMaterialPriceList(payload)
-  }
-
   const deleteDamagePriceList = (id: string) => {
     setDamagePriceList(damagesPriceList.filter((item) => item.id !== id))
   }
 
-  const deleteMaterialPriceList = (id: string) => {
-    setMaterialPriceList(materialPriceList.filter((item) => item.id !== id))
+  const deleteMaterialPriceList = (item: MaterialPriceWithAction) => {
+    if (item.action === 'edit' && item.paytrans_id) {
+      setDeleteActionMaterialPriceList([...deleteActionMaterialPriceList, item])
+    }
+    setMaterialPriceList(materialPriceList.filter((item) => item.id !== item.id))
   }
 
   const deleteMinibarPriceList = (id: string) => {
@@ -596,8 +591,12 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                         className="flex gap-4 items-end"
                       >
                         <div className='w-full max-w-41'>
-                          <Popover open={selectMaterial === material.id} onOpenChange={() => {
-                            if (selectMaterialDamage === material.id) {
+                          <Popover open={selectMaterial === material.id} onOpenChange={(e) => {
+                            const eventTarget = document.activeElement
+                            if (!(eventTarget instanceof HTMLInputElement)) {
+                              setSelectMaterial(null)
+                            }
+                            else if (selectMaterialDamage === material.id) {
                               setSelectMaterial(null)
                             }
                             else{
@@ -638,7 +637,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                           key={materialMasterData.MaterialID}
                                           value={materialMasterData.MaterialID}
                                           onSelect={(curr) => {
-                                            if (materialIndex !== -1){
+                                            if (materialIndex !== -1 && (curr !== material.material_id)) {
                                               setMaterialPriceList((prev) => {
                                                 prev[materialIndex].material_id = curr
                                                 prev[materialIndex].material_name = materialMasterData.MaterialName
@@ -693,7 +692,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                         </div>
                         <div 
                           className='rounded-full border p-1 cursor-pointer'
-                          onClick={() => deleteMaterialPriceList(material.id)}
+                          onClick={() => deleteMaterialPriceList(material)}
                         >
                           <Trash className='text-gray-600' size={12}/>
                         </div>

@@ -64,6 +64,15 @@ export interface IPayloadCheckout {
   book_room_id: string;
   remark?: string;
   damages: Array<{ id: string; material_id: string; material_name: string; price: number }>;
+  materials: Array<{
+    action: string;
+    paytrans_id?: string;
+    id: string
+    material_id: string
+    material_name: string
+    price: number
+    qty: number
+  }>
 }
 
 export const CheckoutUnitApi = async (payload: IPayloadCheckout): Promise<ApiResponse<boolean>> => {

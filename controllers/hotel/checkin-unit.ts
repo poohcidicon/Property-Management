@@ -102,6 +102,15 @@ export interface IPayloadCheckoutUnit {
   create_by: string;
   remark?: string
   damages: Array<{ id: string; material_id: string; material_name: string; price: number; qty: number }>;
+  materials: Array<{
+    action: string;
+    paytrans_id?: string;
+    id: string
+    material_id: string
+    material_name: string
+    price: number
+    qty: number
+  }>
 }
 
 export const checkoutUnitController = async (payload: IPayloadCheckoutUnit): Promise<IResponse<boolean>> => {
