@@ -20,6 +20,15 @@ export interface IPayloadCheckoutUnitService {
     price: number;
     qty: number
   }>;
+  materials: Array<{
+    action: string;
+    paytrans_id?: string;
+    id: string
+    material_id: string
+    material_name: string
+    price: number
+    qty: number
+  }>
 }
 
 export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService): Promise<boolean> => {
@@ -263,8 +272,18 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       SET ModifyDate = GETDATE()
       , Quantity = @Quantity
       , Price = @Price
-      , Description = @Description
+      , Discount = @Discount
+      , FeeQuantity = @FeeQuantity
+      , BaseAmount = @BaseAmount
+      , VATPercent = @VATPercent
+      , VATAmount = @VATAmount
+      , TotalAmount = @TotalAmount
       WHERE PayTransID = @PayTransID
+    `
+    const deletePayTransQuery = `
+      DELETE FROM Sys_Hotel_PayTrans
+      WHERE PayTransID = @PayTransID
+      AND BookRoomID = @BookRoomID
     `
     for (const damage of payload.damages) {
       const VAT = 0.07
@@ -291,6 +310,61 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("TotalAmount", amount)
         .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
         .query(insertPayTransQuery)
+    }
+
+    for (const material of payload.materials) {
+      const { action } = material
+
+      if (action === 'add'){
+        const VAT = 0.07
+        const amount = material.price * material.qty
+        const baseAmount = Number((amount / (1 + VAT)).toFixed(2))
+        const vatAmount = baseAmount * VAT
+        const { recordset: [payTransID] } = await transaction.request().query(`
+          SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
+        `)
+        await transaction.request()
+          .input("PayTransID", payTransID.PayTransID)
+          .input("BookRoomID", payload.book_room_id)
+          .input("EffectDate", dayjs(payload.checkout_date).format('YYYY-MM-DD'))
+          .input("Description", material.material_name)
+          .input("RefType", "Service")
+          .input("RefID", material.material_id)
+          .input("Quantity", material.qty)
+          .input("Price", material.price)
+          .input("Discount", 0)
+          .input("FeeQuantity", 0)
+          .input("BaseAmount", baseAmount)
+          .input("VATPercent", VAT*100)
+          .input("VATAmount", vatAmount)
+          .input("TotalAmount", amount)
+          .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+          .query(insertPayTransQuery)
+      }
+      else if (action === 'edit'){
+        const VAT = 0.07
+        const amount = material.price * material.qty
+        const baseAmount = Number((amount / (1 + VAT)).toFixed(2))
+        const vatAmount = baseAmount * VAT
+        await transaction.request()
+          .input("PayTransID", material.paytrans_id)
+          .input("Quantity", material.qty)
+          .input("Price", material.price)
+          .input("Discount", 0)
+          .input("FeeQuantity", 0)
+          .input("BaseAmount", baseAmount)
+          .input("VATPercent", VAT*100)
+          .input("VATAmount", vatAmount)
+          .input("TotalAmount", amount)
+          .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+          .query(updatePayTransQuery)
+      }
+      else if (action === 'delete'){
+        await transaction.request()
+          .input("PayTransID", material.paytrans_id)
+          .input("BookRoomID", payload.book_room_id)
+          .query(deletePayTransQuery)
+      }
     }
 
     // paytrans daily detail
