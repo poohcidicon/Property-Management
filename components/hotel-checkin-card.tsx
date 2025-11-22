@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Clock, X, Trash, ChevronDown } from 'lucide-react';
-import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, getBookPayTransApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
+import { CheckoutUnitApi, DelBookMaterialOptionApi, GetBookMaterialOptionApi, getBookPayTransApi, GetCheckinDetailApi, GetMaterialApi, IBookMaterialOption, IMaterial, InsBookMaterialOptionApi, IPayloadCheckout, IPayloadCheckoutMaterials, IPayloadDeleteBookMaterialOption, IPayloadInsertMaterialOption, IPayloadPreCheckout, PreCheckoutApi } from '@/lib/api/hotel/checkin';
 import dayjs from 'dayjs';
 import { getOtherBookingGuestsApi, Guest, SysHotelGuests } from '@/lib/api/hotel/get-guest';
 import Spinner from './ui/Spinner';
@@ -113,14 +113,35 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
 
   const handleCheckout = async () => {
     const checkin_customer = checkin_customers[0]
-    const damages = damagesPriceList.map<{ id: string; material_id: string; material_name: string; price: number }>((damage) => {
+    const damages = damagesPriceList.map<{ id: string; material_id: string; material_name: string; price: number; qty: number }>((damage) => {
       return {
         id: damage.id,
         material_id: damage.material_id || "",
         material_name: damage.material_name,
-        price: damage.price
+        price: damage.price,
+        qty: damage.qty
       }
     })
+    const materials = [
+      ...materialPriceList.map<IPayloadCheckoutMaterials>((material) => ({
+        action: material.action,
+        id: material.id,
+        paytrans_id: material.paytrans_id,
+        material_name: material.material_name,
+        price: material.price,
+        qty: material.qty,
+        material_id: material.material_id || ""
+      })),
+      ...deleteActionMaterialPriceList.map<IPayloadCheckoutMaterials>((material) => ({
+        action: 'delete',
+        id: material.id,
+        paytrans_id: material.paytrans_id,
+        material_name: material.material_name,
+        price: material.price,
+        qty: material.qty,
+        material_id: material.material_id || ""
+      }))
+    ]
     const payloadCheckout = {
       unit_id: roomId || '',
       checkout_date: dayjs().format('YYYY-MM-DD'),
@@ -130,15 +151,16 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       book_room_id: checkin_customer.book_room_id,
       remark: paymentRemark || null,
       damages,
-      materials: []
+      materials: materials
     } as IPayloadCheckout
-    const result = await CheckoutUnitApi(payloadCheckout);
-    if (result.data) {
-      gotoReservationsRental(checkin_customer.book_room_id)
-      if (onChangeStatus) {
-        onChangeStatus(true);
-      }
-    }
+    console.log(payloadCheckout, 'payloadCheckout')
+    // const result = await CheckoutUnitApi(payloadCheckout);
+    // if (result.data) {
+    //   gotoReservationsRental(checkin_customer.book_room_id)
+    //   if (onChangeStatus) {
+    //     onChangeStatus(true);
+    //   }
+    // }
   };
 
   const handleSetCheckin = async () => {
@@ -639,12 +661,20 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                           onSelect={(curr) => {
                                             if (materialIndex !== -1 && (curr !== material.material_id)) {
                                               setMaterialPriceList((prev) => {
+                                                prev[materialIndex].action = 'add'
+                                                prev[materialIndex].id = `material-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
+                                                prev[materialIndex].paytrans_id = undefined
                                                 prev[materialIndex].material_id = curr
                                                 prev[materialIndex].material_name = materialMasterData.MaterialName
                                                 prev[materialIndex].price = 0
                                                 return prev
                                               })
                                               setSelectMaterial(null)
+                                              if (material.action === 'edit'){
+                                                setDeleteActionMaterialPriceList((prev) => {
+                                                  return [...prev, material]
+                                                })
+                                              }
                                             }
                                           }}
                                           data-selected={!(material.material_id === materialMasterData.MaterialID)}

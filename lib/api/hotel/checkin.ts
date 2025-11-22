@@ -63,7 +63,7 @@ export interface IPayloadCheckout {
   payment_method: string;
   book_room_id: string;
   remark?: string;
-  damages: Array<{ id: string; material_id: string; material_name: string; price: number }>;
+  damages: Array<{ id: string; material_id: string; material_name: string; price: number; qty: number }>;
   materials: Array<{
     action: string;
     paytrans_id?: string;
