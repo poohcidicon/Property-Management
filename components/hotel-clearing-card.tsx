@@ -5,6 +5,7 @@ import dayjs from "dayjs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useState } from "react"
 import { Button } from "./ui/button"
+import { useRoomTypeStore } from "@/app/room-type-store"
 
 interface HotelClearingCardProps {
   selectedProperty: Circle | null
@@ -14,6 +15,7 @@ interface HotelClearingCardProps {
 }
 
 export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus, onClose }: HotelClearingCardProps) {
+  const { roomTypesLowwer: ROOM_TYPE_COLORS } = useRoomTypeStore()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const handleChangeStatusRoom = async (status: number) => {

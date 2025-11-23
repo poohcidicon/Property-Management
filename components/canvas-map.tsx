@@ -18,6 +18,7 @@ import { useFilterStore } from "@/app/filter-store"
 import Spinner from "./ui/Spinner"
 import SpinnerSmall from "./ui/spinner-small"
 import { PendingBooking } from "@/data/booking-mock-data"
+import { useRoomTypeStore } from "@/app/room-type-store"
 
 export interface Circle {
   x: number
@@ -134,6 +135,7 @@ export default function CanvasMap({
   selectPendingGuest
 }: CanvasMapProps) {
   const { projectId } = useProjectStore()
+  const { roomTypesLowwer: ROOM_TYPE_COLORS } = useRoomTypeStore()
   const { activeDate, floor } = useFilterStore()
   // Get selectedProperty from parent
   const [selectedProperty, setSelectedProperty] = useState<Circle | null>(null)
@@ -417,7 +419,7 @@ export default function CanvasMap({
         }
       }
     },
-    [selectedPropertyIds, selectedRoomType, currentUsername, businessType, selectedProperty],
+    [selectedPropertyIds, selectedRoomType, currentUsername, businessType, selectedProperty, ROOM_TYPE_COLORS],
   )
 
   // Initialize username and load circles

@@ -18,7 +18,7 @@ import ConnectionGuard from "@/components/connection-guard"
 import { updateCircleStatus, getCircles } from "@/lib/api/circles"
 import Spinner from "@/components/ui/Spinner"
 import { getZonesByProjectApi } from "@/lib/api/unit-matrix"
-import { getFloorMasApi, getUnitMatrixHotelApi, IFloorMas } from "@/lib/api/hotel/unit-matrix-hotel"
+import { getFloorMasApi, getRoomTypeMasterApi, getUnitMatrixHotelApi, IFloorMas } from "@/lib/api/hotel/unit-matrix-hotel"
 import { getUnitBookingDateApi, UnitBookingDate, bookUnitApi, IPayloadBookUnit } from "@/lib/api/unit-booking"
 import { useCustomerStore } from "../customer-store"; // เพิ่มบรรทัดนี้
 import { axiosPublic } from "@/lib/axios"
@@ -35,6 +35,8 @@ import { useModalOtherGuestStore } from "../modal-other-guest-store"
 import { useFilterStore } from "../filter-store"
 import { Input } from "@/components/ui/input"
 import SpinnerSmall from "@/components/ui/spinner-small"
+import { useRoomTypeStore } from "../room-type-store"
+import { cn } from "@/lib/utils"
 interface Property {
   id: string
   name: string;
@@ -101,6 +103,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
+  const { roomTypes, setRoomTypes, setRoomTypesLowwer } = useRoomTypeStore()
   const { activeDate, setActiveDate } = useFilterStore()
   const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
@@ -311,6 +314,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       // The CanvasMap component will handle fetching the appropriate data
       getZoneList()
       getUnitBookingDate({})
+      getRoomTypes()
 
       handleGetGuestList()
 
@@ -389,6 +393,20 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       setUnitBookingDateList([])
     }
     return unitBookingDateData.data
+  }
+
+  const getRoomTypes = async () => {
+    const roomTypesData = await getRoomTypeMasterApi()
+    if (roomTypesData.data && roomTypesData.data?.length > 0){
+      let recordRoomTypeColor: {[key: string]: any} = {}
+      let recordRoomTypeColorLowwer: {[key: string]: any} = {}
+      roomTypesData.data.forEach((item) => {
+        recordRoomTypeColor[item.Value] = item.color
+        recordRoomTypeColorLowwer[item.Value.toLowerCase()] = item.color
+      })
+      setRoomTypes(recordRoomTypeColor)
+      setRoomTypesLowwer(recordRoomTypeColorLowwer)
+    }
   }
 
   const handleDisableDateByProperty = (unit: Property) => {
@@ -2005,7 +2023,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               </div>
             </div>
             <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center">
-              <div className="flex items-center gap-1 md:gap-2">
+              {/* <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#4b5563]"></div>
                 <span>Standard</span>
               </div>
@@ -2020,7 +2038,13 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
               <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#3b82f6]"></div>
                 <span>Superior</span>
-              </div>
+              </div> */}
+              {Object.keys(roomTypes).map((roomType) => (
+                <div key={roomType} className="flex items-center gap-1 md:gap-2">
+                  <div className={cn("w-3 h-3 md:w-4 md:h-4 rounded-full border-2", `border-[${roomTypes[roomType].primary}]`)}></div>
+                  <span>{roomType}</span>
+                </div>
+              ))}
             </div>
           </div>
 
