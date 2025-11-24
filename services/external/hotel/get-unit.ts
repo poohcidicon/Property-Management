@@ -285,18 +285,32 @@ const mappingColorRoomType = (roomType: RoomTypeMaster) => {
   return {...roomType, color}
 }
 
-export const getRoomTypeMasService = async (): Promise<IResponse<RoomTypeMaster[]>> => {
+export const getRoomTypeMasService = async ({ project_id }: { project_id?: string }): Promise<IResponse<RoomTypeMaster[]>> => {
   try{
     const pool = await getConnection();
     const result = await pool.request()
-      .query<RoomTypeMaster>(`
-        select Id, Value, Name, NameEng, Sequence
-        from Sys_Master_AllType 
-        where Groups = 'RoomTypeHotel'
-        AND isnull(isDelete, 0) = 0
+      .input("ProjectID", sql.NVarChar, project_id)
+      .query(`
+        SELECT RT.RoomTypeID, RoomTypeName, RoomTypeColor, RTJ.ID, RTJ.ProjectID 
+        FROM Sys_Hotel_RoomType RT
+        INNER JOIN Sys_Hotel_RoomType_Proj RTJ ON RT.RoomTypeID = RTJ.RoomTypeID AND ISNULL(RTJ.IsDelete,0) = 0
+        ${project_id ? 'and ProjectID = @ProjectID' : ''}
       `)
 
-    const mappedResult = result.recordset.map(mappingColorRoomType)
+    const mappedResult = result.recordset.map<RoomTypeMaster>((item, index) => {
+      return {
+        Id: item.ID,
+        Value: item.RoomTypeName,
+        Name: item.RoomTypeName,
+        NameEng: item.RoomTypeName,
+        Sequence: index+1,
+        color: {
+          primary: item.RoomTypeColor,
+          secondary: item.RoomTypeColor,
+          glow: item.RoomTypeColor,
+        }
+      }
+    })
     return {
       success: true,
       data: mappedResult,

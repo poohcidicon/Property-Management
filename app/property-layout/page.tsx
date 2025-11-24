@@ -396,7 +396,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   }
 
   const getRoomTypes = async () => {
-    const roomTypesData = await getRoomTypeMasterApi()
+    const roomTypesData = await getRoomTypeMasterApi({
+      project_id: projectId
+    })
     if (roomTypesData.data && roomTypesData.data?.length > 0){
       let recordRoomTypeColor: {[key: string]: any} = {}
       let recordRoomTypeColorLowwer: {[key: string]: any} = {}

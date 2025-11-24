@@ -103,9 +103,13 @@ export interface RoomTypeMaster {
   };
 }
 
-export const getRoomTypeMasterApi = async (): Promise<ApiResponse<RoomTypeMaster[]>> => {
+export interface IPayloadGetRoomTypeMaster {
+  project_id: string
+}
+
+export const getRoomTypeMasterApi = async (input: IPayloadGetRoomTypeMaster): Promise<ApiResponse<RoomTypeMaster[]>> => {
   try{
-    const response = await axiosPublic.get<ApiResponse<RoomTypeMaster[]>>('/api/hotel/get-room-type');
+    const response = await axiosPublic.post<ApiResponse<RoomTypeMaster[]>>('/api/hotel/get-room-type', input);
     return response.data
   }
   catch (error: any) {

@@ -70,9 +70,9 @@ export const updateRoomStatusController = async (payload: IUpdateRoomStatus): Pr
   }
 };
 
-export const getRoomTypeMasController = async (): Promise<IResponse<RoomTypeMaster[]>> => {
+export const getRoomTypeMasController = async ({ project_id }: { project_id?: string }): Promise<IResponse<RoomTypeMaster[]>> => {
   try{
-    const roomTypeMas = await getRoomTypeMasService();
+    const roomTypeMas = await getRoomTypeMasService({ project_id });
     return roomTypeMas;
   }
   catch (err: any) {
