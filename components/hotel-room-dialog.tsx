@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
 import HotelClearingCard from "./hotel-clearing-card"
 import dayjs from "dayjs"
+import { useRoomTypeStore } from "@/app/room-type-store"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -40,6 +41,7 @@ export default function HotelRoomDialog({
   onDialogClose
 }: HotelRoomDialogProps) {
   console.log(selectGuest, 'selectGuest')
+  const { roomTypesLowwer: ROOM_TYPE_COLORS } = useRoomTypeStore()
 
   const [guest, setGuest] = useState<Guest | null>(null);
 
@@ -176,7 +178,7 @@ export default function HotelRoomDialog({
               className="font-medium capitalize"
               style={{
                 color: selectedProperty?.room_type
-                  ? ROOM_TYPE_COLORS[selectedProperty.room_type as keyof typeof ROOM_TYPE_COLORS]?.primary || "#6b7280"
+                  ? ROOM_TYPE_COLORS[selectedProperty.room_type.toLocaleLowerCase() as keyof typeof ROOM_TYPE_COLORS]?.primary || "#6b7280"
                   : selectedRoomType
                     ? ROOM_TYPE_COLORS[selectedRoomType]?.primary || "#6b7280"
                     : "#6b7280"

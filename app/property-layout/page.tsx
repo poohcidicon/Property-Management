@@ -103,7 +103,7 @@ export interface PropertyLayoutProps {
 export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayoutProps) {
   // test project
   const setCustomer = useCustomerStore((state) => state.setCustomer)
-  const { roomTypes, setRoomTypes, setRoomTypesLowwer } = useRoomTypeStore()
+  const { roomTypes, setRoomTypes, setRoomTypesLowwer, roomTypesLowwer } = useRoomTypeStore()
   const { activeDate, setActiveDate } = useFilterStore()
   const modalOtherGuests = useModalOtherGuestStore()
   const [currentBusinessType, setCurrentBusinessType] = useState(typeBusiness)
@@ -407,6 +407,12 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         recordRoomTypeColorLowwer[item.Value.toLowerCase()] = item.color
       })
       setRoomTypes(recordRoomTypeColor)
+      // set other type
+      recordRoomTypeColorLowwer['standard'] = {
+        "primary": "#6b7280",
+        "secondary": "#6b7280",
+        "glow": "#6b7280"
+      }
       setRoomTypesLowwer(recordRoomTypeColorLowwer)
     }
   }
@@ -2041,12 +2047,14 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-[#3b82f6]"></div>
                 <span>Superior</span>
               </div> */}
-              {Object.keys(roomTypes).map((roomType) => (
-                <div key={roomType} className="flex items-center gap-1 md:gap-2">
-                  <div className={cn("w-3 h-3 md:w-4 md:h-4 rounded-full border-2", `border-[${roomTypes[roomType].primary}]`)}></div>
-                  <span>{roomType}</span>
-                </div>
-              ))}
+              {Object.keys(roomTypes).map((roomType) => {
+                return (
+                  <div key={roomType} className="flex items-center gap-1 md:gap-2">
+                    <div className={cn("w-3 h-3 md:w-4 md:h-4 rounded-full border-2")} style={{ borderColor: roomTypesLowwer[roomType.toLocaleLowerCase()].primary }}></div>
+                    <span>{roomType}</span>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
