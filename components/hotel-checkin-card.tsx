@@ -491,7 +491,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   <div className="flex justify-between pt-2 border-gray-200" key={bm.ID}>
                     <div className="text-sm flex flex-col gap-2">
                       <span>{bm.MaterialName}</span>
-                      <span className='text-xs'>{format(new Date(bm.CreateDate), "dd MMM yyyy HH:mm", { locale: th })}</span>
+                      <span className='text-xs'>{format(new Date(bm.CreateDate), "dd MMM yyyy", { locale: th })}</span>
                     </div>
                     <div className="text-sm font-bold text-lg text-green-600 flex gap-2">
                       <div>฿ {bm.Price?.toLocaleString() || 0 }</div>
