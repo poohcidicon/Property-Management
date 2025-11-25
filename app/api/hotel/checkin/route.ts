@@ -25,6 +25,9 @@ export async function POST(request: Request) {
       ...body,
       create_by: userSession.data?.user_id
     })
+    if (!result.success){
+      return NextResponse.json(result, { status: 500 })
+    }
     return NextResponse.json(result, { status: 200 })
   }
   catch(err: any){

@@ -2,6 +2,7 @@ import { getConnection } from "@/lib/db";
 import sql from "mssql";
 import dayjs from "dayjs";
 import { db } from "./mock/units"
+import { IResponse } from "../models/master";
 
 export interface IPayloadCheckinUnitService {
   unit_id: string;
@@ -20,7 +21,7 @@ export interface IPayloadCheckinUnitService {
   create_by: string;
 }
 
-export const checkinService = async (payload: IPayloadCheckinUnitService): Promise<boolean> => {
+export const checkinService = async (payload: IPayloadCheckinUnitService): Promise<IResponse<boolean>> => {
   const pool = await getConnection();
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
@@ -103,12 +104,18 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       .query(bookDetailQuery)
     if(bookDetailResult.length === 0){
       await transaction.rollback();
-      return false
+      return {
+        success: false,
+        message: "Book detail not found",
+      }
     }
 
     if (!bookDetailResult) {
       await transaction.rollback();
-      return false
+      return {
+        success: false,
+        message: "Book detail not found",
+      }
     }
 
     // use amount from BathPerNight
@@ -122,7 +129,10 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       .query(checkinQuery)
     if(bookRoomResult.length === 0){
       await transaction.rollback();
-      return false
+      return {
+        success: false,
+        message: "Book room not found",
+      }
     }
     const { recordset: checkinResult=[]} = await transaction.request()
       .input("BookingID", payload.customers[0].booking_id)
@@ -132,14 +142,31 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
       `)
     const bookRoom = bookRoomResult[0]
-    const roomPrice = bookRoom.BathPerNight
-    if (!roomPrice && roomPrice !== 0) {
+    // const roomPrice = bookRoom.BathPerNight
+    // if (!roomPrice && roomPrice !== 0) {
+    //   await transaction.rollback();
+    //   return false
+    // }
+    const {recordset: bookRoomPriceResult=[]} = await transaction.request()
+      .input("BookingID", payload.customers[0].booking_id)
+      .input("BookRoomID", payload.customers[0].book_room_id)
+      .query<{
+        StartDate: string;
+        EndDate: string;
+        Amount: number;
+        Night: number;
+      }>(`
+        select * from Sys_Hotel_BookPrice
+        WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
+        order by StartDate desc
+      `)
+    if (bookRoomPriceResult.length === 0) {
       await transaction.rollback();
-      return false
+      return {
+        success: false,
+        message: "Book room price not found",
+      }
     }
-    const VAT = 0.07
-    const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
-    const vatAmount = baseAmount * VAT
     const paidType = bookDetailResult.PaidType // postpaid or prepaid
     // const paytransStatus = paidType === "prepaid" ? "P" : "A"
     const paytransStatus = "A"
@@ -149,6 +176,23 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       const { recordset: [payTransID] } = await transaction.request().query(`
         SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
       `)
+      let roomPrice = bookRoomPriceResult.find((item) => {
+        const isBetween = (dayjs(item.StartDate).isBefore(d) || dayjs(item.StartDate).isSame(d)) && (dayjs(item.EndDate).isAfter(d) || dayjs(item.EndDate).isSame(d))
+        return isBetween
+      })?.Amount
+      if (!roomPrice) {
+        roomPrice = bookRoom.BathPerNight
+      }
+      if (!roomPrice && roomPrice !== 0) {
+        await transaction.rollback();
+        return {
+          success: false,
+          message: "Room price not found",
+        }
+      }
+      const VAT = 0.07
+      const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
+      const vatAmount = baseAmount * VAT
       const insertPayTrans = transaction.request()
       insertPayTrans.input("PayTransID", payTransID.PayTransID)
       insertPayTrans.input("BookRoomID", checkin.BookRoomID)
@@ -215,12 +259,22 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
 
     await transaction.commit();
     
-    return true
+    return {
+      success: true,
+      data: true,
+      message: "Success",
+      error: ""
+    }
   }
   catch(err: any){
     await transaction.rollback();
     console.error('Error in checkinService:', err);
-    return false
+    return {
+      success: false,
+      data: false,
+      message: 'Error in checkinService',
+      error: 'Error in checkinService'
+    }
   }
 }
 

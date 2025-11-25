@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import SpinnerSmall from './ui/spinner-small';
 import { SysHotelBookGuests } from '@/services/external/models/customer';
+import { toast } from 'sonner';
 
 interface HotelBookedCardProps {
   booking?: {
@@ -74,6 +75,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
     } as IPayloadCheckin
     const result = await CheckinUnitApi(payloadCheckin)
     if (result.data){
+      toast.success("Checkin Success");
       if (onChangeStatus){
         onChangeStatus(true)
       }

@@ -67,13 +67,8 @@ export const checkinUnitController = async (payload: IPayloadCheckinUnit): Promi
       }
     }
     const result = await checkinService(payload)
-    if(!result){
-      return {
-        success: false,
-        data: false,
-        error: "Check-in failed",
-        message: "Check-in failed"
-      }
+    if(!result.data){
+      return result
     }
     return {
       success: true,
