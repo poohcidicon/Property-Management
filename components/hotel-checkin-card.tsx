@@ -16,6 +16,7 @@ import { TooltipPortal } from '@radix-ui/react-tooltip';
 import FormattedInput from './ui/formatted-input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
+import { useFilterStore } from '@/app/filter-store';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -64,6 +65,7 @@ interface MaterialPriceWithAction extends MaterialPrice {
 }
 
 export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
+  const { activeDate } = useFilterStore()
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [otherGuests, setOtherGuests] = useState<SysHotelGuests[]>([]);
@@ -146,7 +148,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     ]
     const payloadCheckout = {
       unit_id: roomId || '',
-      checkout_date: dayjs().format('YYYY-MM-DD'),
+      checkout_date: activeDate || dayjs().format('YYYY-MM-DD'),
       total_amount: summaryPrice,
       project_id: projectId,
       payment_method: paymentMethod,
