@@ -301,7 +301,7 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
         .input("RefType", "Service")
         .input("RefID", damage.material_id)
         .input("Quantity", damage.qty || 1)
-        .input("Price", amount)
+        .input("Price", damage.price)
         .input("Discount", 0)
         .input("FeeQuantity", 0)
         .input("BaseAmount", baseAmount)
