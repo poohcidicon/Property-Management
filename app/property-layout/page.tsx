@@ -35,6 +35,7 @@ import { useModalOtherGuestStore } from "../modal-other-guest-store"
 import { useFilterStore } from "../filter-store"
 import { Input } from "@/components/ui/input"
 import SpinnerSmall from "@/components/ui/spinner-small"
+import { DatePicker } from 'antd'
 import { useRoomTypeStore } from "../room-type-store"
 import { cn } from "@/lib/utils"
 interface Property {
@@ -1928,15 +1929,16 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             {currentBusinessType === "hotel" && (
               <div className="flex items-center gap-2">
                 <div className="flex gap-2 items-center">
-                  <span className="text-sm font-medium text-gray-700 w-full">วันที่:</span>
-                  <Input 
-                    type="date"
-                    defaultValue={activeDate}
-                    onChange={(e) => {
-                      setActiveDate(e.target.value)
+                  <span className="text-sm font-medium text-gray-700 w-16">วันที่:</span>
+                  <DatePicker 
+                    value={activeDate ? dayjs(activeDate) : null}
+                    onChange={(date) => {
+                      setActiveDate(date?.format('YYYY-MM-DD') || '')
                       setShowHotelRoomDialog(false)
                       clearRoomSelect()
                     }}
+                    format="DD/MM/YYYY"
+                    className="w-full"
                   />
                 </div>
                 <span className="text-sm font-medium text-gray-700">ชั้น:</span>
