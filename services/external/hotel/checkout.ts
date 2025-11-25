@@ -367,6 +367,50 @@ export const checkoutUnitService = async (payload: IPayloadCheckoutUnitService):
       }
     }
 
+    // for calculate total amount with VAT
+    const queryViewPayTrans = `
+      select * from VW_Hotel_PayTransStatus
+      where BookRoomID = @BookRoomID
+    `
+    const { recordset: viewPayTrans } = await transaction.request()
+      .input("BookRoomID", payload.book_room_id)
+      .query<{
+        Quantity: number;
+        Price: number;
+        PayTransID: string;
+        BookRoomID: string;
+        Discount: number;
+        FeeQuantity: number;
+        BaseAmount: number;
+        VATPercent: number;
+        VATAmount: number;
+        TotalAmount: number;
+        PaidAmount: number;
+      }>(queryViewPayTrans)
+    
+    for (const vPaytrans of viewPayTrans) {
+      await transaction.request()
+        .input("PayTransID", vPaytrans.PayTransID)
+        .input("Discount", vPaytrans.Discount)
+        .input("FeeQuantity", vPaytrans.FeeQuantity)
+        .input("BaseAmount", vPaytrans.BaseAmount)
+        .input("VATPercent", vPaytrans.VATPercent)
+        .input("VATAmount", vPaytrans.VATAmount)
+        .input("TotalAmount", vPaytrans.TotalAmount)
+        .input("UpdateBy", payload.create_by || process.env.DEFAULT_SALE_ID || "system")
+        .query(`
+          UPDATE Sys_Hotel_PayTrans
+          SET Discount = @Discount
+          , FeeQuantity = @FeeQuantity
+          , BaseAmount = @BaseAmount
+          , VATPercent = @VATPercent
+          , VATAmount = @VATAmount
+          , TotalAmount = @TotalAmount
+          , ModifyBy = @UpdateBy
+          WHERE PayTransID = @PayTransID
+        `)
+    }
+
     // paytrans daily detail
     const { recordset: dailyPaytrans } = await transaction.request()
       .input("BookRoomID", payload.book_room_id)
