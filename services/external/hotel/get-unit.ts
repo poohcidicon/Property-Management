@@ -156,7 +156,7 @@ export const getFloorMas = async (payload: { project_id: string }): Promise<IRes
         SELECT vr.FloorID, vr.FloorName , F.Id FileID
         FROM VW_Hotel_RoomStatus vr
         INNER JOIN Sys_Daily_Floor_Plan dp on vr.FloorID = dp.FloorID AND dp.IsDeleted = 0
-        LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), dp.FloorPlanID) = F.RefID AND F.Process = 'floorplan' AND F.ProjectID = dp.ProjectID
+        LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), dp.ParentID) = F.RefID AND F.Process = 'floorplan' AND F.ProjectID = dp.ProjectID
         AND ISNULL(F.Isdelete,0) = 0
         WHERE vr.ProjectID = @ProjectID
         GROUP BY vr.FloorID, vr.FloorName, F.Id
