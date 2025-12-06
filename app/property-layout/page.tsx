@@ -351,9 +351,15 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const getFloor = async () => {
     const floorData = await getFloorMasApi({ project_id: projectId })
     if (floorData.data && floorData.data?.length > 0){
+      const floor = floorData.data[0]
       setFloorList(floorData.data)
-      setSelectedFloor(floorData.data[0].FloorID)
-      setCanvasBackgroundImage(floorData.data[0].ImagePath)
+      setSelectedFloor(floor.FloorID)
+      if (floor.FileID){
+        setCanvasBackgroundImage(floorData.data[0].ImagePath)
+      }
+      else{
+        setCanvasBackgroundImage(null)
+      }
     }
     else{
       setFloorList([])
@@ -1946,7 +1952,12 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                   const floor = floorList.find((f) => f.FloorID.toString() === value);
                   if (floor) {
                     setSelectedFloor(floor.FloorID);
-                    setCanvasBackgroundImage(floor.ImagePath);
+                    if (floor.FileID){
+                      setCanvasBackgroundImage(floor.ImagePath);
+                    }
+                    else{
+                      setCanvasBackgroundImage(null);
+                    }
                   }
                   else {
                     setSelectedFloor(0);
