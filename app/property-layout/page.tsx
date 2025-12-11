@@ -476,7 +476,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
       month: filter.month || Number(selectedMonth),
       year: filter.year || Number(selectedYear)
     })
-
+    
 
     if (unitBookingDateData.data && unitBookingDateData.data.length > 0){
       // mock data date current month
@@ -2077,6 +2077,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                   onCirclesChange={setCircles}
                   filterUnitMatrix={searchUnitMatrix}
                   onLoading={(isLoading) => {
+                    console.log('isLoading', isLoading)
                     setIsLoadingUnitMatrix(isLoading)
                   }}
                   onChangeFilterDay={(day: number) => {

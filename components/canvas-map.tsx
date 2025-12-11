@@ -14,6 +14,7 @@ import { useCustomerStore } from "@/app/customer-store"
 import { useUserStore } from "@/app/user-store"
 import { useFilterStore } from "@/app/filter-store"
 import { useUnitBookingStore } from "@/app/unit-booking-store"
+import { th } from "date-fns/locale"
 
 export interface Circle {
   x: number
@@ -77,6 +78,7 @@ export default function CanvasMap({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
+  console.log('isImageLoaded', isImageLoaded)
   const [isDragOver, setIsDragOver] = useState(false)
   const [showUploadArea, setShowUploadArea] = useState(false)
   const [showInstructions, setShowInstructions] = useState(true)
@@ -193,17 +195,25 @@ export default function CanvasMap({
 
         // test connect rental
         if (!phase){
-          return
+          setIsLoadingCircles(false)
+          if (onLoading) {
+            onLoading(false)
+          }
+          throw new Error('กรุณาเลือกเฟสก่อนโหลดข้อมูลจุดจอง')
         }
         if (unit_booking_list.length === 0) {
-          return
+          setIsLoadingCircles(false)
+          if (onLoading) {
+            onLoading(false)
+          }
+          throw new Error('ไม่มีข้อมูลการจองห้องชั่วคราว กรุณารีเฟรชหน้าใหม่')
         }
         const searchUnitMatrixPayload = {
           project_id: projectId,
           year: filterUnitMatrix?.year || 2025,
           month: filterUnitMatrix?.month || 9,
           day: filterUnitMatrix?.day || filterDay || 0, // 0 means whole month
-          phase: phase
+          phase: phase,
         }
         const unitMatrixData = await getUnitMatrixApi(searchUnitMatrixPayload)
 
@@ -554,6 +564,9 @@ export default function CanvasMap({
     img.crossOrigin = "anonymous"
     img.onload = () => {
       setBackgroundImage(img)
+       if (onLoading){
+        onLoading(false)
+      }
       setIsImageLoaded(true)
     }
     if (backgroundImageUrl && img.src !== backgroundImageUrl){
@@ -1285,7 +1298,16 @@ export default function CanvasMap({
             <div className="text-gray-500">กรุณาเลือกโซน</div>
           </div>
         </div>
-      ) :!isImageLoaded && (
+      ): 
+      unit_booking_list.length === 0 ? (
+         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            {/* <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div> */}
+            <div className="text-gray-500">ยังไม่เปิดให้ทำการจอง</div>
+          </div>
+        </div>
+      ):
+      !isImageLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
@@ -1293,6 +1315,8 @@ export default function CanvasMap({
           </div>
         </div>
       )}
+
+      
 
       {/* Enhanced Instructions */}
       {(showInstructions && !viewOnly && !isFullscreen) && (
