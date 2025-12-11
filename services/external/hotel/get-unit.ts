@@ -126,6 +126,26 @@ export const getUnitsHotelService = async (payload: {
   }
 }
 
+const sortByName = (a: string, b: string) => {
+  const aNum = Number(a);
+  const bNum = Number(b);
+
+  const aIsNum = !isNaN(aNum);
+  const bIsNum = !isNaN(bNum);
+
+  // 1) ตัวอักษรต้องมาก่อนตัวเลข
+  if (!aIsNum && bIsNum) return -1;
+  if (aIsNum && !bIsNum) return 1;
+
+  // 2) ทั้งคู่เป็นตัวอักษร → ใช้ localeCompare
+  if (!aIsNum && !bIsNum) {
+    return a.localeCompare(b, undefined, { numeric: true });
+  }
+
+  // 3) ทั้งคู่เป็นตัวเลข → เรียงเลขจริง
+  return aNum - bNum;
+}
+
 export interface IFloorMas {
   FloorID: number;
   FloorName: string;
@@ -171,9 +191,10 @@ export const getFloorMas = async (payload: { project_id: string }): Promise<IRes
       }
       return acc
     }, [])
+    const sortedResult = unqineResult.sort((a, b) => sortByName(a.FloorName, b.FloorName))
     return {
       success: true,
-      data: unqineResult,
+      data: sortedResult,
       message: "Success",
       error: ""
     }
