@@ -226,7 +226,8 @@ export const updateRoomStatusService = async (payload: IUpdateRoomStatus): Promi
     const queryUpdateRoomStatus = `
       UPDATE [dbo].[Sys_Hotel_RoomStatus]
       SET Status = @Status
-      WHERE UnitID = @UnitID 
+      WHERE UnitID = @UnitID
+      and Status IN (3, 4)
       and CONVERT(date, ActiveDate) >= @ActiveDate
     `
     await transaction.request()
