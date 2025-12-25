@@ -21,7 +21,7 @@ interface HotelRoomDialogProps {
   onConfirmHotelRoom: () => void
   onChangeStatus?: (status: boolean) => void
   guestList: Guest[]
-  statusType?: "available" | "booked" | "checkin" | "clearing"
+  statusType?: "available" | "booked" | "checkin" | "clearing" | "close"
   customerData?: any | null
   onDialogClose?: () => void // Add callback for dialog close
   selectGuest?: PendingBooking | null
@@ -118,7 +118,7 @@ export default function HotelRoomDialog({
     )
   }
 
-  if (statusType === 'clearing') {
+  if (statusType === 'clearing' || statusType === 'close') {
     return (
       <HotelClearingCard
         selectedProperty={selectedProperty}

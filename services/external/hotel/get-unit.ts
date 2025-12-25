@@ -94,7 +94,11 @@ export const getUnitsHotelService = async (payload: {
         d_price: 0,
         floor: item.FloorID?.toString() || '0',
         room_type: item.RoomType?.toLocaleLowerCase() || 'other',
-        status_desc: checkin_customers.length > 0 ? 'Checkin' : item.BookingStatus === 'W' ? 'Booked' : Number(item.Status) === 3 ? 'Clearing' : 'Available',
+        status_desc: checkin_customers.length > 0 ? 'Checkin' 
+          : item.BookingStatus === 'W' ? 'Booked' 
+          : Number(item.Status) === 3 ? 'Clearing' 
+          : Number(item.Status) === 4 ? 'Close'
+          : 'Available',
         total_amount: item.TotalAmount ? Number(item.TotalAmount) : 0,
         checkin_customers: checkin_customers.map((c) => {
           return {
@@ -222,7 +226,8 @@ export const updateRoomStatusService = async (payload: IUpdateRoomStatus): Promi
     const queryUpdateRoomStatus = `
       UPDATE [dbo].[Sys_Hotel_RoomStatus]
       SET Status = @Status
-      WHERE UnitID = @UnitID and CONVERT(date, ActiveDate) = @ActiveDate
+      WHERE UnitID = @UnitID 
+      and CONVERT(date, ActiveDate) >= @ActiveDate
     `
     await transaction.request()
       .input("UnitID", payload.unit_id)

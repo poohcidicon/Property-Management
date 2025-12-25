@@ -42,7 +42,7 @@ interface Property {
   id: string
   name: string;
   price: string
-  status: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing'
+  status: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' | 'close'
   bookedAt?: number
   bookedBy?: string
   remainingTime?: number
@@ -1052,6 +1052,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
         setStatusType("checkin")
       } else if (property.initStatus === "clearing") {
         setStatusType("clearing")
+      } else if (property.initStatus === "close") {
+        setStatusType("close")
       } else {
         // Default to available if status is not recognized
         setStatusType("available")
@@ -1161,7 +1163,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showClearConfirmDialog, setShowClearConfirmDialog] = useState(false)
   const [showHotelRoomDialog, setShowHotelRoomDialog] = useState(false)
-  const [statusType, setStatusType] = useState<"available" | "booked" | "checkin" | "clearing">("available")
+  const [statusType, setStatusType] = useState<"available" | "booked" | "checkin" | "clearing" | "close">("available")
   
   // Sync propertyList กับ circles ที่มีสถานะ pending และถูกเลือกโดย user
   useEffect(() => {

@@ -47,7 +47,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
           <h2 className="text-xl font-semibold text-gray-800">ห้อง {selectedProperty?.name || '101'}</h2>
           <div className="flex items-center gap-2">
             <span className={`bg-gray-100 text-gray-700" text-sm px-3 py-1 rounded-full`}>
-              รอทำความสะอาด
+              {selectedProperty?.status === 'clearing' ? 'รอทำความสะอาด' : 'ปิดปรับปรุง'}
             </span>
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"

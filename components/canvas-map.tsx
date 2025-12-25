@@ -24,8 +24,8 @@ export interface Circle {
   x: number
   y: number
   r: number
-  status: "available" | "booked" | "pending" | "some available" | "checkin" |  'clearing',
-  initStatus: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing', // สถานะเริ่มต้นจาก API
+  status: "available" | "booked" | "pending" | "some available" | "checkin" |  'clearing' | 'close',
+  initStatus: "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' | 'close', // สถานะเริ่มต้นจาก API
   id: string
   name: string;
   room_type?: string // เพิ่ม
@@ -236,7 +236,7 @@ export default function CanvasMap({
           }
         }
 
-        if (circle.initStatus === 'clearing'){
+        if (circle.initStatus === 'clearing' || circle.initStatus === 'close'){
           return {
             fillColor: "rgba(0, 0, 0, 0.3)",
             strokeColor: "rgba(7, 7, 7, 0.4)",
@@ -456,7 +456,7 @@ export default function CanvasMap({
             
             if (hotelUnitsData.data && hotelUnitsData.data.length > 0) {
               circlesData = hotelUnitsData.data.map((unit, index) => {
-                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' => {
+                const getStatusValue = (): "available" | "booked" | "pending" | "some available" | "checkin" | 'clearing' | 'close' => {
                   if (unit.status === 0) return 'available';
                   if (unit.status === 2) return 'booked';
                   if (unit.status === 3) return 'checkin';
@@ -469,6 +469,7 @@ export default function CanvasMap({
                     if (desc === 'pending') return 'pending';
                     if (desc === 'some available') return 'some available';
                     if (desc === 'clearing') return 'clearing'
+                    if (desc === 'close') return 'close'
                   }
                   return 'available';
                 };
