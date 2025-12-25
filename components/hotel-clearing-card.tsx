@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { useRoomTypeStore } from "@/app/room-type-store"
+import { useFilterStore } from "@/app/filter-store"
 
 interface HotelClearingCardProps {
   selectedProperty: Circle | null
@@ -16,11 +17,12 @@ interface HotelClearingCardProps {
 
 export default function HotelClearingCard ({ selectedProperty, selectedRoomType, onChangeStatus, onClose }: HotelClearingCardProps) {
   const { roomTypesLowwer: ROOM_TYPE_COLORS } = useRoomTypeStore()
+  const { activeDate } = useFilterStore()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const handleChangeStatusRoom = async (status: number) => {
     const payload = {
-      active_date: dayjs().format('YYYY-MM-DD'),
+      active_date: activeDate,
       status: status,
       unit_id: selectedProperty?.id
     } as IUpdateRoomStatus
