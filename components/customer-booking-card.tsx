@@ -156,7 +156,6 @@ export default function CustomerBookingCard({
           assignedRoomName: g.booking ? g.booking.room_number : g.assigned_room_number || undefined
         };
       })
-      console.log(pendingList, 'pendingList')
       const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
         return {
           id: g.id,
