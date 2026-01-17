@@ -75,7 +75,8 @@ export interface BookingGuest {
   BookUnitID: string,
   CheckinUnitID: string,
   CheckinRoomNumber: string,
-  BookingRoomStatus: string
+  BookingRoomStatus: string,
+  AssignedRoomNumber: string
 }
 
 export interface SysHotelGuests {

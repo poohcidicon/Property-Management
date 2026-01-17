@@ -17,7 +17,7 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       SELECT DISTINCT g.*
       , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
       , checkin.UnitID as CheckinUnitID, checkin.RoomNumber as CheckinRoomNumber
-      , gbr.Status as BookingRoomStatus
+      , gbr.Status as BookingRoomStatus, gbr.RoomNumber as AssignedRoomNumber
       FROM VW_Hotel_BookingStatus g
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
@@ -65,7 +65,8 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
           room_number: item.BookRoomNumber
         } : null,
         checkin: checkin,
-        book_status: item.BookingRoomStatus
+        book_status: item.BookingRoomStatus,
+        assigned_room_number: item.AssignedRoomNumber
       }
     })
 
