@@ -16,6 +16,7 @@ import { useCustomerStore } from "@/app/customer-store"
 import { useFilterStore } from "@/app/filter-store"
 import SpinnerSmall from "./ui/spinner-small"
 import { useProjectStore } from "@/app/project-store"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -36,6 +37,7 @@ export default function CustomerBookingCard({
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { customer, setCustomer } = useCustomerStore();
+    const { locale } = useSelectLanguage()
     
     const selectBooking = (booking: PendingBooking) => {
       if (!customer || (customer.book_room_id !== booking.book_room_id)) {
@@ -183,7 +185,7 @@ export default function CustomerBookingCard({
     return (
     <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
       <div className="p-3 md:p-4 border-b">
-        <h2 className="text-lg md:text-xl font-bold">รายการจอง</h2>
+        <h2 className="text-lg md:text-xl font-bold">{locale?.home?.title_booking || 'รายการจอง'}</h2>
       </div>
 
       {/* Room Type Filter */}
