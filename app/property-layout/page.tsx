@@ -169,7 +169,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
 
   // Language selection
-  const { locale } = useSelectLanguage()
+  const { locale, language } = useSelectLanguage()
 
   const handleGetGuestList = async () => {
     if (!projectId){
@@ -416,6 +416,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       roomTypesData.data.forEach((item) => {
         recordRoomTypeColor[item.Value] = item.color
         recordRoomTypeColorLowwer[item.Value.toLowerCase()] = item.color
+        recordRoomTypeColor[item.Value]['name'] = language === 'en' ? item.NameEng : item.Name
+        recordRoomTypeColorLowwer[item.Value]['name'] = language === 'en' ? item.NameEng.toLocaleLowerCase() : item.Name.toLocaleLowerCase()
       })
       setRoomTypes(recordRoomTypeColor)
       // set other type
@@ -2070,7 +2072,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 return (
                   <div key={roomType} className="flex items-center gap-1 md:gap-2">
                     <div className={cn("w-3 h-3 md:w-4 md:h-4 rounded-full border-2")} style={{ borderColor: roomTypesLowwer[roomType.toLocaleLowerCase()].primary }}></div>
-                    <span>{roomType}</span>
+                    <span>{roomTypesLowwer[roomType].name}</span>
                   </div>
                 )
               })}

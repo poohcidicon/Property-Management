@@ -4,6 +4,7 @@ interface RoomTypeColoer {
   primary: string
   secondary: string,
   glow: string,
+  name?: string
 }
 interface RoomTypeState {
   roomTypes: Record<string, RoomTypeColoer>;

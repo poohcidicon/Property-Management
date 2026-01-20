@@ -30,6 +30,7 @@ export interface Circle {
   id: string
   name: string;
   room_type?: string // เพิ่ม
+  room_type_desc?: string
   bookedBy?: string // Username ของคนที่จอง (สำหรับ pending)
   bookedAt?: number // Timestamp ของการจอง
   m_price: number // ราคาเช่ารายเดือน
