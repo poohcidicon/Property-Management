@@ -26,6 +26,7 @@
     "room_checked_in": "Checked In",
     "room_booked": "Booked",
     "room_maintenance": "Maintenance",
+    "room_cleaning": "Cleaning",
     "delete": "Delete",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -76,7 +77,10 @@
     "grand_total": "Total",
     "confirm_check_out": "Confirm Check Out",
     "add_on_placeholder": "Specify add-on services",
-    "damage_placeholder": "Specify damage charges"
+    "damage_placeholder": "Specify damage charges",
+    "open_room": "Open Room",
+    "confirm_open_room": "Confirm Opening Room",
+    "confirm_open_room_description": "Do you want to open this room?"
   },
   "select_customer": {
     "title": "Select Customer",

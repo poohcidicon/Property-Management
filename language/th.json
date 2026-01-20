@@ -26,6 +26,7 @@
     "room_checked_in": "เข้าพัก",
     "room_booked": "จองแล้ว",
     "room_maintenance": "ซ่อมบำรุง",
+    "room_cleaning": "ทำความสะอาด",
     "delete": "ลบ",
     "confirm": "ยืนยัน",
     "cancel": "ยกเลิก",
@@ -76,7 +77,10 @@
     "grand_total": "ยอดรวมทั้งสิ้น",
     "confirm_check_out": "ยืนยันการเช็คเอาท์",
     "add_on_placeholder": "ระบุค่าบริการเสริม",
-    "damage_placeholder": "ระบุค่าความเสียหาย"
+    "damage_placeholder": "ระบุค่าความเสียหาย",
+    "open_room": "เปิดห้อง",
+    "confirm_open_room": "ยืนยันการเปิดห้อง",
+    "confirm_open_room_description": "คุณต้องการเปิดห้องนี้หรือไม่?"
   },
   "select_customer": {
     "title": "ค้นหาชื่อลูกค้า",
