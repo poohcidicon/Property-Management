@@ -12,5 +12,24 @@
     "room": "ห้อง",
     "stay_until": "ถึง",
     "checked_in": "เช็คอินแล้ว"
+  },
+  "main": {
+    "show_all": "แสดงทั้งหมด",
+    "last_update": "อัพเดทล่าสุด",
+    "date": "วันที่",
+    "floor": "ชั้น",
+    "online_status": "ออนไลน์",
+    "reset_view": "รีเซ็ตมุมมอง",
+    "is_connected": "เชื่อมต่อแล้ว",
+    "is_connecting": "กำลังเชื่อมต่อ",
+    "room_available": "ว่าง",
+    "room_checked_in": "เข้าพัก",
+    "room_booked": "จองแล้ว",
+    "room_maintenance": "ซ่อมบำรุง"
+  },
+  "connection_guard": {
+    "is_connecting": "กำลังเชื่อมต่อ",
+    "wait_for_connection": "กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับเซิร์ฟเวอร์",
+    "offline_title": "คุณออฟไลน์อยู่"
   }
 }

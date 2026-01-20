@@ -12,5 +12,24 @@
     "room": "Room No.",
     "stay_until": "Check-out",
     "checked_in": "Checked in"
+  },
+  "main": {
+    "show_all": "Show All",
+    "last_update": "Last Update",
+    "date": "Date",
+    "floor": "Floor",
+    "online_status": "Online",
+    "reset_view": "Reset View",
+    "is_connected": "Connected",
+    "is_connecting": "Connecting",
+    "room_available": "Available",
+    "room_checked_in": "Checked In",
+    "room_booked": "Booked",
+    "room_maintenance": "Maintenance"
+  },
+  "connection_guard": {
+    "is_connecting": "Connecting",
+    "wait_for_connection": "Wait for connection, This web is connecting to the server",
+    "offline_title": "You are offline"
   }
 }

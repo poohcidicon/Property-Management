@@ -19,6 +19,7 @@ import Spinner from "./ui/Spinner"
 import SpinnerSmall from "./ui/spinner-small"
 import { PendingBooking } from "@/data/booking-mock-data"
 import { useRoomTypeStore } from "@/app/room-type-store"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 
 export interface Circle {
   x: number
@@ -168,6 +169,8 @@ export default function CanvasMap({
   const { user: userLogin } = useUserStore();
   // Real-time booking hook
   const { socket, isConnected, isLoading, broadcastCircleUpdate } = useRealtimeBooking()
+
+  const { locale } = useSelectLanguage()
   
   // Track active bookings count
   const [activeBookingsCount, setActiveBookingsCount] = useState(0)
@@ -1542,8 +1545,8 @@ export default function CanvasMap({
                   isConnected ? 'bg-green-500' : 'bg-red-500'
                 }`}></div>
                 <span className="text-xs text-gray-600">
-                  {isLoading ? 'กำลังเชื่อมต่อ' : 
-                  isConnected ? 'ออนไลน์' : 'ออฟไลน์'}
+                  {isLoading ? locale?.main?.is_connecting || 'กำลังเชื่อมต่อ' : 
+                  isConnected ? locale?.main?.is_connected || 'ออนไลน์' : 'offline'}
                 </span>
               </div>
             </div>
@@ -1641,7 +1644,7 @@ export default function CanvasMap({
 
           <Button onClick={resetView} variant="outline" className="bg-white/90 hover:bg-white shadow-lg" size="sm">
             <RotateCcw className="w-4 h-4 mr-2" />
-            รีเซ็ตมุมมอง
+            {locale?.main?.reset_view || 'รีเซ็ตมุมมอง'}
           </Button>
         </div>
       </div>

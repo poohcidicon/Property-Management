@@ -4,6 +4,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import { useSelectLanguage } from '@/hooks/use-select-language'
 
 interface ConnectionGuardProps {
   isLoading: boolean
@@ -26,6 +27,8 @@ export default function ConnectionGuard({
     window.location.reload()
   }
 
+  const { locale } = useSelectLanguage()
+
   // Show loading state
   if (isLoading) {
     return (
@@ -39,10 +42,10 @@ export default function ConnectionGuard({
               </div>
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
-              กำลังเชื่อมต่อ...
+              {locale?.connection_guard?.is_connecting || "กำลังเชื่อมต่อ"}...
             </h2>
             <p className="text-gray-600 text-sm">
-              กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับเซิร์ฟเวอร์
+              {locale?.connection_guard?.wait_for_connection || "โปรดรอสักครู่ ขณะระบบกำลังพยายามเชื่อมต่อกับเซิร์ฟเวอร์..."}
             </p>
             {retryCount > 0 && (
               <p className="text-orange-600 text-xs mt-2">
@@ -133,7 +136,7 @@ export default function ConnectionGuard({
         <div className="fixed top-4 right-4 z-50">
           <div className="flex items-center gap-2 bg-green-100 border border-green-300 rounded-full px-3 py-1 shadow-sm">
             <Wifi className="w-4 h-4 text-green-600" />
-            <span className="text-green-700 text-xs font-medium">เชื่อมต่อแล้ว</span>
+            <span className="text-green-700 text-xs font-medium">{locale?.main?.is_connected || 'เชื่อมต่อแล้ว'}</span>
           </div>
         </div>
       </div>
