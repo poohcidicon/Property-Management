@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import SpinnerSmall from "./ui/spinner-small";
 import { useModalOtherGuestStore } from "@/app/modal-other-guest-store";
+import { useSelectLanguage } from "@/hooks/use-select-language";
 
 export interface SelectHotelOtherGuestProps {
   setShowModal: (show: boolean) => void;
@@ -28,6 +29,8 @@ export default function SelectHotelOtherGuest({
   const [loading, setLoading] = useState(false);
   const [searchCustomerCounter, setSearchCustomerCounter] = useState(0)
   const [showGotoCRM, setShowGotoCRM] = useState(false)
+
+  const { locale } = useSelectLanguage()
 
   // Search API
   async function handleSearch() {
@@ -77,7 +80,7 @@ export default function SelectHotelOtherGuest({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl font-medium text-gray-800">ค้นหาชื่อลูกค้า</h2>
+          <h2 className="text-xl font-medium text-gray-800">{locale?.select_customer?.title || "Select Customer"}</h2>
           <button className="text-gray-400 hover:text-gray-600" onClick={closeModal}>
             <X size={24} />
           </button>
@@ -89,7 +92,7 @@ export default function SelectHotelOtherGuest({
           <div className="flex gap-3 mb-4">
             <input
               type="text"
-              placeholder="เลขบัตรประชาชน/ชื่อ/เบอร์โทร"
+              placeholder={locale?.select_customer?.search_placeholder || "Citizen ID/Name/Phone"}
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -101,7 +104,7 @@ export default function SelectHotelOtherGuest({
               disabled={loading}
             >
               <Search size={20} />
-              {loading ? "ค้นหา..." : "ค้นหา"}
+              {loading ? `${locale?.select_customer?.search || "Search"}...` : `${locale?.select_customer?.search || "Search"}`}
             </button>
           </div>
 
@@ -111,9 +114,9 @@ export default function SelectHotelOtherGuest({
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-300">
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 w-32">Customer ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ชื่อ-นามสกุล</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">เลขบัตรประชาชน</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">เบอร์โทร</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{locale?.select_customer?.full_name || "Full Name"}</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{locale?.select_customer?.citizen_id || "Citizen ID"}</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">{locale?.select_customer?.mobile || "Mobile"}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -129,14 +132,14 @@ export default function SelectHotelOtherGuest({
                 ) : customers?.length === 0 ? (
                   <tr className="justify-center">
                     <td colSpan={6} className="px-4 py-16 text-center">
-                      {searchCustomerCounter > 0 && <p className="text-red-500">ไม่มีข้อมูล</p>}
+                      {searchCustomerCounter > 0 && <p className="text-red-500">{locale?.select_customer?.no_customer_found || "No customer found"}</p>}
                       <div className="flex justify-center">
                         <Button
                           variant="outline"
                           className="้text-black text-sm px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap mt-4"
                           onClick={() => gotoCRM()}
                         >
-                          <PlusIcon /> เพิ่มลูกค้า
+                          <PlusIcon /> {locale?.select_customer?.add_customer || "Add Customer"}
                         </Button>
                       </div>
                     </td>
@@ -156,7 +159,7 @@ export default function SelectHotelOtherGuest({
                           className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                           onClick={() => handleSelect(c)}
                         >
-                          เลือก
+                          {locale?.main?.select || "Select"}
                         </button>
                       </td>
                     </tr>

@@ -28,7 +28,8 @@
     "room_maintenance": "ซ่อมบำรุง",
     "delete": "ลบ",
     "confirm": "ยืนยัน",
-    "cancel": "ยกเลิก"
+    "cancel": "ยกเลิก",
+    "select": "เลือก"
   },
   "connection_guard": {
     "is_connecting": "กำลังเชื่อมต่อ",
@@ -56,5 +57,15 @@
     "is_check_in": "เช็คอินแล้ว",
     "is_check_out": "เช็คเอาท์แล้ว",
     "is_booked": "จองแล้ว"
+  },
+  "select_customer": {
+    "title": "ค้นหาชื่อลูกค้า",
+    "search_placeholder": "เลขที่บัตรประชาชน/ชื่อ/เบอร์โทร",
+    "search": "ค้นหา",
+    "full_name": "ชื่อ-นามสกุล",
+    "citizen_id": "เลขบัตรประชาชน",
+    "mobile": "เบอร์โทร",
+    "add_customer": "เพิ่มลูกค้า",
+    "no_customer_found": "ไม่มีข้อมูล"
   }
 }
