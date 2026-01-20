@@ -25,11 +25,30 @@
     "room_available": "ว่าง",
     "room_checked_in": "เข้าพัก",
     "room_booked": "จองแล้ว",
-    "room_maintenance": "ซ่อมบำรุง"
+    "room_maintenance": "ซ่อมบำรุง",
+    "delete": "ลบ",
+    "confirm": "ยืนยัน",
+    "cancel": "ยกเลิก"
   },
   "connection_guard": {
     "is_connecting": "กำลังเชื่อมต่อ",
     "wait_for_connection": "กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับเซิร์ฟเวอร์",
     "offline_title": "คุณออฟไลน์อยู่"
+  },
+  "room_dialog": {
+    "room_no": "ห้อง",
+    "room_type": "ประเภทห้อง",
+    "room_price": "ราคาห้องพัก",
+    "customer_info": "ข้อมูลผู้จอง",
+    "name": "ชื่อ",
+    "phone": "เบอร์โทร",
+    "lodger_info": "ข้อมูลผู้เข้าพัก",
+    "check_in_date": "เช็คอินวันที่",
+    "check_out_date": "เช็คเอาท์วันที่",
+    "total_price": "ยอดชำระ",
+    "booking_total_price": "ค่าจองทั้งหมด",
+    "check_in": "เช็คอิน",
+    "check_out": "เช็คเอาท์",
+    "confirm_check_in": "ยืนยันการเช็คอิน"
   }
 }

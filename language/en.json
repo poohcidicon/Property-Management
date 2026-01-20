@@ -25,11 +25,30 @@
     "room_available": "Available",
     "room_checked_in": "Checked In",
     "room_booked": "Booked",
-    "room_maintenance": "Maintenance"
+    "room_maintenance": "Maintenance",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "connection_guard": {
     "is_connecting": "Connecting",
     "wait_for_connection": "Wait for connection, This web is connecting to the server",
     "offline_title": "You are offline"
+  },
+  "room_dialog": {
+    "room_no": "Room No.",
+    "room_type": "Room Type",
+    "room_price": "Room Price",
+    "customer_info": "Customer Information",
+    "name": "Name",
+    "phone": "Phone",
+    "lodger_info": "Lodger Information",
+    "check_in_date": "Check-in",
+    "check_out_date": "Check-out",
+    "total_price": "Total Price",
+    "booking_total_price": "Booking Total Price",
+    "check_in": "Check in",
+    "check_out": "Check out",
+    "confirm_check_in": "Confirm Check in"
   }
 }
