@@ -10,6 +10,7 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { format, set } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { enUS } from 'date-fns/locale/en-US';
 import { useProjectStore } from '@/app/project-store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { TooltipPortal } from '@radix-ui/react-tooltip';
@@ -17,6 +18,7 @@ import FormattedInput from './ui/formatted-input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { useFilterStore } from '@/app/filter-store';
+import { useSelectLanguage } from '@/hooks/use-select-language';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -96,6 +98,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [selectMaterialMinibar, setSelectMaterialMinibar] = useState<string | null>(null)
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
+
+  const { locale, language } = useSelectLanguage()
+  const localeDate = language === 'th' ? th : enUS;
 
   const summaryMaterialPrice = materialPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)
   const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)

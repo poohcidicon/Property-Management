@@ -9,9 +9,11 @@ import { Guest } from "@/lib/api/hotel/get-guest"
 import { useEffect, useState } from "react"
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { enUS } from 'date-fns/locale/en-US';
 import HotelClearingCard from "./hotel-clearing-card"
 import dayjs from "dayjs"
 import { useRoomTypeStore } from "@/app/room-type-store"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 
 interface HotelRoomDialogProps {
   showHotelRoomDialog: boolean
@@ -45,14 +47,17 @@ export default function HotelRoomDialog({
 
   const [guest, setGuest] = useState<Guest | null>(null);
 
+  const { locale, language } = useSelectLanguage()
+  const localeDate = language === 'th' ? th : enUS;
+
+  const night = selectGuest?.checkOutDate ? Math.abs(dayjs(selectGuest?.checkInDate).diff(dayjs(selectGuest?.checkOutDate), 'day')): 3
+
   const handleSetGuest = () => {
     if (guestList.length > 0) {
       const guest = guestList.find(g => g.id === selectedProperty?.booking?.booking_id)
       setGuest(guest || null)
     }
   }
-
-  console.log(selectedProperty)
 
   useEffect(() => {
     handleSetGuest()
@@ -147,16 +152,16 @@ export default function HotelRoomDialog({
       <div className="max-w-sm bg-white rounded-2xl shadow p-5 border border-gray-100">
         {/* Header */}
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-gray-800">ห้อง {selectedProperty?.name || '101'}</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{locale?.room_dialog?.room_no || 'ห้อง'} {selectedProperty?.name || ''}</h2>
           <div className="flex items-center gap-2">
             <span className={`${
               statusType === "available" ? "bg-green-100 text-green-700" :
               statusType === "booked" ? "bg-orange-100 text-orange-700" :
               "bg-red-100 text-red-700"
             } text-sm px-3 py-1 rounded-full`}>
-              {statusType === "available" ? "ว่าง" :
-               statusType === "booked" ? "จองแล้ว" :
-               "เช็คอินแล้ว"}
+              {statusType === "available" ? locale?.main?.room_available || 'ว่าง' :
+               statusType === "booked" ? locale?.main?.room_booked || 'จองแล้ว' :
+               locale?.main?.room_checked_in || 'เช็คอินแล้ว'}
             </span>
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -173,7 +178,7 @@ export default function HotelRoomDialog({
         {/* Room Type + Price */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div className="text-gray-500">
-            <p className="text-sm">ประเภทห้อง</p>
+            <p className="text-sm">{locale?.room_dialog?.room_type || 'ประเภทห้อง'}</p>
             <p
               className="font-medium capitalize"
               style={{
@@ -195,16 +200,16 @@ export default function HotelRoomDialog({
 
         {/* Status-specific content */}
         <div className="text-gray-700 space-y-2 mb-4">
-          <p className="font-medium">ตรวจสอบความพร้อม</p>
+          <p className="font-medium">{locale?.room_dialog?.check_availability || 'ตรวจสอบความพร้อม'}</p>
           <div className="flex items-center text-sm text-gray-600">
             <Calendar className="w-4 h-4 mr-2 text-gray-500" />
             <span>
               {selectGuest?.checkInDate && selectGuest?.checkOutDate 
-                ? `${format(selectGuest?.checkInDate, "dd MMM", { locale: th })} - ${format(selectGuest?.checkOutDate, "dd MMM yyyy", { locale: th })}`
+                ? `${format(selectGuest?.checkInDate, "dd MMM", { locale: localeDate })} - ${format(selectGuest?.checkOutDate, "dd MMM yyyy", { locale: localeDate })}`
                 : selectedProperty?.booking?.start_date && selectedProperty?.booking?.end_date
                 ? `${new Date(selectedProperty.booking.start_date).toLocaleDateString('th-TH')} - ${new Date(selectedProperty.booking.end_date).toLocaleDateString('th-TH')}`
                 // : `${new Intl.DateTimeFormat('th-TH', { month: 'short', day: 'numeric' }).format(new Date())}  -  ${new Intl.DateTimeFormat('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))}`
-                : `${format(new Date(), "dd MMM", { locale: th })} - ${format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "dd MMM yyyy", { locale: th })}`
+                : `${format(new Date(), "dd MMM", { locale: localeDate })} - ${format(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), "dd MMM yyyy", { locale: localeDate })}`
               }
             </span>
           </div>
@@ -212,12 +217,12 @@ export default function HotelRoomDialog({
             <CheckCircle className="w-4 h-4 mr-2" />
             <span>
               {statusType === "available"
-                ? `ห้องว่างตามวันที่ต้องการ (${selectGuest?.checkInDate && selectGuest?.checkOutDate ? Math.abs(dayjs(selectGuest?.checkInDate).diff(dayjs(selectGuest?.checkOutDate), 'day')): '3'} คืน)`
+                ? `${locale?.room_dialog?.room_is_available || 'ห้องว่างตามวันที่ต้องการ'} (${night} ${night > 1 ? locale?.booking_card?.nights || 'คืน' : locale?.booking_card?.night || 'คืน'})`
                 : statusType === "booked"
                   ? `ถูกจองโดย ${selectedProperty?.booking?.customer_id || 'ลูกค้า'}`
                   : statusType === "checkin"
                     ? `เช็คอินโดย ${selectedProperty?.booking?.customer_id || 'ลูกค้า'}`
-                    : "ห้องว่างตามวันที่ต้องการ (3 คืน)"
+                    : `${locale?.room_dialog?.room_is_available || 'ห้องว่างตามวันที่ต้องการ'} (3 ${locale?.booking_card?.nights || 'คืน'})`
               }
             </span>
           </div>
@@ -230,7 +235,7 @@ export default function HotelRoomDialog({
               className="w-full bg-black text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
               onClick={onConfirmHotelRoom}
             >
-              ยืนยันการจอง
+              {locale?.room_dialog?.confirm_booking || 'ยืนยันการจอง'}
             </button>
           ) : null
         ) : statusType === "booked" ? (
@@ -241,7 +246,7 @@ export default function HotelRoomDialog({
               onDialogClose?.()
             }}
           >
-            ห้องถูกจองแล้ว
+            {locale?.room_dialog?.is_booked || 'ห้องถูกจองแล้ว'}
           </button>
         ) : statusType === "checkin" ? (
           <button
@@ -251,7 +256,7 @@ export default function HotelRoomDialog({
               onDialogClose?.()
             }}
           >
-            ห้องถูกเช็คอินแล้ว
+            {locale?.room_dialog?.is_check_in || 'ห้องถูกเช็คอินแล้ว'}
           </button>
         ) : null}
       </div>

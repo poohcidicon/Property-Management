@@ -49,6 +49,12 @@
     "booking_total_price": "ค่าจองทั้งหมด",
     "check_in": "เช็คอิน",
     "check_out": "เช็คเอาท์",
-    "confirm_check_in": "ยืนยันการเช็คอิน"
+    "confirm_check_in": "ยืนยันการเช็คอิน",
+    "check_availability": "ตรวจสอบความพร้อม",
+    "room_is_available": "ห้องว่างตามวันที่ต้องการ",
+    "confirm_booking": "ยืนยันการจอง",
+    "is_check_in": "เช็คอินแล้ว",
+    "is_check_out": "เช็คเอาท์แล้ว",
+    "is_booked": "จองแล้ว"
   }
 }
