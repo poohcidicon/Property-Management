@@ -327,9 +327,9 @@ export const getRoomTypeMasService = async ({ project_id }: { project_id?: strin
     const mappedResult = result.recordset.map<RoomTypeMaster>((item, index) => {
       return {
         Id: item.ID,
-        Value: item.RoomTypeName,
+        Value: item.RoomTypeID.toLocaleLowerCase(),
         Name: item.RoomTypeName,
-        NameEng: item.RoomTypeName,
+        NameEng: item.RoomTypeID,
         Sequence: index+1,
         color: {
           primary: item.RoomTypeColor,
