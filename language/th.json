@@ -1,5 +1,16 @@
 {
   "home": {
     "title_booking": "รายการจอง"
+  },
+  "booking_card": {
+    "title": "รายการจอง",
+    "pending": "รอดำเนินการ",
+    "total": "ยอดรวม",
+    "nights": "คืน",
+    "night": "คืน",
+    "check_in": "เช็คอินแล้ว",
+    "room": "ห้อง",
+    "stay_until": "ถึง",
+    "checked_in": "เช็คอินแล้ว"
   }
 }

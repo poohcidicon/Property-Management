@@ -1,5 +1,16 @@
 {
   "home": {
     "title_booking": "Booking List"
+  },
+  "booking_card": {
+    "title": "Booking List",
+    "pending": "Pending",
+    "total": "Total",
+    "nights": "Nights",
+    "night": "Night",
+    "check_in": "Check-in",
+    "room": "Room No.",
+    "stay_until": "Check-out",
+    "checked_in": "Checked in"
   }
 }
