@@ -29,7 +29,10 @@
     "delete": "ลบ",
     "confirm": "ยืนยัน",
     "cancel": "ยกเลิก",
-    "select": "เลือก"
+    "select": "เลือก",
+    "price": "ราคา",
+    "Baht": "บาท",
+    "confirm_delete": "ยืนยันการลบ"
   },
   "connection_guard": {
     "is_connecting": "กำลังเชื่อมต่อ",
@@ -56,7 +59,11 @@
     "confirm_booking": "ยืนยันการจอง",
     "is_check_in": "เช็คอินแล้ว",
     "is_check_out": "เช็คเอาท์แล้ว",
-    "is_booked": "จองแล้ว"
+    "is_booked": "จองแล้ว",
+    "add_on_services": "บริการเสริม",
+    "select_add_on_services": "เลือกบริการเสริม",
+    "select_add_on_services_description": "บันทึกบริการเสริมเพิ่มเติม",
+    "service_name": "ชื่อบริการ"
   },
   "select_customer": {
     "title": "ค้นหาชื่อลูกค้า",

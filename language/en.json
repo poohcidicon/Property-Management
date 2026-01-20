@@ -29,7 +29,10 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "select": "Select"
+    "select": "Select",
+    "price": "Price",
+    "Baht": "Baht",
+    "confirm_delete": "Confirm Delete"
   },
   "connection_guard": {
     "is_connecting": "Connecting",
@@ -56,7 +59,11 @@
     "confirm_booking": "Confirm Booking",
     "is_check_in": "Room is checked in",
     "is_check_out": "Room is checked out",
-    "is_booked": "Room is booked"
+    "is_booked": "Room is booked",
+    "add_on_services": "Add-on Services",
+    "select_add_on_services": "Select Add-on Services",
+    "select_add_on_services_description": "Save additional services",
+    "service_name": "Service Name"
   },
   "select_customer": {
     "title": "Select Customer",
