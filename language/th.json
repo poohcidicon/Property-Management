@@ -32,7 +32,9 @@
     "select": "เลือก",
     "price": "ราคา",
     "Baht": "บาท",
-    "confirm_delete": "ยืนยันการลบ"
+    "confirm_delete": "ยืนยันการลบ",
+    "quantity": "จำนวน",
+    "price_per_unit": "ราคาต่อหน่วย"
   },
   "connection_guard": {
     "is_connecting": "กำลังเชื่อมต่อ",
@@ -63,7 +65,18 @@
     "add_on_services": "บริการเสริม",
     "select_add_on_services": "เลือกบริการเสริม",
     "select_add_on_services_description": "บันทึกบริการเสริมเพิ่มเติม",
-    "service_name": "ชื่อบริการ"
+    "service_name": "ชื่อบริการ",
+    "check_out_description": "กรุณาระบุค่าใช้จ่ายเพิ่มเติม (ถ้ามี)",
+    "add_on_services_charge": "ค่าบริการเพิ่มเติม",
+    "damage_charge": "ค่าความเสียหาย",
+    "remark": "หมายเหตุ",
+    "total_room_price": "ค่าห้องพัก",
+    "total_add_on_services": "ค่าบริการเสริม",
+    "total_damage_charge": "ค่าความเสียหาย",
+    "grand_total": "ยอดรวมทั้งสิ้น",
+    "confirm_check_out": "ยืนยันการเช็คเอาท์",
+    "add_on_placeholder": "ระบุค่าบริการเสริม",
+    "damage_placeholder": "ระบุค่าความเสียหาย"
   },
   "select_customer": {
     "title": "ค้นหาชื่อลูกค้า",
