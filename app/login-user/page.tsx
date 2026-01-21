@@ -14,13 +14,15 @@ export default function LoginUserPage() {
     const type = params.get('type');
     const language = params.get('lang');
 
+    const languageLower = language ? language.toLowerCase() : null;
+
     if (user_id && username) {
       const resultLogin = await loginUser({ user_id, username });
       if (resultLogin.success) {
         window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH !== "" ? process.env.NEXT_PUBLIC_BASE_PATH : '/') 
         + (projectId ? `?p=${projectId}` : '')
         + (type ? `${projectId ? '&' : '?'}type=${type}` : '')
-        + (language ? `${(projectId || type) ? '&' : '?'}lang=${language}` : '');
+        + (language ? `${(projectId || type) ? '&' : '?'}lang=${languageLower}` : '');
       } else {
         alert('Login failed: ' + resultLogin.message);
       }
