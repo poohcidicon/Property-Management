@@ -10,6 +10,7 @@ import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { format, set } from 'date-fns';
 import { th } from 'date-fns/locale/th';
+import { enUS } from 'date-fns/locale/en-US';
 import { useProjectStore } from '@/app/project-store';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { TooltipPortal } from '@radix-ui/react-tooltip';
@@ -17,6 +18,7 @@ import FormattedInput from './ui/formatted-input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { useFilterStore } from '@/app/filter-store';
+import { useSelectLanguage } from '@/hooks/use-select-language';
 
 interface HotelCheckinCardProps {
   booking?: {
@@ -96,6 +98,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
   const [selectMaterialMinibar, setSelectMaterialMinibar] = useState<string | null>(null)
   const [counter, setCounter] = useState(0)
   const { projectId } = useProjectStore()
+
+  const { locale, language } = useSelectLanguage()
+  const localeDate = language === 'th' ? th : enUS;
 
   const summaryMaterialPrice = materialPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)
   const summaryDamage = damagesPriceList.reduce((acc, curr) => acc+(curr.price * curr.qty), 0)
@@ -390,7 +395,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
     <div className="max-w-sm mx-auto w-80 bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
-        <h2 className="text-2xl font-bold text-gray-800">ห้อง {roomNumber || '202'}</h2>
+        <h2 className="text-2xl font-bold text-gray-800">{locale?.room_dialog?.room_no || 'ห้อง'} {roomNumber || '202'}</h2>
         <p className="text-sm text-gray-600 mt-1 capitalize">{roomType || 'ห้องคอร์'}</p>
       </div>
 
@@ -402,7 +407,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             <div>
-              <p className="text-xs text-gray-500">ประเภทห้องพัก</p>
+              <p className="text-xs text-gray-500">{locale?.room_dialog?.room_type || 'ประเภทห้องพัก'}</p>
               <p className="text-sm font-semibold text-gray-800 capitalize">{roomType}</p>
             </div>
           </div>
@@ -412,7 +417,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-xs text-gray-500">ราคา</p>
+              <p className="text-xs text-gray-500">{locale?.room_dialog?.room_price || 'ราคา'}</p>
               {/* <p className="text-sm font-semibold text-green-600">฿ {selectGuest?.total_amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p> */}
               <p className="text-sm font-semibold text-green-600">฿ {checkinDetail?.amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</p> 
             </div>
@@ -421,7 +426,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
 
         {/* Booking Information */}
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-base font-bold text-gray-800 mb-3">ข้อมูลผู้เข้าพัก</h3>
+          <h3 className="text-base font-bold text-gray-800 mb-3">{locale?.room_dialog?.lodger_info || 'ข้อมูลผู้เข้าพัก'}</h3>
           
           <div className="space-y-2 text-sm">
             {/* <div className="flex justify-between">
@@ -440,12 +445,12 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 return (
                   <div className='border-b mb-2 py-3' key={guest.GuestID}>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">ชื่อ:</span>
+                      <span className="text-gray-600">{locale?.room_dialog?.name || 'ชื่อ'}:</span>
                       <span className="font-medium text-gray-800">{guest?.GuestFirstName || ''} {guest?.GuestLastName || ''}</span>
                     </div>
                     
                     <div className="flex justify-between">
-                      <span className="text-gray-600">เบอร์โทร:</span>
+                      <span className="text-gray-600">{locale?.room_dialog?.phone || 'เบอร์โทร'}:</span>
                       <span className="font-medium text-gray-800">{guest?.GuestPhone || '-'}</span>
                     </div>
                   </div>
@@ -453,23 +458,23 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               })}
             
             <div className="flex justify-between">
-              <span className="text-gray-600">เช็คอินวันที่:</span>
+              <span className="text-gray-600">{locale?.room_dialog?.check_in_date || 'เช็คอินวันที่'}:</span>
               <span className="font-medium text-gray-800">
                 {/* {selectGuest?.start_booking ? new Date(selectGuest.start_booking).toLocaleDateString('th-TH') : '08 ต.ค. 2025'} */}
-                {checkinDetail?.check_in ? format(new Date(checkinDetail?.check_in ), "dd MMM yyyy", { locale: th }) : '-'}
+                {checkinDetail?.check_in ? format(new Date(checkinDetail?.check_in ), "dd MMM yyyy", { locale: localeDate }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between">
-              <span className="text-gray-600">เช็คเอาท์วันที่:</span>
+              <span className="text-gray-600">{locale?.room_dialog?.check_out_date || 'เช็คเอาท์วันที่'}:</span>
               <span className="font-medium text-gray-800">
                 {/* {selectGuest?.end_booking ? new Date(selectGuest.end_booking).toLocaleDateString('th-TH') : '11 ต.ค. 2025'} */}
-                {checkinDetail?.check_out ? format(new Date(checkinDetail.check_out), "dd MMM yyyy", { locale: th }) : '-'}
+                {checkinDetail?.check_out ? format(new Date(checkinDetail.check_out), "dd MMM yyyy", { locale: localeDate }) : '-'}
               </span>
             </div>
             
             <div className="flex justify-between pt-2 border-t border-gray-200">
-              <span className="text-gray-800 font-semibold">ยอดชำระ:</span>
+              <span className="text-gray-800 font-semibold">{locale?.room_dialog?.total_price || 'ยอดชำระ'}:</span>
               <span className="font-bold text-lg text-green-600">฿ {checkinDetail?.amount?.toLocaleString() || total_amount?.toLocaleString() || 0 }</span>
             </div>
           </div>
@@ -482,7 +487,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             onClick={() => setShowDialogMaterial(true)}
             className="w-full flex items-center justify-between py-3 text-left"
           >
-            <h3 className="text-base font-bold text-gray-800">บริการเพิ่มเติม</h3>
+            <h3 className="text-base font-bold text-gray-800">{locale?.room_dialog?.add_on_services || 'บริการเพิ่มเติม'}</h3>
             <Plus className={`w-5 h-5 text-gray-600 transition-transform ${showPaymentDetails ? 'rotate-45' : ''}`} />
           </button>
           
@@ -512,7 +517,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                             <TooltipPortal>
                               <TooltipContent className="TooltipContent" sideOffset={5}>
                                 <div className='flex flex-col gap-2'>
-                                  <span>ยืนยันการลบ</span>
+                                  <span>{locale?.main?.confirm_delete || 'ยืนยันการลบ'}</span>
                                   <div className='flex gap-2'>
                                     <Button
                                       variant="default"
@@ -520,7 +525,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                       className='text-xs bg-red-500'
                                       onClick={() => handleDeleteBookMaterial(bm)}
                                     >
-                                      ลบ
+                                      {locale?.main?.delete || 'ลบ'}
                                     </Button>
                                     <Button
                                       variant="outline"
@@ -532,7 +537,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                         })
                                       }}
                                     >
-                                      ยกเลิก
+                                      {locale?.main?.cancel || 'ยกเลิก'}
                                     </Button>
                                   </div>
                                 </div>
@@ -576,7 +581,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           }}
           className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
         >
-          เช็คเอาท์
+          {locale?.room_dialog?.check_out || 'เช็คเอาท์'}
         </button>
       </div>
       <Dialog open={showDialogCheckout} onOpenChange={(open) => {
@@ -586,9 +591,9 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
           <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <DialogTitle className="text-xl flex items-center gap-2 flex flex-col items-start">
-              <div>เช็คเอาท์</div>
+              <div>{locale?.room_dialog?.confirm_check_out || 'Confirm Check Out'}</div>
               <div className='text-[#888888] text-sm'>
-                <span>กรุณาระบุค่าใช้จ่ายเพิ่มเติม (ถ้ามี)</span>
+                <span>{locale?.room_dialog?.check_out_description || 'Please specify additional charges (if any)'}</span>
               </div>
             </DialogTitle>
           </DialogHeader>
@@ -596,7 +601,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <div className='flex flex-col gap-6'>
               <div className='flex flex-col'>
                 <div className="flex gap-4 items-center justify-between">
-                  <label>ค่าบริการเพิ่มเติม</label>
+                  <label>{locale?.room_dialog?.add_on_services || 'Add-on Services'}</label>
                   <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
                     onClick={addMaterialPriceList}
                   >
@@ -631,7 +636,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                             <PopoverTrigger asChild>
                               <input
                                 type="text"
-                                placeholder="ระบุบริการเสริม"
+                                placeholder={locale?.room_dialog?.add_on_placeholder || 'Select Service'}
                                 value={material.material_name}
                                 onChange={(e) => {
                                   setMaterialPriceList((prev) => {
@@ -654,7 +659,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                   // }}
                                 /> */}
                                 <CommandList>
-                                  <CommandEmpty>ไม่พบข้อมูล</CommandEmpty>
+                                  <CommandEmpty>Not Found</CommandEmpty>
                                   <CommandGroup>
                                     {materialMas.map((materialMasterData) => {
                                       return (
@@ -693,7 +698,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                           </Popover>
                         </div>
                         <div className='flex flex-col gap-2 max-w-16'>
-                          <label className='text-sm'>จำนวน</label>
+                          <label className='text-sm'>{locale?.main?.quantity || 'Quantity'}</label>
                           <FormattedInput
                             label=""
                             type="number"
@@ -709,7 +714,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                           />
                         </div>
                         <div className='flex flex-col gap-2 max-w-28'>
-                          <label className='text-sm'>ราคาต่อหน่วย</label>
+                          <label className='text-sm'>{locale?.main?.price_per_unit || 'Price per unit'}</label>
                           <FormattedInput
                             label=""
                             type="number"
@@ -736,7 +741,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
               </div>
               <div className='flex flex-col'>
                 <div className="flex gap-4 items-center justify-between">
-                  <label>ค่าความเสียหาย (บาท)</label>
+                  <label>{locale?.room_dialog?.damage_charge || `Damage Charge`} {'('} {locale?.main?.Baht || 'Baht'} {')'}</label>
                   <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded"
                     onClick={addDamagePriceList}
                   >
@@ -762,7 +767,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                             <PopoverTrigger asChild>
                               <input
                                 type="text"
-                                placeholder="ระบุความเสียหาย"
+                                placeholder={locale?.room_dialog?.add_on_placeholder || 'ระบุรายการความเสียหาย'}
                                 value={damage.material_name}
                                 onChange={(e) => {
                                   setDamagePriceList((prev) => {
@@ -785,7 +790,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                                   // }}
                                 /> */}
                                 <CommandList>
-                                  <CommandEmpty>ไม่พบข้อมูล</CommandEmpty>
+                                  <CommandEmpty>Not found</CommandEmpty>
                                   <CommandGroup>
                                     {materialMas.map((material) => {
                                       return (
@@ -817,7 +822,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                           </Popover>
                         </div>
                         <div className='flex flex-col gap-2 max-w-16'>
-                          <label className='text-sm'>จำนวน</label>
+                          <label className='text-sm'>{locale?.main?.quantity || 'Quantity'}</label>
                           <FormattedInput
                             label=""
                             type="number"
@@ -833,7 +838,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                           />
                         </div>
                         <div className='flex flex-col gap-2 max-w-28'>
-                          <label className='text-sm'>ราคาต่อหน่วย</label>
+                          <label className='text-sm'>{locale?.main?.price_per_unit || 'Price per unit'}</label>
                           <FormattedInput
                             label=""
                             type="number"
@@ -859,7 +864,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 </div>
               </div>
               <div className='flex flex-col gap-2 text-sm'>
-                <label>หมายเหตุ</label>
+                <label>{locale?.room_dialog?.remark || 'Remark'}</label>
                 <textarea
                   value={paymentRemark || ""}
                   onChange={e => setPaymentRemark(e.target.value)}
@@ -870,19 +875,19 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             <div className="border-t border-gray-300 mt-6 pt-4 pb-4 flex flex-col gap-1 text-sm">
               <div className='flex justify-between'>
                 <div>
-                  ค่าห้องพัก
+                  {locale?.room_dialog?.room_price || 'Room Price'}
                 </div>
                 <div>฿ {checkinDetail?.amount.toLocaleString()  || total_amount?.toLocaleString() || 0 }</div>
               </div>
               <div className='flex justify-between'>
                 <div>
-                  ค่าบริการเพิ่มเติม
+                  {locale?.room_dialog?.add_on_services_charge || 'Add-on Services Charge'}
                 </div>
                 <div>฿ {summaryMaterialPrice?.toLocaleString() || 0}</div>
               </div>
               <div className='flex justify-between'>
                 <div>
-                  ค่าความเสียหาย
+                  {locale?.room_dialog?.damage_charge || 'Damage Charge'}
                 </div>
                 <div>฿ {summaryDamage?.toLocaleString() || 0}</div>
               </div>
@@ -895,7 +900,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </div>
             <div className="border-t border-gray-300 mt-2 pt-4 pb-4 flex flex-col gap-4 text-xl">
               <div className='flex justify-between'>
-                <div className='font-semibold'>ยอดรวมทั้งหมด</div>
+                <div className='font-semibold'>{locale?.room_dialog?.grand_total || 'Grand Total'}</div>
                 <div className='text-green-600 font-semibold'>฿ {summaryPrice?.toLocaleString() || 0}</div>
               </div>
               <div className="flex justify-end gap-2">
@@ -905,7 +910,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                   className="mt-2"
                   onClick={() => setShowDialogCheckout(false)}
                 >
-                  ยกเลิก
+                  {locale?.main?.cancel || 'ยกเลิก'}
                 </Button>
                 <Button
                   variant="default"
@@ -917,7 +922,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     setShowConfirmCheckoutDialog(true)
                   }}
                 >
-                  ยืนยันเช็คเอาท์
+                  {locale?.room_dialog?.confirm_check_out || 'ยืนยันเช็คเอาท์'}
                 </Button>
               </div>
             </div>
@@ -931,16 +936,16 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
           className="max-w-xl max-h-[90vh] w-full overflow-hidden flex flex-col border-2 border-blue-200 shadow-xl">
           <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <DialogTitle className="text-xl flex items-center gap-2 flex flex-col items-start">
-              <div>เพิ่มบริการ</div>
+              <div>{locale?.room_dialog?.select_add_on_services || 'เลือกบริการเสริม'}</div>
               <div className='text-[#888888] text-sm'>
-                <span>บันทึกบริการเพิ่มเติม</span>
+                <span>{locale?.room_dialog?.select_add_on_services_description || 'บันทึกบริการเสริมเพิ่มเติม'}</span>
               </div>
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col flex-1 overflow-auto p-1 gap-8">
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-2 text-sm'>
-                <label>ชื่อบริการ</label>
+                <label>{locale?.room_dialog?.service_name || 'ชื่อบริการ'}</label>
                 <div style={{ width: "100%" }}>
                   <Select
                     value={selectMaterialId || undefined} 
@@ -967,7 +972,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 </div>
               </div>
               <FormattedInput
-                label="ราคา (บาท)"
+                label={`${locale?.main?.price || 'ราคา'} (${locale?.main?.Baht || 'บาท'})`}
                 type="number"
                 value={materialPrice}
                 onChange={setMaterialPrice}
@@ -980,7 +985,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 className="mt-2"
                 onClick={() => handleDialogAddService(false)}
               >
-                ยกเลิก
+                {locale?.main?.cancel || 'ยกเลิก'}
               </Button>
               <Button
                 variant="default"
@@ -988,7 +993,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 className="mt-2"
                 onClick={() => handleBookMaterial()}
               >
-                ยืนยัน
+                {locale?.main?.confirm || 'ยืนยัน'}
               </Button>
             </div>
           </div>
@@ -1092,7 +1097,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              ยืนยันเช็คเอาท์
+              {locale?.room_dialog?.confirm_check_out || 'ยืนยันการเช็คเอาท์'}
             </DialogTitle>
           </DialogHeader>
           <div className="flex justify-end gap-3">
@@ -1102,7 +1107,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 setShowConfirmCheckoutDialog(false)
               }}
             >
-              ยกเลิก
+              {locale?.main?.cancel || 'ยกเลิก'}
             </Button>
             <Button
               variant="default"
@@ -1112,7 +1117,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                 setShowConfirmCheckoutDialog(false)
               }}
             >
-              ยืนยัน
+              {locale?.main?.confirm || 'ยืนยัน'}
             </Button>
           </div>
         </DialogContent>

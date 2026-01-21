@@ -8,6 +8,7 @@ export interface UnitMatrixHotel{
   y: number | null;
   d_price: number;
   room_type: string;
+  room_type_desc: string;
   status_desc: string;
   total_amount: number;
   booking: {

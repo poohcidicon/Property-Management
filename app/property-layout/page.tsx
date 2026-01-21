@@ -38,6 +38,7 @@ import SpinnerSmall from "@/components/ui/spinner-small"
 import { DatePicker } from 'antd'
 import { useRoomTypeStore } from "../room-type-store"
 import { cn } from "@/lib/utils"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 interface Property {
   id: string
   name: string;
@@ -166,6 +167,9 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
   
   // State for tracking remaining booking time
   const [remainingTimes, setRemainingTimes] = useState<Record<string, number>>({})
+
+  // Language selection
+  const { locale, language } = useSelectLanguage()
 
   const handleGetGuestList = async () => {
     if (!projectId){
@@ -412,6 +416,8 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
       roomTypesData.data.forEach((item) => {
         recordRoomTypeColor[item.Value] = item.color
         recordRoomTypeColorLowwer[item.Value.toLowerCase()] = item.color
+        recordRoomTypeColor[item.Value]['name'] = language === 'en' ? item.NameEng : item.Name
+        recordRoomTypeColorLowwer[item.Value]['name'] = language === 'en' ? item.NameEng.toLocaleLowerCase() : item.Name.toLocaleLowerCase()
       })
       setRoomTypes(recordRoomTypeColor)
       // set other type
@@ -1928,16 +1934,16 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             <div className="flex items-center gap-3">
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200">
                 <Info className="w-3 h-3 mr-1" />
-                แสดงทั้งหมด
+                {locale?.main?.show_all || 'แสดงทั้งหมด'}
               </Badge>
-              <span className="text-sm text-gray-600">อัพเดทล่าสุด: {lastRefreshTime.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="text-sm text-gray-600">{locale?.main?.last_update || 'อัพเดทล่าสุด'}: {lastRefreshTime.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             
             {/* Floor Filter - Only show for hotel business type */}
             {currentBusinessType === "hotel" && (
               <div className="flex items-center gap-2">
                 <div className="flex gap-2 items-center">
-                  <span className="text-sm font-medium text-gray-700 w-16">วันที่:</span>
+                  <span className="text-sm font-medium text-gray-700 w-16">{locale?.main?.date || 'วันที่'}:</span>
                   <DatePicker 
                     value={activeDate ? dayjs(activeDate) : null}
                     onChange={(date) => {
@@ -1949,7 +1955,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     className="w-full"
                   />
                 </div>
-                <span className="text-sm font-medium text-gray-700">ชั้น:</span>
+                <span className="text-sm font-medium text-gray-700">{locale?.main?.floor || 'ชั้น'}:</span>
                 <Select value={selectedFloor.toString()} onValueChange={(value) => {
                   const floor = floorList.find((f) => f.FloorID.toString() === value);
                   if (floor) {
@@ -1976,7 +1982,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                     ))} */}
                     {floorList.map((floor) => (
                       <SelectItem key={floor.FloorID} value={floor.FloorID.toString()}>
-                        {floor.FloorID === 0 ? `ไม่ระบุชั้น` : `ชั้น ${floor.FloorName}` }
+                        {floor.FloorID === 0 ? `Not defined` : `${floor.FloorName}` }
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -2030,19 +2036,19 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
             <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center mb-2">
               <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-green-500"></div>
-                <span>ว่าง</span>
+                <span>{locale?.main?.room_available || 'ว่าง'}</span>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-red-500"></div>
-                <span>เข้าพัก</span>
+                <span>{locale?.main?.room_checked_in || 'เข้าพัก'}</span>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-amber-500"></div>
-                <span>จองแล้ว</span>
+                <span>{locale?.main?.room_booked || 'จองแล้ว'}</span>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
                 <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-500"></div>
-                <span>ซ่อมบำรุง</span>
+                <span>{locale?.main?.room_maintenance || 'ซ่อมบำรุง'}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm justify-center">
@@ -2066,7 +2072,7 @@ export default function PropertyLayout({ typeBusiness, projectId }: PropertyLayo
                 return (
                   <div key={roomType} className="flex items-center gap-1 md:gap-2">
                     <div className={cn("w-3 h-3 md:w-4 md:h-4 rounded-full border-2")} style={{ borderColor: roomTypesLowwer[roomType.toLocaleLowerCase()].primary }}></div>
-                    <span>{roomType}</span>
+                    <span>{roomTypesLowwer[roomType].name}</span>
                   </div>
                 )
               })}

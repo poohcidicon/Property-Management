@@ -7,6 +7,7 @@ import { useState } from "react"
 import { Button } from "./ui/button"
 import { useRoomTypeStore } from "@/app/room-type-store"
 import { useFilterStore } from "@/app/filter-store"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 
 interface HotelClearingCardProps {
   selectedProperty: Circle | null
@@ -19,6 +20,8 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
   const { roomTypesLowwer: ROOM_TYPE_COLORS } = useRoomTypeStore()
   const { activeDate } = useFilterStore()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+
+  const { locale } = useSelectLanguage()
 
   const handleChangeStatusRoom = async (status: number) => {
     const payload = {
@@ -46,10 +49,10 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
       <div className="max-w-sm w-80 bg-white rounded-2xl shadow p-5 border border-gray-100">
         {/* Header */}
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-gray-800">ห้อง {selectedProperty?.name || '101'}</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{locale?.room_dialog?.room_no || 'Room'} {selectedProperty?.name || '101'}</h2>
           <div className="flex items-center gap-2">
             <span className={`bg-gray-100 text-gray-700" text-sm px-3 py-1 rounded-full`}>
-              {selectedProperty?.status === 'clearing' ? 'รอทำความสะอาด' : 'ปิดปรับปรุง'}
+              {selectedProperty?.status === 'clearing' ? locale?.main?.room_cleaning || 'รอทำความสะอาด' : locale?.main?.room_maintenance || 'ปิดปรับปรุง'}
             </span>
             <button
               className="p-1 rounded-full hover:bg-gray-100 transition-colors"
@@ -67,7 +70,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
         {/* Room Type + Price */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div className="text-gray-500">
-            <p className="text-sm">ประเภทห้อง</p>
+            <p className="text-sm">{locale?.room_dialog?.room_type || 'Room Type'}</p>
             <p
               className="font-medium capitalize"
               style={{
@@ -93,7 +96,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
             className="w-full bg-green-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
             onClick={() => setShowConfirmDialog(true)}
           >
-            เปิดห้อง
+            {locale?.room_dialog?.open_room || 'เปิดห้อง'}
           </button>
           {/* <button
             className="w-full bg-gray-600 text-white rounded-xl py-2.5 hover:bg-gray-800 transition"
@@ -107,11 +110,11 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              ยืนยันการเปลี่ยนแปลง
+              {locale?.room_dialog?.confirm_open_room || 'ยืนยันการเปิดห้อง'}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-gray-600">คุณต้องเปิดห้องใช่หรือไม่?</p>
+            <p className="text-sm text-gray-600">{locale?.room_dialog?.confirm_open_room_description || 'คุณต้องการเปิดห้องนี้หรือไม่?'}</p>
           </div>
           <div className="flex justify-end gap-3">
               <Button
@@ -120,7 +123,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
                   setShowConfirmDialog(false)
                 }}
               >
-              ยกเลิก
+              {locale?.main?.cancel || 'ยกเลิก'}
             </Button>
             <Button
               variant="default"
@@ -128,7 +131,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
                 handleChangeStatusRoom(0)
               }}
             >
-              ยืนยัน
+              {locale?.main?.confirm || 'ยืนยัน'}
             </Button>
           </div>
         </DialogContent>

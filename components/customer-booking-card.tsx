@@ -6,7 +6,7 @@ import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { User, Phone, Bed, Calendar, Clock, Filter } from "lucide-react"
 import { format } from "date-fns"
-import { th } from "date-fns/locale"
+import { th, enUS } from "date-fns/locale"
 import { pendingBookings as mockPendingBookings, checkedInBookings as mockCheckedInBookings, ROOM_TYPES, HOTEL_ROOM_TYPES, PendingBooking, CheckedInBooking } from "@/data/booking-mock-data"
 import { useEffect, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
@@ -16,6 +16,7 @@ import { useCustomerStore } from "@/app/customer-store"
 import { useFilterStore } from "@/app/filter-store"
 import SpinnerSmall from "./ui/spinner-small"
 import { useProjectStore } from "@/app/project-store"
+import { useSelectLanguage } from "@/hooks/use-select-language"
 
 export default function CustomerBookingCard({
     counter=0,
@@ -36,6 +37,9 @@ export default function CustomerBookingCard({
     const [checkedInBookings, setCheckedInBookings] = useState<CheckedInBooking[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { customer, setCustomer } = useCustomerStore();
+    const { locale, language } = useSelectLanguage()
+
+    const localeDate = language === 'th' ? th : enUS;
     
     const selectBooking = (booking: PendingBooking) => {
       if (!customer || (customer.book_room_id !== booking.book_room_id)) {
@@ -183,7 +187,7 @@ export default function CustomerBookingCard({
     return (
     <div className="w-full lg:w-96 h-64 lg:h-full bg-background border-b lg:border-b-0 lg:border-r flex flex-col">
       <div className="p-3 md:p-4 border-b">
-        <h2 className="text-lg md:text-xl font-bold">รายการจอง</h2>
+        <h2 className="text-lg md:text-xl font-bold">{locale?.booking_card?.title || 'รายการจอง'}</h2>
       </div>
 
       {/* Room Type Filter */}
@@ -223,7 +227,7 @@ export default function CustomerBookingCard({
           {/* Pending Bookings */}
           <div>
             <h3 className="text-xs md:text-sm font-semibold text-muted-foreground mb-2">
-              รอดำเนินการ ({pendingBookings.length})
+              {locale?.booking_card?.pending || 'รอดำเนินการ'} ({pendingBookings.length})
             </h3>
             <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
               {pendingBookings.map((booking) => (
@@ -259,19 +263,19 @@ export default function CustomerBookingCard({
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                       <Calendar className="w-3 h-3" />
                       <span>
-                        {format(new Date(booking.checkInDate), "dd MMM", { locale: th })} -{" "}
-                        {format(new Date(booking.checkOutDate), "dd MMM yyyy", { locale: th })}
+                        {format(new Date(booking.checkInDate), "dd MMM", { locale: localeDate })} -{" "}
+                        {format(new Date(booking.checkOutDate), "dd MMM yyyy", { locale: localeDate })}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                       <Clock className="w-3 h-3" />
-                      <span>{booking.numberOfDays} คืน</span>
+                      <span>{booking.numberOfDays} {booking.numberOfDays === 1 ? (locale?.booking_card?.night || 'คืน') : (locale?.booking_card?.nights || 'คืน')}</span>
                     </div>
 
                     <div className="pt-2 border-t">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs md:text-sm text-muted-foreground">ยอดรวม</span>
+                        <span className="text-xs md:text-sm text-muted-foreground">{locale?.booking_card?.total || 'ยอดรวม'}</span>
                         <span className="font-bold text-primary text-sm md:text-base">
                           ฿{booking.totalAmount.toLocaleString()}
                         </span>
@@ -280,7 +284,7 @@ export default function CustomerBookingCard({
 
                     {booking.assignedRoomName && (
                       <div className="text-xs text-muted-foreground">
-                        ห้อง: {booking.assignedRoomName?.replace("room-", "")}
+                        {locale?.booking_card?.room || 'ห้อง'} {booking.assignedRoomName?.replace("room-", "")}
                       </div>
                     )}
                   </div>
@@ -293,7 +297,7 @@ export default function CustomerBookingCard({
           {checkedInBookings.length > 0 && (
             <div>
               <h3 className="text-xs md:text-sm font-semibold text-muted-foreground mb-2">
-                เช็คอินแล้ว ({checkedInBookings.length})
+                {locale?.booking_card?.check_in || 'เข้าพัก'} ({checkedInBookings.length})
               </h3>
               <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
                 {checkedInBookings.map((booking) => (
@@ -309,19 +313,19 @@ export default function CustomerBookingCard({
                           <span className="font-semibold text-sm md:text-base">{booking.guestName}</span>
                         </div>
                         <Badge variant="default" className="bg-green-600 text-xs">
-                          เข้าพักแล้ว
+                          {locale?.booking_card?.checked_in || 'เช็คอินแล้ว'}
                         </Badge>
                       </div>
 
                       {booking.assignedRoomName && (
                         <div className="text-xs md:text-sm font-medium">
-                          ห้อง: {booking.assignedRoomName.replace("room-", "")}
+                          {locale?.booking_card?.room || 'ห้อง'} {booking.assignedRoomName.replace("room-", "")}
                         </div>
                       )}
 
                       <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        <span>ถึง {format(new Date(booking.checkOutDate), "dd MMM yyyy", { locale: th })}</span>
+                        <span>{locale?.booking_card?.stay_until || 'ถึง'} {format(new Date(booking.checkOutDate), "dd MMM yyyy", { locale: localeDate })}</span>
                       </div>
                     </div>
                   </Card>
