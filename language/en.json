@@ -91,5 +91,12 @@
     "mobile": "Mobile",
     "add_customer": "Add Customer",
     "no_customer_found": "No customer found"
+  },
+  "manual_hotel": {
+    "title": "User Guide",
+    "step_1": "Use mouse to zoom",
+    "step_2": "Drag to pan the map",
+    "step_3": "Click on booking card",
+    "step_4": "Click on room circle to perform action"
   }
 }

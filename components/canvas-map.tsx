@@ -1674,14 +1674,14 @@ export default function CanvasMap({
           >
             <X className="w-4 h-4" />
           </Button>
-          <h4 className="font-semibold mb-2 text-yellow-300">วิธีใช้งาน:</h4>
+          <h4 className="font-semibold mb-2 text-yellow-300">{locale?.manual_hotel?.title || 'วิธีใช้งาน'}:</h4>
           <div className="space-y-1">
-            <p>• ใช้ล้อเมาส์เพื่อซูม</p>
-            <p>• ลากเพื่อเลื่อนแผนที่</p>
+            <p>• {locale?.manual_hotel?.step_1 || 'ใช้ล้อเมาส์เพื่อซูม'}</p>
+            <p>• {locale?.manual_hotel?.step_2 || 'ลากเพื่อเลื่อนแผนที่'}</p>
             {businessType === 'hotel' ? (
               <>
-                <p>• คลิกการ์ดรายการจอง</p>
-                <p>• คลิกวงกลมห้องที่ต้องดำเนินการ</p>
+                <p>• {locale?.manual_hotel?.step_3 || 'คลิกการ์ดรายการจอง'}</p>
+                <p>• {locale?.manual_hotel?.step_4 || 'คลิกวงกลมห้องที่ต้องดำเนินการ'}</p>
               </>
             ) :(
               <>
