@@ -322,7 +322,7 @@ export const getRoomTypeMasService = async ({ project_id }: { project_id?: strin
     const result = await pool.request()
       .input("ProjectID", sql.NVarChar, project_id)
       .query(`
-        SELECT RT.RoomTypeID, RoomTypeName, RoomTypeColor, RTJ.ID, RTJ.ProjectID 
+        SELECT RT.RoomTypeID, RoomTypeName, RoomTypeColor, RTJ.ID, RTJ.ProjectID, RoomTypeNameEng
         FROM Sys_Hotel_RoomType RT
         INNER JOIN Sys_Hotel_RoomType_Proj RTJ ON RT.RoomTypeID = RTJ.RoomTypeID AND ISNULL(RTJ.IsDelete,0) = 0
         ${project_id ? 'and ProjectID = @ProjectID' : ''}
@@ -333,7 +333,7 @@ export const getRoomTypeMasService = async ({ project_id }: { project_id?: strin
         Id: item.ID,
         Value: item.RoomTypeID.toLocaleLowerCase(),
         Name: item.RoomTypeName,
-        NameEng: item.RoomTypeID,
+        NameEng: item.RoomTypeNameEng || item.RoomTypeName,
         Sequence: index+1,
         color: {
           primary: item.RoomTypeColor,
