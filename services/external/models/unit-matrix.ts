@@ -65,5 +65,7 @@ export interface IUnitMatrixHotelDB {
   BookingID: string | null;
   BookRoomID: string | null;
   BookingStatus: string | null;
-  RoomType: string
+  RoomType: string;
+  RoomTypeName: string;
+  RoomTypeNameEng: string;
 }

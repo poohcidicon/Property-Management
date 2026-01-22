@@ -81,7 +81,7 @@ export default function HotelClearingCard ({ selectedProperty, selectedRoomType,
                     : "#6b7280"
               }}
             >
-              {selectedProperty?.room_type || selectedRoomType || 'standard'}
+              {selectedProperty?.room_type_desc || selectedRoomType || 'standard'}
             </p>
           </div>
           {/* <div className="text-right">

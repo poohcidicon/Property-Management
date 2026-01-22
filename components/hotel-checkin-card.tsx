@@ -37,6 +37,7 @@ interface HotelCheckinCardProps {
   }>
   roomNumber?: string;
   roomType?: string;
+  roomTypeDesc?: string;
   roomId?: string;
   guestList: Guest[];
   total_amount: number;
@@ -66,7 +67,7 @@ interface MaterialPriceWithAction extends MaterialPrice {
   paytrans_id?: string
 }
 
-export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount }: HotelCheckinCardProps) {
+export default function HotelCheckinCard({ booking, roomNumber, roomType, onChangeStatus, roomId, guestList, checkin_customers, total_amount, roomTypeDesc }: HotelCheckinCardProps) {
   const { activeDate } = useFilterStore()
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -396,7 +397,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
         <h2 className="text-2xl font-bold text-gray-800">{locale?.room_dialog?.room_no || 'ห้อง'} {roomNumber || '202'}</h2>
-        <p className="text-sm text-gray-600 mt-1 capitalize">{roomType || 'ห้องคอร์'}</p>
+        <p className="text-sm text-gray-600 mt-1 capitalize">{roomTypeDesc || '-'}</p>
       </div>
 
       {/* Room Details */}
@@ -408,7 +409,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
             </svg>
             <div>
               <p className="text-xs text-gray-500">{locale?.room_dialog?.room_type || 'ประเภทห้องพัก'}</p>
-              <p className="text-sm font-semibold text-gray-800 capitalize">{roomType}</p>
+              <p className="text-sm font-semibold text-gray-800 capitalize">{roomTypeDesc || '-'}</p>
             </div>
           </div>
           

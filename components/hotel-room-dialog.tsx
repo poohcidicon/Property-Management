@@ -85,6 +85,7 @@ export default function HotelRoomDialog({
             checkin_customers={selectedProperty?.checkin_customers || []} 
             roomNumber={selectedProperty?.name} 
             roomType={selectedProperty?.room_type} 
+            roomTypeDesc={selectedProperty?.room_type_desc}
             roomId={selectedProperty?.id} 
             onChangeStatus={onChangeStatus} 
             guestList={guestList}
@@ -114,6 +115,7 @@ export default function HotelRoomDialog({
             booking={selectedProperty?.booking} 
             roomNumber={selectedProperty?.name} 
             roomType={selectedProperty?.room_type} 
+            roomTypeDesc={selectedProperty?.room_type_desc}
             roomId={selectedProperty?.id}
             onChangeStatus={onChangeStatus} 
             guestList={guestList}
@@ -189,7 +191,7 @@ export default function HotelRoomDialog({
                     : "#6b7280"
               }}
             >
-              {selectedProperty?.room_type || selectedRoomType || 'standard'}
+              {selectedProperty?.room_type_desc || selectedRoomType || 'standard'}
             </p>
           </div>
           {/* <div className="text-right">

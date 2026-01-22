@@ -29,6 +29,7 @@ interface HotelBookedCardProps {
   roomNumber?: string;
   roomId?: string;
   roomType?: string;
+  roomTypeDesc?: string;
   guestList: Guest[];
   onChangeStatus?: (status: boolean) => void;
 }
@@ -45,7 +46,7 @@ interface CheckinData {
   guest_phone: string
 }
 
-export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList }: HotelBookedCardProps) {
+export default function HotelBookedCard({ booking, roomNumber, roomType, roomId, onChangeStatus, guestList, roomTypeDesc }: HotelBookedCardProps) {
   const { 
     lastOtherGuest,
     bookOtherGuests,
@@ -173,7 +174,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
       {/* Header */}
       <div className="bg-gray-100 px-6 py-4">
         <h2 className="text-2xl font-bold text-gray-800">{locale?.room_dialog?.room_no || 'ห้อง'} {roomNumber || ''}</h2>
-        <p className="text-sm text-gray-600 mt-1 capitalize">{roomType || ''}</p>
+        <p className="text-sm text-gray-600 mt-1 capitalize">{roomTypeDesc || ''}</p>
       </div>
 
       {/* Room Details */}
@@ -185,7 +186,7 @@ export default function HotelBookedCard({ booking, roomNumber, roomType, roomId,
             </svg>
             <div>
               <p className="text-xs text-gray-500">{locale?.room_dialog?.room_type || 'ประเภทห้องพัก'}</p>
-              <p className="text-sm font-semibold text-gray-800 capitalize">{roomType || 'Deluxe'}</p>
+              <p className="text-sm font-semibold text-gray-800 capitalize">{roomTypeDesc || 'Deluxe'}</p>
             </div>
           </div>
           

@@ -16,9 +16,11 @@ export const getUnitsHotelService = async (payload: {
       , u.Area, u.X, u.Y, u.TowerID, u.TowerName, u.FloorID, u.FloorName, u.RoomType
       , u.ActiveDate, u.DateType, u.StatusText, u.Status
       , booking.BookingID, Booking.BookRoomID, booking.Status as BookingStatus
+      , rt.RoomTypeName, rt.RoomTypeNameEng
       FROM VW_Hotel_RoomStatus u
       LEFT JOIN Sys_Hotel_CheckIn booking ON (u.UnitID = booking.UnitID AND booking.Status = 'W' AND booking.CheckIn = convert(date, @ActiveDate))
       LEFT JOIN Sys_Hotel_Room room ON (u.UnitID = room.UnitID)
+      LEFT JOIN Sys_Hotel_RoomType rt ON (u.RoomType = rt.RoomTypeID)
       WHERE u.ActiveDate = @ActiveDate and isNull(u.FloorID, 0) = @Floor
       AND u.ProjectID = @ProjectID
     `
@@ -94,6 +96,8 @@ export const getUnitsHotelService = async (payload: {
         d_price: 0,
         floor: item.FloorID?.toString() || '0',
         room_type: item.RoomType?.toLocaleLowerCase() || 'other',
+        room_type_name: item.RoomTypeName || '-',
+        room_type_name_eng: item.RoomTypeNameEng || '-',
         status_desc: checkin_customers.length > 0 ? 'Checkin' 
           : item.BookingStatus === 'W' ? 'Booked' 
           : Number(item.Status) === 3 ? 'Clearing' 

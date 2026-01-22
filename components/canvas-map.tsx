@@ -171,7 +171,7 @@ export default function CanvasMap({
   // Real-time booking hook
   const { socket, isConnected, isLoading, broadcastCircleUpdate } = useRealtimeBooking()
 
-  const { locale } = useSelectLanguage()
+  const { locale, language } = useSelectLanguage()
   
   // Track active bookings count
   const [activeBookingsCount, setActiveBookingsCount] = useState(0)
@@ -491,6 +491,7 @@ export default function CanvasMap({
                   m_price: unit.d_price, // Using d_price for both since hotel is daily
                   d_price: unit.d_price,
                   room_type: unit.room_type,
+                  room_type_desc: language === 'en' ? unit.room_type_name_eng : unit.room_type_name,
                   booking: unit.booking,
                   checkin_customers: unit.checkin_customers,
                   total_amount: unit.total_amount
