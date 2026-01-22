@@ -18,10 +18,12 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
       , booking.UnitID as BookUnitID, booking.RoomNumber as BookRoomNumber
       , checkin.UnitID as CheckinUnitID, checkin.RoomNumber as CheckinRoomNumber
       , gbr.Status as BookingRoomStatus, gbr.RoomNumber as AssignedRoomNumber
+      , rt.RoomTypeName, rt.RoomTypeNameEng
       FROM VW_Hotel_BookingStatus g
       LEFT JOIN Sys_Hotel_CheckIn booking ON (g.BookingID = booking.BookingID AND g.BookRoomID = booking.BookRoomID and booking.Status = 'W')
       LEFT JOIN Sys_Hotel_CheckIn checkin ON (g.BookingID = checkin.BookingID AND g.BookRoomID = checkin.BookRoomID and checkin.Status = 'A')
       INNER JOIN Sys_Hotel_BookRoom gbr ON (g.BookRoomID = gbr.BookRoomID)
+      LEFT JOIN Sys_Hotel_RoomType rt ON (g.RoomType = rt.RoomTypeID)
       WHERE g.CheckIn = @CheckInDate and gbr.Status <> 'P' and gbr.Status <> 'O'
       AND g.ProjectID = @ProjectID
     `
@@ -53,6 +55,8 @@ export const getGuestList = async (payload: IPayloadGetGuestListService): Promis
         start_booking: item.CheckIn,
         end_booking: item.CheckOut,
         room_type: item.RoomType.toLowerCase(),
+        room_type_name: item.RoomTypeName,
+        room_type_name_eng: item.RoomTypeNameEng,
         night: Number(item.Night) || 1,
         adults: Number(item.Adults) || 1,
         children: Number(item.Children) || 0,

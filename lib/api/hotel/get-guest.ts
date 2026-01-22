@@ -23,6 +23,8 @@ export interface Guest {
   end_booking: string;
   night: number;
   assigned_room_number: string;
+  room_type_name: string;
+  room_type_name_eng: string;
   booking: {
     unit_id: string;
     room_number: string;

@@ -60,6 +60,8 @@ export interface PendingBooking {
   status: "confirmed" | "pending";
   assignedRoomId?: string;
   assignedRoomName?: string;
+  roomTypeName?: string;
+  roomTypeNameEng?: string;
 }
 
 export interface CheckedInBooking {

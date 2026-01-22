@@ -157,7 +157,9 @@ export default function CustomerBookingCard({
           totalAmount,
           status: "pending",
           assignedRoomId: g.booking ? g.booking.unit_id : undefined,
-          assignedRoomName: g.booking ? g.booking.room_number : g.assigned_room_number || undefined
+          assignedRoomName: g.booking ? g.booking.room_number : g.assigned_room_number || undefined,
+          roomTypeName: g.room_type_name,
+          roomTypeNameEng: g.room_type_name_eng
         };
       })
       const checkedInList = guestList.data.filter(g => g.checkin).map<CheckedInBooking>((g) => {
@@ -256,7 +258,7 @@ export default function CustomerBookingCard({
                     <div className="flex items-center gap-2 text-xs md:text-sm">
                       <Bed className="w-3 h-3" />
                       <span className="font-medium" style={{ color: ROOM_TYPES[booking.roomType]?.color || '#222222' }}>
-                        {ROOM_TYPES[booking.roomType]?.name || booking.roomType}
+                        {language === 'en' ? booking.roomTypeNameEng : booking.roomTypeName}
                       </span>
                     </div>
 
