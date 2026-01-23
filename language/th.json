@@ -35,7 +35,8 @@
     "Baht": "บาท",
     "confirm_delete": "ยืนยันการลบ",
     "quantity": "จำนวน",
-    "price_per_unit": "ราคาต่อหน่วย"
+    "price_per_unit": "ราคาต่อหน่วย",
+    "loading_plan": "กำลังโหลดแผนผังชั้น"
   },
   "connection_guard": {
     "is_connecting": "กำลังเชื่อมต่อ",

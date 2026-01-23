@@ -35,7 +35,8 @@
     "Baht": "Baht",
     "confirm_delete": "Confirm Delete",
     "quantity": "Quantity",
-    "price_per_unit": "Price per unit"
+    "price_per_unit": "Price per unit",
+    "loading_plan": "Loading floor plan"
   },
   "connection_guard": {
     "is_connecting": "Connecting",
