@@ -958,7 +958,7 @@ export default function HotelCheckinCard({ booking, roomNumber, roomType, onChan
                     }}
                   >
                     <SelectTrigger className="w-full h-8 text-sm">
-                      <SelectValue placeholder="ยังไม่ได้เลือกบริการเสริม..."/>
+                      <SelectValue placeholder={`${locale?.room_dialog?.select_add_on_services_placeholder}...` || 'เลือกบริการเสริม...'}/>
                     </SelectTrigger>
                     <SelectContent className='w-full'>
                       {materialMas.map((m, index) => {

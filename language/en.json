@@ -67,6 +67,7 @@
     "add_on_services": "Add-on Services",
     "select_add_on_services": "Select Add-on Services",
     "select_add_on_services_description": "Save additional services",
+    "select_add_on_services_placeholder": "Should specify add-on services",
     "service_name": "Service Name",
     "check_out_description": "Please specify additional charges (if any)",
     "add_on_services_charge": "Add-on Services Charge",

@@ -67,6 +67,7 @@
     "add_on_services": "บริการเสริม",
     "select_add_on_services": "เลือกบริการเสริม",
     "select_add_on_services_description": "บันทึกบริการเสริมเพิ่มเติม",
+    "select_add_on_services_placeholder": "เลือกบริการเสริม",
     "service_name": "ชื่อบริการ",
     "check_out_description": "กรุณาระบุค่าใช้จ่ายเพิ่มเติม (ถ้ามี)",
     "add_on_services_charge": "ค่าบริการเพิ่มเติม",
