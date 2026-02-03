@@ -8,6 +8,7 @@
     "build:citi-uat": "env-cmd -f ./env/.env.citi-uat next build",
     "build:citi-qas": "env-cmd -f ./env/.env.citi-qas next build",
     "build:ss": "env-cmd -f ./env/.env.hotel-ss next build",
+    "build:std-ss": "env-cmd -f ./env/.env.std-ss next build",
     "build:citi-sit": "env-cmd -f ./env/.env.citi-sit next build",
     "build:citi-mig2": "env-cmd -f ./env/.env.citi-mig2 next build",
     "build:number-uat": "env-cmd -f ./env/.env.numberone-uat next build",
