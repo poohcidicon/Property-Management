@@ -11,6 +11,7 @@
     "build:std-ss": "env-cmd -f ./env/.env.std-ss next build",
     "build:citi-sit": "env-cmd -f ./env/.env.citi-sit next build",
     "build:citi-mig2": "env-cmd -f ./env/.env.citi-mig2 next build",
+    "buid:reignwood-uat": "env-cmd -f ./env/.env.reignwood-uat next build",
     "build:number-uat": "env-cmd -f ./env/.env.numberone-uat next build",
     "build:local": "env-cmd -f ./env/.env.local next build",
     "build:market-uat": "env-cmd -f ./env/.env.daily-market next build",
