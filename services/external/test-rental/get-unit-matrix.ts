@@ -71,25 +71,6 @@ export const getFloorPlanService = async ({ project_id }: IPayloadGetFloorPlanSe
     if (project_id) {
       request.input("ProjectID", sql.NVarChar, project_id)
     }
-    // const { recordset: result } = await request.query(`
-    //   SELECT P1.ProjectID, P1.FloorPlanName, P1.X, P1.Y, P2.FloorPlanPath, F.Id FileID
-    //   FROM Sys_Daily_Floor_Plan P1
-    //   INNER JOIN Sys_Daily_Floor_Plan P2 ON P2.FloorPlanID = P1.ParentID
-    //   LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), P2.FloorPlanID) = F.RefID
-    //     AND ISNULL(F.Isdelete,0) = 0
-    //     AND F.Process = 'floorplan'
-    //   WHERE P1.ParentID <> 0 ${project_id ? 'AND P1.ProjectID = @ProjectID' : ''}
-    //   AND F.Id is not null
-    // `)
-    // const { recordset: result } = await request.query(`
-    //   SELECT P1.FloorPlanID, P1.ProjectID, P2.FloorPlanName MainFloorPlan, P1.FloorPlanName, P1.X, P1.Y, P2.FloorPlanPath, F.Id FileID
-    //   FROM Sys_Daily_Floor_Plan P1
-    //   INNER JOIN Sys_Daily_Floor_Plan P2 ON P2.FloorPlanID = P1.ParentID
-    //   LEFT JOIN Sys_REM_FileData F ON Convert(nvarchar(10), P2.FloorPlanID) = F.RefID
-    //   WHERE ISNULL(P1.Isdeleted,0) = 0
-    //   AND P1.ProjectID = @ProjectID
-    //   AND F.Id is not null
-    // `)
     const { recordset: result } = await request.query(`
       SELECT P1.FloorPlanID, P1.ProjectID, P2.FloorPlanName MainFloorPlan, P1.FloorPlanName, P1.X, P1.Y, P2.FloorPlanPath, Convert(nvarchar(10), P2.FloorPlanID) RawFileID, F.Id FileID
       FROM Sys_Daily_Floor_Plan P1
