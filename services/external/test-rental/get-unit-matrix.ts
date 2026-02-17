@@ -25,10 +25,10 @@ export const getUnitMatrixService = async ({ project_id, year, month, day, phase
     // mock price
 
     let newResult = result.recordset.map(item => {
-      if (!item.M_Price || item.M_Price === 0) {
+      if (!item.M_Price) {
         item.M_Price = 0;
       }
-      if (!item.D_Price || item.D_Price === 0) {
+      if (!item.D_Price) {
         item.D_Price = 0;
       }
       return item;
