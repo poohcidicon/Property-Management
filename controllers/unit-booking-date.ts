@@ -33,7 +33,7 @@ export const getUnitBookingDateController = async (payload: IPayloadGetUnitBooki
       const activeBookingDateList = Object.keys(item).reduce<{[key: string]: number}>((acc, dateKey) => {
         const isActive = dayjs(dateKey).isAfter(dayjs(payload.active_date), 'day') || dayjs(dateKey).isSame(dayjs(payload.active_date), 'day') ? 1 : 0
         if (isActive === 1) {
-          acc[dateKey] = item[dateKey] as number
+          acc[dateKey] = (item[dateKey] || 0) as number
         }
         return acc
       }, {})
