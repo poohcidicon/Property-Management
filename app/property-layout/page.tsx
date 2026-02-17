@@ -1869,7 +1869,7 @@ export default function PropertyLayout({ typeBusiness, projectId, initMonth, ini
                 handleConfirmBooking()
               }}
             >
-              ยืนยันกาจอง
+              ยืนยันการจอง
             </Button>
           </div>
         </DialogContent>
