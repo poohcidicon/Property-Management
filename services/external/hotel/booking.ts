@@ -18,42 +18,10 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
   const pool = await getConnection();
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
-  try{
-    // Placeholder for actual booking logic
-    const queryUpdateRoom = `
-      UPDATE [dbo].[VW_Hotel_RoomStatus]
-      SET Status = '1'
-      WHERE UnitID = @UnitID
-    `
-    await transaction.request()
-      .input("UnitID", payload.unit_id)
-      .query(queryUpdateRoom)
-    
+  try{    
     const checkinBooking = transaction.request()
-    delete checkinBooking.parameters['UnitID']
     let insertListOnDate = []
     let count = 0
-    // for(let d = dayjs(payload.start_date); d.isBefore(dayjs(payload.end_date)); d = d.add(1, 'day')){
-    //   checkinBooking.input(`UnitID_${count}`, payload.unit_id)
-    //   checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
-    //   checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
-    //   checkinBooking.input(`RoomNumber_${count}`, payload.room_number)
-    //   checkinBooking.input(`TransacDate_${count}`, dayjs().format('YYYY-MM-DD'))
-    //   checkinBooking.input(`CheckIn_${count}`, d.format('YYYY-MM-DD'))
-    //   checkinBooking.input(`Status_${count}`, 'W')
-    //   insertListOnDate.push(`
-    //     (@UnitID_${count}
-    //     , @BookingID_${count}
-    //     , @BookingRoomID_${count}
-    //     , @RoomNumber_${count}
-    //     , @TransacDate_${count}
-    //     , @CheckIn_${count}
-    //     , @Status_${count}
-    //     , GETDATE()
-    //     )
-    //   `)
-    //   count++
-    // }
     checkinBooking.input(`UnitID_${count}`, payload.unit_id)
     checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
     checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
