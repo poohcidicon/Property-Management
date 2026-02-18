@@ -287,7 +287,7 @@ export default function CanvasMap({
 
         console.log('👤 Current user:', currentUsername)
       } catch (error) {
-        console.error('❌ Failed to load circles:', error)
+        console.log('❌ Failed to load circles:', error)
         toast.error('ไม่สามารถโหลดข้อมูลจุดจองได้')
       } finally {
         setIsLoadingCircles(false)
