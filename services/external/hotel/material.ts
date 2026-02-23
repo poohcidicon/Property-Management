@@ -28,6 +28,7 @@ export const getMaterial = async (): Promise<IMaterial[]> => {
       , mp.MaterialPriceID, mp.StartDate, mp.EndDate, mp.Price
       from Sys_Hotel_Material m
       left join Sys_Hotel_MaterialPrice mp on m.MaterialID = mp.MaterialID
+      where m.IsDelete = 0 and m.IsShow = 1
     `
     const result = await pool.request().query(query);
     const mapping = result.recordset.reduce<IMaterial[]>((acc, cur) => {
