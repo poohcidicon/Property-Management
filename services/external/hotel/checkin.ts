@@ -1,48 +1,50 @@
 import { getConnection } from "@/lib/db";
 import sql from "mssql";
 import dayjs from "dayjs";
-import { db } from "./mock/units"
+import { db } from "./mock/units";
 import { IResponse } from "../models/master";
 
 export interface IPayloadCheckinUnitService {
   unit_id: string;
-  customers: Array<{ 
-    customer_id?: string; 
-    name?: string
-    booking_id: string; 
-    book_room_id: string
+  customers: Array<{
+    customer_id?: string;
+    name?: string;
+    booking_id: string;
+    book_room_id: string;
   }>;
   other_guests?: Array<{
     book_room_id: string;
     guest_id: string;
     gest_name: string;
-  }>
+  }>;
   checkin_date: string; // ISO date string
   create_by: string;
 }
 
-export const checkinService = async (payload: IPayloadCheckinUnitService): Promise<IResponse<boolean>> => {
+export const checkinService = async (
+  payload: IPayloadCheckinUnitService,
+): Promise<IResponse<boolean>> => {
   const pool = await getConnection();
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
 
-  try{
+  try {
     const queryUpdateRoom = `
       UPDATE [dbo].[Sys_Hotel_CheckIn]
       SET Status = 'A', ModifyDate = GETDATE(), CreateBy = @CreateBy, ModifyBy = @CreateBy
       WHERE UnitID = @UnitID AND BookingID = @BookingID AND BookRoomID = @BookRoomID AND Status = 'W'
-    `
-    for(const customer of payload.customers){
-      const updateRequest = transaction.request()
-      updateRequest.input("UnitID", payload.unit_id)
-      updateRequest.input("BookingID", customer.booking_id)
-      updateRequest.input("BookRoomID", customer.book_room_id)
-      updateRequest.input("CreateBy", payload.create_by)
-      await updateRequest.query(queryUpdateRoom)
-      delete updateRequest.parameters['UnitID']
-      delete updateRequest.parameters['BookingID']
-      delete updateRequest.parameters['BookRoomID']
-      delete updateRequest.parameters['CreateBy']
+    `;
+    for (const customer of payload.customers) {
+      const updateRequest = transaction.request();
+      updateRequest.input("UnitID", payload.unit_id);
+      updateRequest.input("BookingID", customer.booking_id);
+      updateRequest.input("BookRoomID", customer.book_room_id);
+      updateRequest.input("CreateBy", payload.create_by);
+      await updateRequest.query(queryUpdateRoom);
+      delete updateRequest.parameters["UnitID"];
+      delete updateRequest.parameters["BookingID"];
+      delete updateRequest.parameters["BookRoomID"];
+      delete updateRequest.parameters["CreateBy"];
     }
 
     const insertPayTransQuery = `
@@ -92,22 +94,25 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         ,@UpdateBy
         ,GETDATE()
         ,@UpdateBy)
-    `
+    `;
 
     // Book Detail
     const bookDetailQuery = `
       SELECT * FROM Sys_Hotel_Booking
       WHERE BookingID = @BookingID
-    `
-    const { recordset: [bookDetailResult]} = await transaction.request()
+    `;
+    const {
+      recordset: [bookDetailResult],
+    } = await transaction
+      .request()
       .input("BookingID", payload.customers[0].booking_id)
-      .query(bookDetailQuery)
-    if(bookDetailResult.length === 0){
+      .query(bookDetailQuery);
+    if (bookDetailResult.length === 0) {
       await transaction.rollback();
       return {
         success: false,
         message: "Book detail not found",
-      }
+      };
     }
 
     if (!bookDetailResult) {
@@ -115,122 +120,132 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
       return {
         success: false,
         message: "Book detail not found",
-      }
+      };
     }
 
     // use amount from BathPerNight
     const checkinQuery = `
       SELECT * FROM Sys_Hotel_BookRoom
       WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
-    `
-    const {recordset: bookRoomResult=[]} = await transaction.request()
+    `;
+    const { recordset: bookRoomResult = [] } = await transaction
+      .request()
       .input("BookingID", payload.customers[0].booking_id)
       .input("BookRoomID", payload.customers[0].book_room_id)
-      .query(checkinQuery)
-    if(bookRoomResult.length === 0){
+      .query(checkinQuery);
+    if (bookRoomResult.length === 0) {
       await transaction.rollback();
       return {
         success: false,
         message: "Book room not found",
-      }
+      };
     }
-    const { recordset: checkinResult=[]} = await transaction.request()
+    const { recordset: checkinResult = [] } = await transaction
+      .request()
       .input("BookingID", payload.customers[0].booking_id)
-      .input("BookRoomID", payload.customers[0].book_room_id)
-      .query(`
+      .input("BookRoomID", payload.customers[0].book_room_id).query(`
         select * from Sys_Hotel_CheckIn
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
-      `)
-    const bookRoom = bookRoomResult[0]
+      `);
+    const bookRoom = bookRoomResult[0];
     // const roomPrice = bookRoom.BathPerNight
     // if (!roomPrice && roomPrice !== 0) {
     //   await transaction.rollback();
     //   return false
     // }
-    const {recordset: bookRoomPriceResult=[]} = await transaction.request()
+    const { recordset: bookRoomPriceResult = [] } = await transaction
+      .request()
       .input("BookingID", payload.customers[0].booking_id)
-      .input("BookRoomID", payload.customers[0].book_room_id)
-      .query<{
-        StartDate: string;
-        EndDate: string;
-        Amount: number;
-        Night: number;
-      }>(`
+      .input("BookRoomID", payload.customers[0].book_room_id).query<{
+      StartDate: string;
+      EndDate: string;
+      Amount: number;
+      Night: number;
+    }>(`
         select * from Sys_Hotel_BookPrice
         WHERE BookingID = @BookingID AND BookRoomID = @BookRoomID
         order by StartDate desc
-      `)
+      `);
     if (bookRoomPriceResult.length === 0) {
       await transaction.rollback();
       return {
         success: false,
         message: "Book room price not found",
-      }
+      };
     }
-    const paidType = bookDetailResult.PaidType // postpaid or prepaid
+    const paidType = bookDetailResult.PaidType; // postpaid or prepaid
     // const paytransStatus = paidType === "prepaid" ? "P" : "A"
-    const paytransStatus = "A"
-    const checkin = checkinResult[0]
+    const paytransStatus = "A";
+    const checkin = checkinResult[0];
 
-    for (let d = dayjs(bookRoom.CheckIn); d.isBefore(dayjs(bookRoom.CheckOut)); d = d.add(1, 'day')){
-      const { recordset: [payTransID] } = await transaction.request().query(`
+    for (
+      let d = dayjs(bookRoom.CheckIn);
+      d.isBefore(dayjs(bookRoom.CheckOut));
+      d = d.add(1, "day")
+    ) {
+      const {
+        recordset: [payTransID],
+      } = await transaction.request().query(`
         SELECT ISNULL(MAX(PayTransID), 0) + 1 as PayTransID FROM Sys_Hotel_PayTrans
-      `)
+      `);
       let roomPrice = bookRoomPriceResult.find((item) => {
-        const isBetween = (dayjs(item.StartDate).isBefore(d) || dayjs(item.StartDate).isSame(d)) && (dayjs(item.EndDate).isAfter(d) || dayjs(item.EndDate).isSame(d))
-        return isBetween
-      })?.Amount
+        const isBetween =
+          (dayjs(item.StartDate).isBefore(d) ||
+            dayjs(item.StartDate).isSame(d)) &&
+          (dayjs(item.EndDate).isAfter(d) || dayjs(item.EndDate).isSame(d));
+        return isBetween;
+      })?.Amount;
       if (!roomPrice) {
-        roomPrice = bookRoom.BathPerNight
+        roomPrice = bookRoom.BathPerNight;
       }
       if (!roomPrice && roomPrice !== 0) {
         await transaction.rollback();
         return {
           success: false,
           message: "Room price not found",
-        }
+        };
       }
-      const VAT = 0.07
-      const baseAmount = Number((roomPrice/ (1 + VAT)).toFixed(2))
-      const vatAmount = baseAmount * VAT
-      const insertPayTrans = transaction.request()
-      insertPayTrans.input("PayTransID", payTransID.PayTransID)
-      insertPayTrans.input("BookRoomID", checkin.BookRoomID)
-      insertPayTrans.input("EffectDate", d.format('YYYY-MM-DD'))
-      insertPayTrans.input("Description", "เช่ารายวัน")
-      insertPayTrans.input("RefType", "Book")
-      insertPayTrans.input("RefID", checkin.BookingID)
-      insertPayTrans.input("Quantity", 1)
-      insertPayTrans.input("Price", roomPrice)
-      insertPayTrans.input("Discount", 0)
-      insertPayTrans.input("FeeQuantity", 0)
-      insertPayTrans.input("BaseAmount", baseAmount)
-      insertPayTrans.input("VATPercent", VAT*100)
-      insertPayTrans.input("VATAmount", vatAmount)
-      insertPayTrans.input("TotalAmount", roomPrice)
-      insertPayTrans.input("Status", paytransStatus)
-      insertPayTrans.input("UpdateBy", payload.create_by)
-      await insertPayTrans.query(insertPayTransQuery)
-      delete insertPayTrans.parameters['BookRoomID']
-      delete insertPayTrans.parameters['EffectDate']
-      delete insertPayTrans.parameters['Description']
-      delete insertPayTrans.parameters['RefType']
-      delete insertPayTrans.parameters['RefID']
-      delete insertPayTrans.parameters['Quantity']
-      delete insertPayTrans.parameters['Price']
-      delete insertPayTrans.parameters['Discount']
-      delete insertPayTrans.parameters['FeeQuantity']
-      delete insertPayTrans.parameters['BaseAmount']
-      delete insertPayTrans.parameters['VATPercent']
-      delete insertPayTrans.parameters['VATAmount']
-      delete insertPayTrans.parameters['TotalAmount']
-      delete insertPayTrans.parameters['Status']
-      delete insertPayTrans.parameters['UpdateBy']
+      const VAT = 0.07;
+      const baseAmount = Number((roomPrice / (1 + VAT)).toFixed(2));
+      const vatAmount = baseAmount * VAT;
+      const insertPayTrans = transaction.request();
+      insertPayTrans.input("PayTransID", payTransID.PayTransID);
+      insertPayTrans.input("BookRoomID", checkin.BookRoomID);
+      insertPayTrans.input("EffectDate", d.format("YYYY-MM-DD"));
+      insertPayTrans.input("Description", "เช่ารายวัน");
+      insertPayTrans.input("RefType", "Book");
+      insertPayTrans.input("RefID", checkin.BookingID);
+      insertPayTrans.input("Quantity", 1);
+      insertPayTrans.input("Price", roomPrice);
+      insertPayTrans.input("Discount", 0);
+      insertPayTrans.input("FeeQuantity", 0);
+      insertPayTrans.input("BaseAmount", baseAmount);
+      insertPayTrans.input("VATPercent", VAT * 100);
+      insertPayTrans.input("VATAmount", vatAmount);
+      insertPayTrans.input("TotalAmount", roomPrice);
+      insertPayTrans.input("Status", paytransStatus);
+      insertPayTrans.input("UpdateBy", payload.create_by);
+      await insertPayTrans.query(insertPayTransQuery);
+      delete insertPayTrans.parameters["BookRoomID"];
+      delete insertPayTrans.parameters["EffectDate"];
+      delete insertPayTrans.parameters["Description"];
+      delete insertPayTrans.parameters["RefType"];
+      delete insertPayTrans.parameters["RefID"];
+      delete insertPayTrans.parameters["Quantity"];
+      delete insertPayTrans.parameters["Price"];
+      delete insertPayTrans.parameters["Discount"];
+      delete insertPayTrans.parameters["FeeQuantity"];
+      delete insertPayTrans.parameters["BaseAmount"];
+      delete insertPayTrans.parameters["VATPercent"];
+      delete insertPayTrans.parameters["VATAmount"];
+      delete insertPayTrans.parameters["TotalAmount"];
+      delete insertPayTrans.parameters["Status"];
+      delete insertPayTrans.parameters["UpdateBy"];
     }
 
     if (payload.other_guests && payload.other_guests.length > 0) {
-      const insertGuests = transaction.request()
-      insertGuests.input("CreateBy", payload.create_by)
+      const insertGuests = transaction.request();
+      insertGuests.input("CreateBy", payload.create_by);
       const query = `
         INSERT INTO [dbo].[Sys_Hotel_BookGuest]
         ([BookRoomID]
@@ -241,42 +256,58 @@ export const checkinService = async (payload: IPayloadCheckinUnitService): Promi
         ,[ModifyBy]
         ,[CreateDate])
         VALUES
-        ${payload.other_guests.map((guest, index) => {
-          insertGuests.input(`BookRoomID_${index}`, guest.book_room_id)
-          insertGuests.input(`GuestID_${index}`, guest.guest_id)
-          insertGuests.input(`GuestName_${index}`, guest.gest_name)
-          if (index === 0){
-            insertGuests.input(`MainGuest_${index}`, 1)
-          }
-          else{
-            insertGuests.input(`MainGuest_${index}`, 0)
-          }
-          return `(@BookRoomID_${index}, @GuestID_${index}, @GuestName_${index}, @MainGuest_${index}, @CreateBy, @CreateBy, GETDATE())`
-        }).join(',')}
-      `
-      await insertGuests.query(query)
+        ${payload.other_guests
+          .map((guest, index) => {
+            insertGuests.input(`BookRoomID_${index}`, guest.book_room_id);
+            insertGuests.input(`GuestID_${index}`, guest.guest_id);
+            insertGuests.input(`GuestName_${index}`, guest.gest_name);
+            if (index === 0) {
+              insertGuests.input(`MainGuest_${index}`, 1);
+            } else {
+              insertGuests.input(`MainGuest_${index}`, 0);
+            }
+            return `(@BookRoomID_${index}, @GuestID_${index}, @GuestName_${index}, @MainGuest_${index}, @CreateBy, @CreateBy, GETDATE())`;
+          })
+          .join(",")}
+      `;
+      await insertGuests.query(query);
     }
 
+    const updateRoomStatusRequest = transaction.request();
+    updateRoomStatusRequest.input("UnitID", payload.unit_id);
+    updateRoomStatusRequest.input(
+      "CheckIn",
+      dayjs(payload.checkin_date).format("YYYY-MM-DD"),
+    );
+
+    const updateRoomStatus = `
+      UPDATE Sys_Hotel_RoomStatus
+      SET Status = '2'
+      WHERE UnitID = @UnitID
+      and CONVERT(DATE, ActiveDate) = @CheckIn
+    `;
+
+    await updateRoomStatusRequest.query(updateRoomStatus);
+
     await transaction.commit();
-    
+
     return {
       success: true,
       data: true,
       message: "Success",
-      error: ""
-    }
-  }
-  catch(err: any){
+      error: "",
+    };
+  } catch (err: any) {
     await transaction.rollback();
-    console.error('Error in checkinService:', err);
+    console.error("Error in checkinService:", err);
     return {
       success: false,
       data: false,
-      message: 'Error in checkinService',
-      error: 'Error in checkinService'
-    }
+      message: "Error in checkinService",
+      error: "Error in checkinService",
+    };
   }
-}
+};
 
 export interface IPayloadCheckinDetail {
   book_room_id: string;
@@ -289,15 +320,16 @@ export interface CheckinDetail {
   CheckOut: string;
   RoomNumber: string;
   Status: string;
-  Amount: number
+  Amount: number;
   GuestFullName: string;
   GuestPhone: string;
 }
 
-export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<CheckinDetail[]> => {
-  const pool = await getConnection()
-  const result = await pool.request()
-    .input("BookRoomID", payload.book_room_id)
+export const getCheckinDetail = async (
+  payload: IPayloadCheckinDetail,
+): Promise<CheckinDetail[]> => {
+  const pool = await getConnection();
+  const result = await pool.request().input("BookRoomID", payload.book_room_id)
     .query(`
       SELECT c.BookRoomID, c.BookingID, c.RoomNumber, b.Status
       , b.Amount, b.LeadGuest as GuestFullName, b.LeadPhone as GuestPhone
@@ -307,9 +339,9 @@ export const getCheckinDetail = async (payload: IPayloadCheckinDetail): Promise<
       inner join Sys_Hotel_BookRoom br on (c.BookRoomID = br.BookRoomID)
       WHERE c.BookRoomID = @BookRoomID
       ORDER BY CheckIn
-    `)
-  return result.recordset
-}
+    `);
+  return result.recordset;
+};
 
 export interface IPayloadBookPayTrans {
   book_room_id: string;
@@ -334,17 +366,19 @@ export interface BookPayTrans {
   UpdateBy: string;
 }
 
-export const getBookPayTrans = async (payload: IPayloadBookPayTrans): Promise<BookPayTrans[]> => {
-  const pool = await getConnection()
-  const result = await pool.request()
+export const getBookPayTrans = async (
+  payload: IPayloadBookPayTrans,
+): Promise<BookPayTrans[]> => {
+  const pool = await getConnection();
+  const result = await pool
+    .request()
     .input("BookRoomID", payload.book_room_id)
     .input("Status", payload.status)
-    .input("RefType", payload.ref_type)
-    .query(`
+    .input("RefType", payload.ref_type).query(`
       SELECT * FROM Sys_Hotel_PayTrans
       WHERE BookRoomID = @BookRoomID
       AND Status = @Status
-      ${payload.ref_type ? `AND RefType = @RefType` : ''}
-    `)
-  return result.recordset
-}
+      ${payload.ref_type ? `AND RefType = @RefType` : ""}
+    `);
+  return result.recordset;
+};

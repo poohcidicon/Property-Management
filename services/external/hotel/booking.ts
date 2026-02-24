@@ -2,7 +2,7 @@ import { getConnection } from "@/lib/db";
 import sql from "mssql";
 import dayjs from "dayjs";
 
-import { db } from "./mock/units"
+import { db } from "./mock/units";
 
 export interface IPayloadBookUnitService {
   unit_id: string;
@@ -14,21 +14,29 @@ export interface IPayloadBookUnitService {
   room_number: string;
 }
 
-export const bookUnitService = async (payload: IPayloadBookUnitService): Promise<boolean> => {
+export const bookUnitService = async (
+  payload: IPayloadBookUnitService,
+): Promise<boolean> => {
   const pool = await getConnection();
   let transaction = new sql.Transaction(pool);
   await transaction.begin();
-  try{    
-    const checkinBooking = transaction.request()
-    let insertListOnDate = []
-    let count = 0
-    checkinBooking.input(`UnitID_${count}`, payload.unit_id)
-    checkinBooking.input(`BookingID_${count}`, payload.booking_id || null)
-    checkinBooking.input(`BookingRoomID_${count}`, payload.book_room_id || null)
-    checkinBooking.input(`RoomNumber_${count}`, payload.room_number)
-    checkinBooking.input(`TransacDate_${count}`, dayjs().format('YYYY-MM-DD'))
-    checkinBooking.input(`CheckIn_${count}`, dayjs(payload.start_date).format('YYYY-MM-DD'))
-    checkinBooking.input(`Status_${count}`, 'W')
+  try {
+    const checkinBooking = transaction.request();
+    let insertListOnDate = [];
+    let count = 0;
+    checkinBooking.input(`UnitID_${count}`, payload.unit_id);
+    checkinBooking.input(`BookingID_${count}`, payload.booking_id || null);
+    checkinBooking.input(
+      `BookingRoomID_${count}`,
+      payload.book_room_id || null,
+    );
+    checkinBooking.input(`RoomNumber_${count}`, payload.room_number);
+    checkinBooking.input(`TransacDate_${count}`, dayjs().format("YYYY-MM-DD"));
+    checkinBooking.input(
+      `CheckIn_${count}`,
+      dayjs(payload.start_date).format("YYYY-MM-DD"),
+    );
+    checkinBooking.input(`Status_${count}`, "W");
     insertListOnDate.push(`
       (@UnitID_${count}
       , @BookingID_${count}
@@ -39,7 +47,7 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
       , @Status_${count}
       , GETDATE()
       )
-    `)
+    `);
     const queryInsertCheckin = `
       INSERT INTO [dbo].[Sys_Hotel_CheckIn]
       ([UnitID]
@@ -51,10 +59,19 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
       ,[Status]
       ,[CreateDate]
       )
-      VALUES ${insertListOnDate.join(',')}
-    `
-    await checkinBooking.query(queryInsertCheckin)
-    
+      VALUES ${insertListOnDate.join(",")}
+    `;
+
+    const updateRoomStatus = `
+      UPDATE Sys_Hotel_RoomStatus
+      SET Status = '1'
+      WHERE UnitID = @UnitID_${count}
+      and CONVERT(DATE, ActiveDate) = @CheckIn_${count}
+    `;
+
+    await checkinBooking.query(queryInsertCheckin);
+
+    await checkinBooking.query(updateRoomStatus);
 
     // Simulate booking by checking if unit exists in mock data
     // const unitIndex = db.units.findIndex(u => u.unit_id === payload.unit_id);
@@ -73,11 +90,10 @@ export const bookUnitService = async (payload: IPayloadBookUnitService): Promise
 
     await transaction.commit();
 
-    return true
-  }
-  catch(err: any){
+    return true;
+  } catch (err: any) {
     await transaction.rollback();
     console.error("Error booking unit:", err);
-    return false
+    return false;
   }
-}
+};
